@@ -73,10 +73,10 @@
                         <input name="search" value="{{ request('search') }}" placeholder="Search products" class="w-56 rounded-full border-gray-200 text-sm focus:border-primary focus:ring-primary">
                     </form>
 
-                    <a href="{{ route('cart.index') }}" class="relative grid h-10 w-10 place-items-center rounded-full border border-gray-200 text-ink hover:border-primary hover:text-primary" title="Cart">
+                    <button id="open-cart-drawer" type="button" class="relative grid h-10 w-10 place-items-center rounded-full border border-gray-200 text-ink hover:border-primary hover:text-primary" title="Cart">
                         <i class="fa-solid fa-bag-shopping"></i>
-                        <span class="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-xs font-bold text-white">{{ \App\Http\Controllers\CartController::count() }}</span>
-                    </a>
+                        <span id="cart-count-badge" class="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-xs font-bold text-white">{{ $drawerCart['count'] ?? 0 }}</span>
+                    </button>
 
                     @auth
                         <div class="group relative">
@@ -162,6 +162,32 @@
         {{ $slot }}
     </main>
 
+    <div id="cart-drawer-overlay" class="fixed inset-0 z-[80] hidden bg-black/40"></div>
+    <aside id="cart-drawer" class="fixed right-0 top-0 z-[90] flex h-full w-full max-w-md translate-x-full flex-col bg-white shadow-2xl transition-transform duration-300">
+        <div class="flex items-center justify-between border-b px-5 py-4">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wide text-primary">Shopping Cart</p>
+                <h2 class="text-xl font-black text-ink">Your Items</h2>
+            </div>
+            <button id="close-cart-drawer" type="button" class="grid h-10 w-10 place-items-center rounded-full border border-gray-200 text-xl text-ink hover:border-primary hover:text-primary">
+                &times;
+            </button>
+        </div>
+
+        <div id="cart-drawer-items" class="flex-1 overflow-y-auto p-5"></div>
+
+        <div class="border-t p-5">
+            <div class="mb-4 flex items-center justify-between text-lg font-black text-ink">
+                <span>Subtotal</span>
+                <span id="cart-drawer-subtotal">BDT 0.00</span>
+            </div>
+            <div class="grid gap-3">
+                <a href="{{ route('checkout.create') }}" id="cart-drawer-checkout" class="rounded-lg bg-primary px-5 py-3 text-center font-semibold text-white hover:bg-ink">Place Order</a>
+                <a href="{{ route('shop.index') }}" class="rounded-lg border border-gray-200 px-5 py-3 text-center font-semibold text-ink hover:border-primary hover:text-primary">Continue Shopping</a>
+            </div>
+        </div>
+    </aside>
+
     <footer class="mt-16 bg-ink py-12 text-gray-100">
         <div class="container grid gap-8 md:grid-cols-4">
             <div class="md:col-span-2">
@@ -198,6 +224,142 @@
                 menu.classList.toggle('hidden', isOpen);
                 button.setAttribute('aria-expanded', String(!isOpen));
             });
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const drawer = document.getElementById('cart-drawer');
+            const overlay = document.getElementById('cart-drawer-overlay');
+            const openCartButton = document.getElementById('open-cart-drawer');
+            const closeCartButton = document.getElementById('close-cart-drawer');
+            const cartItems = document.getElementById('cart-drawer-items');
+            const cartSubtotal = document.getElementById('cart-drawer-subtotal');
+            const cartBadge = document.getElementById('cart-count-badge');
+            const checkoutButton = document.getElementById('cart-drawer-checkout');
+            let cartState = @json($drawerCart ?? ['items' => [], 'count' => 0, 'subtotal' => 0]);
+
+            const money = (value) => `BDT ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            const escapeHtml = (value) => String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+
+            const openDrawer = () => {
+                drawer.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            };
+
+            const closeDrawer = () => {
+                drawer.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            };
+
+            const renderCart = () => {
+                cartBadge.textContent = cartState.count || 0;
+                cartSubtotal.textContent = money(cartState.subtotal);
+                checkoutButton.classList.toggle('pointer-events-none', !cartState.count);
+                checkoutButton.classList.toggle('opacity-50', !cartState.count);
+
+                if (!cartState.items || cartState.items.length === 0) {
+                    cartItems.innerHTML = `
+                        <div class="flex h-full flex-col items-center justify-center text-center">
+                            <p class="text-lg font-bold text-ink">Your cart is empty</p>
+                            <p class="mt-2 text-sm text-gray-500">Add products and they will appear here.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                cartItems.innerHTML = cartState.items.map((item) => `
+                    <div class="mb-4 grid grid-cols-[72px_1fr] gap-4 rounded-lg border border-gray-100 p-3" data-cart-item="${item.id}">
+                        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" class="h-20 w-20 rounded object-cover">
+                        <div>
+                            <div class="flex gap-3">
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate font-semibold text-ink">${escapeHtml(item.name)}</p>
+                                    <p class="text-sm text-gray-500">${money(item.price)}</p>
+                                </div>
+                                <button type="button" class="js-cart-remove text-sm font-semibold text-red-500 hover:text-red-700" data-product-id="${item.id}">Remove</button>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between gap-3">
+                                <div class="flex items-center overflow-hidden rounded border border-gray-200">
+                                    <button type="button" class="js-cart-decrease px-3 py-1 text-lg" data-product-id="${item.id}" data-quantity="${item.quantity}">-</button>
+                                    <span class="min-w-10 px-3 text-center text-sm font-semibold">${item.quantity}</span>
+                                    <button type="button" class="js-cart-increase px-3 py-1 text-lg" data-product-id="${item.id}" data-quantity="${item.quantity}" data-stock="${item.stock}">+</button>
+                                </div>
+                                <p class="font-bold text-primary">${money(item.total)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            };
+
+            const requestCart = async (url, options = {}) => {
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        ...(options.headers || {}),
+                    },
+                    ...options,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Cart request failed');
+                }
+
+                const data = await response.json();
+                cartState = data.cart;
+                renderCart();
+                openDrawer();
+            };
+
+            document.querySelectorAll('.js-add-to-cart').forEach((form) => {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    requestCart(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                    });
+                });
+            });
+
+            cartItems.addEventListener('click', function (event) {
+                const button = event.target.closest('button[data-product-id]');
+
+                if (!button) {
+                    return;
+                }
+
+                const productId = button.dataset.productId;
+
+                if (button.classList.contains('js-cart-remove')) {
+                    requestCart(`{{ url('/cart') }}/${productId}`, { method: 'DELETE' });
+                    return;
+                }
+
+                const currentQuantity = Number(button.dataset.quantity);
+                const stock = Number(button.dataset.stock || currentQuantity);
+                const nextQuantity = button.classList.contains('js-cart-increase')
+                    ? Math.min(currentQuantity + 1, stock)
+                    : currentQuantity - 1;
+
+                if (nextQuantity < 1) {
+                    requestCart(`{{ url('/cart') }}/${productId}`, { method: 'DELETE' });
+                    return;
+                }
+
+                const body = new URLSearchParams();
+                body.append('quantity', nextQuantity);
+                requestCart(`{{ url('/cart') }}/${productId}`, { method: 'PATCH', body });
+            });
+
+            openCartButton?.addEventListener('click', openDrawer);
+            closeCartButton?.addEventListener('click', closeDrawer);
+            overlay?.addEventListener('click', closeDrawer);
+            renderCart();
         });
     </script>
 </body>

@@ -23,6 +23,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home.index');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/products/{product}', [ShopController::class, 'show'])->name('shop.show');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::get('/cart/snapshot', [CartController::class, 'snapshotResponse'])->name('cart.snapshot');
 Route::post('/cart/{product}', [CartController::class, 'store'])->name('cart.store');
 Route::patch('/cart/{product}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{product}', [CartController::class, 'destroy'])->name('cart.destroy');

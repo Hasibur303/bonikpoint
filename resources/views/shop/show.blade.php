@@ -8,9 +8,9 @@
                 <p class="text-sm font-bold uppercase tracking-wide text-primary">{{ $product->category?->name }}</p>
                 <h1 class="mt-2 text-4xl font-black text-ink">{{ $product->name }}</h1>
                 <div class="mt-4 flex items-center gap-3">
-                    <span class="text-3xl font-black text-primary">৳{{ number_format($product->price, 2) }}</span>
+                    <span class="text-3xl font-black text-primary">BDT {{ number_format($product->price, 2) }}</span>
                     @if($product->compare_price)
-                        <span class="text-lg text-gray-400 line-through">৳{{ number_format($product->compare_price, 2) }}</span>
+                        <span class="text-lg text-gray-400 line-through">BDT {{ number_format($product->compare_price, 2) }}</span>
                     @endif
                 </div>
                 <p class="mt-4 text-sm font-semibold {{ $product->stock > 0 ? 'text-green-600' : 'text-red-600' }}">
@@ -18,7 +18,7 @@
                 </p>
                 <p class="mt-6 leading-8 text-gray-600">{{ $product->description ?: 'No product description yet.' }}</p>
                 @if($product->stock > 0)
-                    <form method="POST" action="{{ route('cart.store', $product) }}" class="mt-8 flex gap-3">
+                    <form method="POST" action="{{ route('cart.store', $product) }}" class="js-add-to-cart mt-8 flex gap-3">
                         @csrf
                         <input type="number" name="quantity" value="1" min="1" max="{{ $product->stock }}" class="w-24 rounded-lg border-gray-200 focus:border-primary focus:ring-primary">
                         <button class="rounded-lg bg-primary px-8 py-3 font-semibold text-white hover:bg-ink">Add to Cart</button>

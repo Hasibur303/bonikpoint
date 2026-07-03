@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,7 +15,7 @@ class CartController extends Controller
         return view('cart.index', ['cartItems' => $this->items()]);
     }
 
-    public function store(Request $request, Product $product): RedirectResponse
+    public function store(Request $request, Product $product): RedirectResponse|JsonResponse
     {
         abort_unless($product->is_active, 404);
 
@@ -28,10 +29,17 @@ class CartController extends Controller
 
         session(['cart' => $cart]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => "{$product->name} added to cart.",
+                'cart' => $this->snapshot(),
+            ]);
+        }
+
         return back()->with('success', "{$product->name} added to cart.");
     }
 
-    public function update(Request $request, Product $product): RedirectResponse
+    public function update(Request $request, Product $product): RedirectResponse|JsonResponse
     {
         $request->validate(['quantity' => ['required', 'integer', 'min:1']]);
 
@@ -42,16 +50,35 @@ class CartController extends Controller
             session(['cart' => $cart]);
         }
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Cart updated.',
+                'cart' => $this->snapshot(),
+            ]);
+        }
+
         return back()->with('success', 'Cart updated.');
     }
 
-    public function destroy(Product $product): RedirectResponse
+    public function destroy(Request $request, Product $product): RedirectResponse|JsonResponse
     {
         $cart = session('cart', []);
         unset($cart[$product->id]);
         session(['cart' => $cart]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Product removed from cart.',
+                'cart' => $this->snapshot(),
+            ]);
+        }
+
         return back()->with('success', 'Product removed from cart.');
+    }
+
+    public function snapshotResponse(): JsonResponse
+    {
+        return response()->json(['cart' => $this->snapshot()]);
     }
 
     public static function count(): int
@@ -84,5 +111,24 @@ class CartController extends Controller
                 'total' => (float) $product->price * $quantity,
             ];
         })->filter()->values()->all();
+    }
+
+    public function snapshot(): array
+    {
+        $items = collect($this->items())->map(fn ($item) => [
+            'id' => $item['product']->id,
+            'name' => $item['product']->name,
+            'image' => $item['product']->image_url,
+            'price' => (float) $item['product']->price,
+            'quantity' => $item['quantity'],
+            'stock' => $item['product']->stock,
+            'total' => $item['total'],
+        ])->values();
+
+        return [
+            'items' => $items,
+            'count' => $items->sum('quantity'),
+            'subtotal' => $items->sum('total'),
+        ];
     }
 }
