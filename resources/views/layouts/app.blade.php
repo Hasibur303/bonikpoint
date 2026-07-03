@@ -39,6 +39,26 @@
                 <nav class="hidden items-center gap-8 text-sm font-semibold uppercase tracking-wide text-ink md:flex">
                     <a href="{{ route('home.index') }}" class="{{ request()->routeIs('home.index') ? 'text-primary' : 'hover:text-primary' }}">Home</a>
                     <a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*') ? 'text-primary' : 'hover:text-primary' }}">Shop</a>
+                    <div class="group relative">
+                        <button type="button" class="{{ request('category') ? 'text-primary' : 'hover:text-primary' }}">
+                            Categories
+                        </button>
+                        <div class="invisible absolute left-0 top-full z-50 w-64 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
+                            <div class="max-h-[420px] overflow-y-auto rounded bg-white py-2 shadow-xl ring-1 ring-gray-100">
+                                <a href="{{ route('shop.index') }}" class="block px-4 py-2 text-sm normal-case tracking-normal text-ink hover:bg-gray-50 hover:text-primary">All Categories</a>
+                                @foreach($headerCategories ?? [] as $category)
+                                    <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="block px-4 py-2 text-sm normal-case tracking-normal {{ request('category') === $category->slug ? 'bg-gray-50 text-primary' : 'text-ink hover:bg-gray-50 hover:text-primary' }}">
+                                        {{ $category->name }}
+                                    </a>
+                                    @foreach($category->children as $child)
+                                        <a href="{{ route('shop.index', ['category' => $child->slug]) }}" class="block px-7 py-2 text-sm normal-case tracking-normal {{ request('category') === $child->slug ? 'bg-gray-50 text-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
+                                            {{ $child->name }}
+                                        </a>
+                                    @endforeach
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                     <a href="{{ route('cart.index') }}" class="{{ request()->routeIs('cart.*') ? 'text-primary' : 'hover:text-primary' }}">Cart</a>
                     @auth
                         <a href="{{ route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'text-primary' : 'hover:text-primary' }}">Orders</a>
@@ -94,6 +114,22 @@
                 <nav class="grid gap-2 text-sm font-semibold uppercase tracking-wide text-ink">
                     <a href="{{ route('home.index') }}" class="rounded px-3 py-2 {{ request()->routeIs('home.index') ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">Home</a>
                     <a href="{{ route('shop.index') }}" class="rounded px-3 py-2 {{ request()->routeIs('shop.*') ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">Shop</a>
+                    <div class="rounded border border-gray-100 p-2">
+                        <p class="px-1 pb-2 text-xs font-bold text-gray-400">Categories</p>
+                        <div class="grid gap-1 normal-case tracking-normal">
+                            <a href="{{ route('shop.index') }}" class="rounded px-3 py-2 text-sm {{ request('category') ? 'hover:bg-gray-50 hover:text-primary' : 'bg-primary text-white' }}">All Categories</a>
+                            @foreach($headerCategories ?? [] as $category)
+                                <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="rounded px-3 py-2 text-sm {{ request('category') === $category->slug ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">
+                                    {{ $category->name }}
+                                </a>
+                                @foreach($category->children as $child)
+                                    <a href="{{ route('shop.index', ['category' => $child->slug]) }}" class="rounded px-6 py-2 text-sm {{ request('category') === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
+                                        {{ $child->name }}
+                                    </a>
+                                @endforeach
+                            @endforeach
+                        </div>
+                    </div>
                     <a href="{{ route('cart.index') }}" class="rounded px-3 py-2 {{ request()->routeIs('cart.*') ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">Cart</a>
                     @auth
                         <a href="{{ route('dashboard') }}" class="rounded px-3 py-2 {{ request()->routeIs('dashboard') ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">Dashboard</a>
