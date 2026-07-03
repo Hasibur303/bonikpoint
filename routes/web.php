@@ -32,11 +32,7 @@ Route::get('/dashboard', function () {
         return redirect()->route('admin.index');
     }
 
-    return view('dashboard', [
-        'ordersCount' => auth()->user()->orders()->count(),
-        'pendingOrdersCount' => auth()->user()->orders()->whereIn('status', ['pending', 'processing'])->count(),
-        'latestOrders' => auth()->user()->orders()->latest()->take(5)->get(),
-    ]);
+    return redirect()->route('shop.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
