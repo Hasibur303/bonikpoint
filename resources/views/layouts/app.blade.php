@@ -63,14 +63,16 @@
                             <button class="grid h-10 w-10 place-items-center rounded-full bg-primary text-white" title="Account">
                                 <i class="fa-regular fa-user"></i>
                             </button>
-                            <div class="invisible absolute right-0 mt-3 w-48 rounded bg-white py-2 opacity-0 shadow-xl ring-1 ring-gray-100 transition group-hover:visible group-hover:opacity-100">
-                                <div class="px-4 py-2 text-xs font-semibold uppercase text-gray-400">{{ auth()->user()->name }}</div>
-                                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Profile</a>
-                                <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">My Orders</a>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50">Sign Out</button>
-                                </form>
+                            <div class="invisible absolute right-0 top-full z-50 w-48 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100">
+                                <div class="rounded bg-white py-2 shadow-xl ring-1 ring-gray-100">
+                                    <div class="px-4 py-2 text-xs font-semibold uppercase text-gray-400">{{ auth()->user()->name }}</div>
+                                    <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Profile</a>
+                                    <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">My Orders</a>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50">Sign Out</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     @else
