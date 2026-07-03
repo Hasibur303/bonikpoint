@@ -140,8 +140,9 @@
             </div>
             <div>
                 <h3 class="mb-4 font-bold text-white">Contact</h3>
-                <p class="text-sm text-gray-300">Gulshan, Bangladesh</p>
-                <p class="text-sm text-gray-300">+8801580491525</p>
+                <p class="text-sm text-gray-300">Shimrail Zero point, Siddirganj, Narayanganj</p>
+                <p class="text-sm text-gray-300">Contact: 01540381020</p>
+                <p class="text-sm text-gray-300">WhatsApp: 01540381020</p>
             </div>
         </div>
     </footer>
