@@ -47,14 +47,30 @@
                             <div class="max-h-[420px] overflow-y-auto rounded bg-white py-2 shadow-xl ring-1 ring-gray-100">
                                 <a href="{{ route('shop.index') }}" class="block px-4 py-2 text-sm normal-case tracking-normal text-ink hover:bg-gray-50 hover:text-primary">All Categories</a>
                                 @foreach($headerCategories ?? [] as $category)
-                                    <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="block px-4 py-2 text-sm normal-case tracking-normal {{ request('category') === $category->slug ? 'bg-gray-50 text-primary' : 'text-ink hover:bg-gray-50 hover:text-primary' }}">
-                                        {{ $category->name }}
-                                    </a>
-                                    @foreach($category->children as $child)
-                                        <a href="{{ route('shop.index', ['category' => $child->slug]) }}" class="block px-7 py-2 text-sm normal-case tracking-normal {{ request('category') === $child->slug ? 'bg-gray-50 text-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
-                                            {{ $child->name }}
+                                    @php
+                                        $isCategoryActive = request('category') === $category->slug;
+                                        $hasActiveChild = $category->children->contains('slug', request('category'));
+                                    @endphp
+
+                                    @if($category->children->isNotEmpty())
+                                        <details class="border-t border-gray-50 first:border-t-0" {{ $isCategoryActive || $hasActiveChild ? 'open' : '' }}>
+                                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-2 text-sm normal-case tracking-normal text-ink hover:bg-gray-50 hover:text-primary">
+                                                <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="{{ $isCategoryActive ? 'text-primary' : '' }}">{{ $category->name }}</a>
+                                                <span class="text-xs text-gray-400">&#9656;</span>
+                                            </summary>
+                                            <div class="pb-1">
+                                                @foreach($category->children as $child)
+                                                    <a href="{{ route('shop.index', ['category' => $child->slug]) }}" class="block px-7 py-2 text-sm normal-case tracking-normal {{ request('category') === $child->slug ? 'bg-gray-50 text-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
+                                                        {{ $child->name }}
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        </details>
+                                    @else
+                                        <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="block px-4 py-2 text-sm normal-case tracking-normal {{ $isCategoryActive ? 'bg-gray-50 text-primary' : 'text-ink hover:bg-gray-50 hover:text-primary' }}">
+                                            {{ $category->name }}
                                         </a>
-                                    @endforeach
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
@@ -119,14 +135,30 @@
                         <div class="grid gap-1 normal-case tracking-normal">
                             <a href="{{ route('shop.index') }}" class="rounded px-3 py-2 text-sm {{ request('category') ? 'hover:bg-gray-50 hover:text-primary' : 'bg-primary text-white' }}">All Categories</a>
                             @foreach($headerCategories ?? [] as $category)
-                                <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="rounded px-3 py-2 text-sm {{ request('category') === $category->slug ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">
-                                    {{ $category->name }}
-                                </a>
-                                @foreach($category->children as $child)
-                                    <a href="{{ route('shop.index', ['category' => $child->slug]) }}" class="rounded px-6 py-2 text-sm {{ request('category') === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
-                                        {{ $child->name }}
+                                @php
+                                    $isCategoryActive = request('category') === $category->slug;
+                                    $hasActiveChild = $category->children->contains('slug', request('category'));
+                                @endphp
+
+                                @if($category->children->isNotEmpty())
+                                    <details class="rounded border border-gray-100" {{ $isCategoryActive || $hasActiveChild ? 'open' : '' }}>
+                                        <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">
+                                            <a href="{{ route('shop.index', ['category' => $category->slug]) }}">{{ $category->name }}</a>
+                                            <span class="text-xs {{ $isCategoryActive ? 'text-white' : 'text-gray-400' }}">&#9656;</span>
+                                        </summary>
+                                        <div class="grid gap-1 px-2 pb-2 pt-1">
+                                            @foreach($category->children as $child)
+                                                <a href="{{ route('shop.index', ['category' => $child->slug]) }}" class="rounded px-4 py-2 text-sm {{ request('category') === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
+                                                    {{ $child->name }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    </details>
+                                @else
+                                    <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="rounded px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">
+                                        {{ $category->name }}
                                     </a>
-                                @endforeach
+                                @endif
                             @endforeach
                         </div>
                     </div>
