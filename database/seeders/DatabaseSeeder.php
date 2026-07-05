@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(ProfessionalCategorySeeder::class);
+        $this->call(AtvsGenxProductSeeder::class);
 
         User::updateOrCreate(
             ['email' => 'admin@bonikpoint.com'],
