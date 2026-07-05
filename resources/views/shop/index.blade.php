@@ -2,19 +2,52 @@
     <section class="bg-white py-10">
         <div class="container">
             <h1 class="text-4xl font-black text-ink">Shop Products</h1>
-            <form action="{{ route('shop.index') }}" class="mt-6 grid gap-3 md:grid-cols-[1fr_220px_auto]">
+            <form action="{{ route('shop.index') }}" class="mt-6 grid gap-3 md:grid-cols-[1fr_auto]">
                 <input name="search" value="{{ $search }}" placeholder="Search products" class="rounded-lg border-gray-200 focus:border-primary focus:ring-primary">
-                <select name="category" class="rounded-lg border-gray-200 focus:border-primary focus:ring-primary">
-                    <option value="">All categories</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category->slug }}" @selected($selectedCategory === $category->slug)>{{ $category->name }}</option>
-                        @foreach($category->children as $child)
-                            <option value="{{ $child->slug }}" @selected($selectedCategory === $child->slug)>-- {{ $child->name }}</option>
-                        @endforeach
-                    @endforeach
-                </select>
-                <button class="rounded-lg bg-primary px-6 py-2 font-semibold text-white hover:bg-ink">Filter</button>
+                @if($selectedCategory)
+                    <input type="hidden" name="category" value="{{ $selectedCategory }}">
+                @endif
+                <button class="rounded-lg bg-primary px-6 py-2 font-semibold text-white hover:bg-ink">Search</button>
             </form>
+
+            <div class="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-4">
+                <div class="mb-3 flex items-center justify-between gap-4">
+                    <h2 class="font-black text-ink">Categories</h2>
+                    <a href="{{ route('shop.index', array_filter(['search' => $search])) }}" class="text-sm font-semibold {{ $selectedCategory ? 'text-primary hover:text-ink' : 'text-gray-400' }}">
+                        All Categories
+                    </a>
+                </div>
+
+                <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                    @foreach($categories as $category)
+                        @php
+                            $isMainActive = $selectedCategory === $category->slug;
+                            $hasActiveChild = $category->children->contains(fn ($child) => $selectedCategory === $child->slug);
+                        @endphp
+
+                        <details class="group rounded-lg bg-white shadow-sm ring-1 ring-gray-100" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
+                                <a href="{{ route('shop.index', array_filter(['category' => $category->slug, 'search' => $search])) }}" class="font-semibold {{ $isMainActive ? 'text-primary' : 'text-ink hover:text-primary' }}">
+                                    {{ $category->name }}
+                                </a>
+                                @if($category->children->count())
+                                    <span class="text-gray-400 transition group-open:rotate-90">&#9656;</span>
+                                @endif
+                            </summary>
+
+                            @if($category->children->count())
+                                <div class="border-t border-gray-100 px-4 py-2">
+                                    @foreach($category->children->sortBy('name') as $child)
+                                        <a href="{{ route('shop.index', array_filter(['category' => $child->slug, 'search' => $search])) }}" class="block rounded px-3 py-2 text-sm {{ $selectedCategory === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
+                                            {{ $child->name }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </details>
+                    @endforeach
+                </div>
+            </div>
         </div>
     </section>
 

@@ -28,7 +28,11 @@ class ShopController extends Controller
 
         return view('shop.index', [
             'products' => $products,
-            'categories' => Category::where('is_active', true)->whereNull('parent_id')->with('children')->orderBy('name')->get(),
+            'categories' => Category::where('is_active', true)
+                ->whereNull('parent_id')
+                ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('name')])
+                ->orderBy('name')
+                ->get(),
             'selectedCategory' => $request->category,
             'search' => $request->search,
         ]);
