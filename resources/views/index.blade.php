@@ -1,21 +1,40 @@
 <x-app-layout>
-    <section class="bg-white">
-        <div class="container grid min-h-[520px] items-center gap-10 py-12 lg:grid-cols-2">
-            <div>
-                <p class="mb-4 text-sm font-bold uppercase tracking-[0.3em] text-accent">Bonik Point Store</p>
-                <h1 class="text-4xl font-black leading-tight text-ink md:text-6xl">Shop fresh products with simple ordering.</h1>
-                <p class="mt-5 max-w-xl text-lg leading-8 text-gray-600">Browse products, add to cart, place orders without payment setup, and let the admin manage products, stock, customers, and order status.</p>
-                <div class="mt-8 flex flex-wrap gap-3">
-                    <a href="{{ route('shop.index') }}" class="rounded-full bg-primary px-7 py-3 font-semibold text-white hover:bg-ink">Shop Now</a>
-                    @auth
-                        <a href="{{ route('orders.index') }}" class="rounded-full border border-gray-200 px-7 py-3 font-semibold text-ink hover:border-primary hover:text-primary">My Orders</a>
-                    @else
-                        <a href="{{ route('register') }}" class="rounded-full border border-gray-200 px-7 py-3 font-semibold text-ink hover:border-primary hover:text-primary">Create Account</a>
-                    @endauth
+    <section class="bg-white py-8">
+        <div class="container">
+            <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <p class="text-sm font-bold uppercase tracking-wide text-primary">Recent & Top Selling</p>
+                    <h1 class="text-3xl font-black text-ink md:text-4xl">Bonik Point Products</h1>
                 </div>
+                <a href="{{ route('shop.index') }}" class="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-ink">Shop All</a>
             </div>
-            <div class="relative">
-                <img src="{{ asset('assets/images/slider/slider-item-1.png') }}" alt="Bonik Point products" class="mx-auto max-h-[460px] object-contain">
+
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                @forelse($spotlightProducts as $product)
+                    <div class="flex gap-4 rounded-lg border border-gray-100 bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                        <a href="{{ route('shop.show', $product) }}" class="h-28 w-28 shrink-0 overflow-hidden rounded bg-gray-100">
+                            <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
+                        </a>
+                        <div class="flex min-w-0 flex-1 flex-col">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-primary">{{ $product->category?->name }}</p>
+                            <a href="{{ route('shop.show', $product) }}" class="mt-1 line-clamp-2 font-semibold text-ink hover:text-primary">{{ $product->name }}</a>
+                            <div class="mt-auto pt-3">
+                                <p class="font-bold text-primary">BDT {{ number_format($product->price, 2) }}</p>
+                                @if($product->compare_price)
+                                    <p class="text-sm text-gray-400 line-through">BDT {{ number_format($product->compare_price, 2) }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        <form method="POST" action="{{ route('cart.store', $product) }}" class="js-add-to-cart self-end">
+                            @csrf
+                            <button class="grid h-9 w-9 place-items-center rounded-full bg-accent text-white hover:bg-primary" title="Add to cart">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </form>
+                    </div>
+                @empty
+                    <p class="text-gray-500">No products added yet.</p>
+                @endforelse
             </div>
         </div>
     </section>
