@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ProfessionalCategorySeeder::class);
         $this->call(AtvsGenxProductSeeder::class);
         $this->call(SmokVapePen22ProductSeeder::class);
+        $this->call(RincoeMantoNanoA4ProductSeeder::class);
 
         User::updateOrCreate(
             ['email' => 'admin@bonikpoint.com'],
