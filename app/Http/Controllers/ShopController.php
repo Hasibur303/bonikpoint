@@ -11,6 +11,8 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
+        $today = today()->toDateString();
+
         $products = Product::with('category')
             ->where('is_active', true)
             ->when($request->category, function ($query, $slug) {
@@ -30,8 +32,8 @@ class ShopController extends Controller
         return view('shop.index', [
             'products' => $products,
             'festivals' => Festival::where('is_active', true)
-                ->where(fn ($query) => $query->whereNull('starts_at')->orWhereDate('starts_at', '<=', now()))
-                ->where(fn ($query) => $query->whereNull('ends_at')->orWhereDate('ends_at', '>=', now()))
+                ->where(fn ($query) => $query->whereNull('starts_at')->orWhereDate('starts_at', '<=', $today))
+                ->where(fn ($query) => $query->whereNull('ends_at')->orWhereDate('ends_at', '>=', $today))
                 ->withCount('products')
                 ->latest()
                 ->take(6)
