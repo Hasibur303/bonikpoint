@@ -26,13 +26,6 @@
     <section class="bg-white py-10">
         <div class="container">
             <h1 class="text-4xl font-black text-ink">Shop Products</h1>
-            <form action="{{ route('shop.index') }}" class="mt-6 grid gap-3 md:grid-cols-[1fr_auto]">
-                <input name="search" value="{{ $search }}" placeholder="Search products" class="rounded-lg border-gray-200 focus:border-primary focus:ring-primary">
-                @if($selectedCategory)
-                    <input type="hidden" name="category" value="{{ $selectedCategory }}">
-                @endif
-                <button class="rounded-lg bg-primary px-6 py-2 font-semibold text-white hover:bg-ink">Search</button>
-            </form>
 
             <div class="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-4">
                 <div class="mb-3 flex items-center justify-between gap-4">
