@@ -2,17 +2,19 @@
     @if($festivals->isNotEmpty())
         <section class="bg-white pt-6">
             <div class="container">
-                <div class="overflow-hidden rounded-lg shadow-sm ring-1 ring-gray-100">
+                <div class="-mx-2 overflow-hidden rounded-lg">
                     <div id="festival-banner-track" class="flex transition-transform duration-700 ease-in-out">
                         @foreach($festivals as $festival)
-                            <a href="{{ route('festivals.show', $festival) }}" class="relative block min-w-full overflow-hidden">
-                                <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" class="h-56 w-full object-cover md:h-80">
-                                <div class="absolute inset-0 bg-ink/55"></div>
-                                <div class="absolute inset-0 flex items-center">
-                                    <div class="px-6 text-white md:px-10">
-                                        <p class="text-sm font-bold uppercase tracking-wide text-accent">{{ number_format($festival->discount_percentage, 0) }}% Discount</p>
-                                        <h2 class="mt-2 max-w-2xl text-3xl font-black md:text-5xl">{{ $festival->title }}</h2>
-                                        <p class="mt-3 text-sm font-semibold text-white/85">{{ $festival->products_count }} selected products</p>
+                            <a href="{{ route('festivals.show', $festival) }}" class="block min-w-full px-2 md:min-w-[50%] lg:min-w-[33.333333%]">
+                                <div class="relative overflow-hidden rounded-lg shadow-sm ring-1 ring-gray-100">
+                                    <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" class="h-48 w-full object-cover md:h-64">
+                                    <div class="absolute inset-0 bg-ink/55"></div>
+                                    <div class="absolute inset-0 flex items-center">
+                                        <div class="px-5 text-white">
+                                            <p class="text-xs font-bold uppercase tracking-wide text-accent md:text-sm">{{ number_format($festival->discount_percentage, 0) }}% Discount</p>
+                                            <h2 class="mt-2 line-clamp-2 text-2xl font-black md:text-3xl">{{ $festival->title }}</h2>
+                                            <p class="mt-3 text-sm font-semibold text-white/85">{{ $festival->products_count }} selected products</p>
+                                        </div>
                                     </div>
                                 </div>
                             </a>
@@ -88,14 +90,46 @@
                 const total = {{ $festivals->count() }};
                 let index = 0;
 
+                const visibleCount = () => {
+                    if (window.innerWidth >= 1024) {
+                        return 3;
+                    }
+
+                    if (window.innerWidth >= 768) {
+                        return 2;
+                    }
+
+                    return 1;
+                };
+
+                const moveBanner = () => {
+                    const visible = visibleCount();
+                    const maxIndex = Math.max(0, total - visible);
+
+                    if (index > maxIndex) {
+                        index = 0;
+                    }
+
+                    track.style.transform = `translateX(-${index * (100 / visible)}%)`;
+                };
+
                 if (!track || total < 2) {
                     return;
                 }
 
                 setInterval(function () {
-                    index = (index + 1) % total;
-                    track.style.transform = `translateX(-${index * 100}%)`;
+                    const maxIndex = Math.max(0, total - visibleCount());
+
+                    if (maxIndex === 0) {
+                        moveBanner();
+                        return;
+                    }
+
+                    index = index >= maxIndex ? 0 : index + 1;
+                    moveBanner();
                 }, 3500);
+
+                window.addEventListener('resize', moveBanner);
             });
         </script>
     @endif
