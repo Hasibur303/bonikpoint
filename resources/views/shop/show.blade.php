@@ -1,4 +1,25 @@
 <x-app-layout>
+    @php
+        $isVapeProduct = in_array($product->category?->slug, ['vape-accessories'], true)
+            || in_array($product->category?->parent?->slug, ['vape-accessories'], true);
+    @endphp
+
+    @if($isVapeProduct)
+        <div id="vape-age-warning" class="fixed inset-0 z-[120] hidden bg-ink/90 px-4 py-6 backdrop-blur">
+            <div class="flex min-h-full items-center justify-center">
+                <div class="w-full max-w-lg rounded-lg bg-white p-6 text-center shadow-2xl">
+                    <p class="text-sm font-bold uppercase tracking-wide text-primary">Age Restricted Product</p>
+                    <h2 class="mt-2 text-3xl font-black text-ink">Are you 18 or older?</h2>
+                    <p class="mt-4 leading-7 text-gray-600">This product is intended for adult users only. Please confirm your age before viewing vape products on Bonik Point.</p>
+                    <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                        <button id="confirm-vape-age" type="button" class="rounded bg-primary px-5 py-3 font-semibold text-white hover:bg-ink">Yes, I am 18+</button>
+                        <a href="{{ route('shop.index') }}" class="rounded border border-gray-200 px-5 py-3 font-semibold text-ink hover:border-primary hover:text-primary">No, go back</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <section class="bg-white py-12">
         <div class="container grid gap-10 lg:grid-cols-2">
             <div class="overflow-hidden rounded-lg bg-gray-100">
@@ -40,4 +61,29 @@
             </div>
         </div>
     </section>
+
+    @if($isVapeProduct)
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const warning = document.getElementById('vape-age-warning');
+                const confirmButton = document.getElementById('confirm-vape-age');
+                const storageKey = 'bonikpoint_vape_age_confirmed';
+
+                if (!warning || !confirmButton) {
+                    return;
+                }
+
+                if (sessionStorage.getItem(storageKey) !== 'yes') {
+                    warning.classList.remove('hidden');
+                    document.body.classList.add('overflow-hidden');
+                }
+
+                confirmButton.addEventListener('click', function () {
+                    sessionStorage.setItem(storageKey, 'yes');
+                    warning.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
+                });
+            });
+        </script>
+    @endif
 </x-app-layout>
