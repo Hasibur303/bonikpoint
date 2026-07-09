@@ -62,6 +62,7 @@ class ProductController extends Controller
             'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'buying_price' => ['nullable', 'numeric', 'min:0'],
             'price' => ['required', 'numeric', 'min:0'],
             'compare_price' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
@@ -72,6 +73,7 @@ class ProductController extends Controller
         ]);
 
         $data['slug'] = Str::slug($data['name']).($product?->exists ? '' : '-'.Str::random(5));
+        $data['buying_price'] = $data['buying_price'] ?? 0;
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_active'] = $request->boolean('is_active');
 

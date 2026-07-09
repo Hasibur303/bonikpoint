@@ -27,6 +27,11 @@
                 <input name="price" type="number" step="0.01" value="{{ old('price', $product->price) }}" class="w-full rounded border-gray-200" required>
             </div>
             <div>
+                <label class="mb-1 block text-sm font-semibold">Buying Price</label>
+                <input name="buying_price" type="number" step="0.01" value="{{ old('buying_price', $product->buying_price ?? 0) }}" class="w-full rounded border-gray-200">
+                <p class="mt-1 text-xs text-gray-500">Admin only. Used for profit calculation and hidden from shop pages.</p>
+            </div>
+            <div>
                 <label class="mb-1 block text-sm font-semibold">Compare Price</label>
                 <input name="compare_price" type="number" step="0.01" value="{{ old('compare_price', $product->compare_price) }}" class="w-full rounded border-gray-200">
             </div>

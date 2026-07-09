@@ -9,6 +9,15 @@
         <div class="rounded-lg bg-white p-5 shadow-sm"><p class="text-sm text-gray-500">Categories</p><p class="mt-2 text-3xl font-black text-ink">{{ $categoriesCount }}</p></div>
         <div class="rounded-lg bg-white p-5 shadow-sm"><p class="text-sm text-gray-500">Customers</p><p class="mt-2 text-3xl font-black text-ink">{{ $usersCount }}</p></div>
     </div>
+    <div class="mt-5 rounded-lg bg-white p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <p class="text-sm font-semibold text-gray-500">Profit Tracking</p>
+                <p class="mt-1 text-lg font-bold text-ink">View profit by selected date, full month, full year, or all time.</p>
+            </div>
+            <a href="{{ route('admin.profit.index') }}" class="rounded bg-primary px-5 py-2 font-semibold text-white">Open Profit Report</a>
+        </div>
+    </div>
     <div class="mt-8 rounded-lg bg-white p-6 shadow-sm">
         <h2 class="mb-4 text-xl font-black text-ink">Recent Orders</h2>
         <div class="overflow-x-auto">

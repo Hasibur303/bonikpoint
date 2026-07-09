@@ -17,6 +17,7 @@ class Product extends Model
         'name',
         'slug',
         'description',
+        'buying_price',
         'price',
         'compare_price',
         'stock',
@@ -30,6 +31,7 @@ class Product extends Model
     {
         return [
             'price' => 'decimal:2',
+            'buying_price' => 'decimal:2',
             'compare_price' => 'decimal:2',
             'is_featured' => 'boolean',
             'is_active' => 'boolean',

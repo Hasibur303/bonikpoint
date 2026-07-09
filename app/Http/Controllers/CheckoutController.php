@@ -60,6 +60,7 @@ class CheckoutController extends Controller
                 $order->items()->create([
                     'product_id' => $product->id,
                     'product_name' => $product->name,
+                    'buying_price' => $product->buying_price,
                     'unit_price' => $product->price,
                     'quantity' => $quantity,
                     'total' => $item['total'],
