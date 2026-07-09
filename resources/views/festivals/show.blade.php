@@ -4,7 +4,9 @@
             <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" class="absolute inset-0 h-full w-full object-cover">
             <div class="absolute inset-0 bg-ink/60"></div>
             <div class="container relative flex min-h-[340px] flex-col justify-center py-12 text-white">
-                <p class="text-sm font-bold uppercase tracking-wide text-accent">{{ number_format($festival->discount_percentage, 0) }}% Festival Discount</p>
+                @if($festival->discount_percentage > 0)
+                    <p class="text-sm font-bold uppercase tracking-wide text-accent">{{ number_format($festival->discount_percentage, 0) }}% Festival Discount</p>
+                @endif
                 <h1 class="mt-2 max-w-3xl text-4xl font-black md:text-6xl">{{ $festival->title }}</h1>
                 @if($festival->description)
                     <p class="mt-4 max-w-2xl text-lg leading-8 text-white/85">{{ $festival->description }}</p>

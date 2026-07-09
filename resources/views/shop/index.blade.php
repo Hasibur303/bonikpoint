@@ -11,7 +11,9 @@
                                     <div class="absolute inset-0 bg-ink/55"></div>
                                     <div class="absolute inset-0 flex items-center">
                                         <div class="px-5 text-white">
-                                            <p class="text-xs font-bold uppercase tracking-wide text-accent md:text-sm">{{ number_format($festival->discount_percentage, 0) }}% Discount</p>
+                                            @if($festival->discount_percentage > 0)
+                                                <p class="text-xs font-bold uppercase tracking-wide text-accent md:text-sm">{{ number_format($festival->discount_percentage, 0) }}% Discount</p>
+                                            @endif
                                             <h2 class="mt-2 line-clamp-2 text-2xl font-black md:text-3xl">{{ $festival->title }}</h2>
                                             <p class="mt-3 text-sm font-semibold text-white/85">{{ $festival->products_count }} selected products</p>
                                         </div>
