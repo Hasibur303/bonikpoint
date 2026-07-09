@@ -305,21 +305,22 @@
                 }
 
                 cartItems.innerHTML = cartState.items.map((item) => `
-                    <div class="mb-4 grid grid-cols-[72px_1fr] gap-4 rounded-lg border border-gray-100 p-3" data-cart-item="${item.id}">
+                    <div class="mb-4 grid grid-cols-[72px_1fr] gap-4 rounded-lg border border-gray-100 p-3" data-cart-item="${escapeHtml(item.key)}">
                         <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" class="h-20 w-20 rounded object-cover">
                         <div>
                             <div class="flex gap-3">
                                 <div class="min-w-0 flex-1">
                                     <p class="truncate font-semibold text-ink">${escapeHtml(item.name)}</p>
+                                    ${item.festival_title ? `<p class="text-xs font-bold uppercase tracking-wide text-accent">${escapeHtml(item.festival_title)}</p>` : ''}
                                     <p class="text-sm text-gray-500">${money(item.price)}</p>
                                 </div>
-                                <button type="button" class="js-cart-remove text-sm font-semibold text-red-500 hover:text-red-700" data-product-id="${item.id}">Remove</button>
+                                <button type="button" class="js-cart-remove text-sm font-semibold text-red-500 hover:text-red-700" data-product-id="${item.id}" data-cart-key="${escapeHtml(item.key)}">Remove</button>
                             </div>
                             <div class="mt-3 flex items-center justify-between gap-3">
                                 <div class="flex items-center overflow-hidden rounded border border-gray-200">
-                                    <button type="button" class="js-cart-decrease px-3 py-1 text-lg" data-product-id="${item.id}" data-quantity="${item.quantity}">-</button>
+                                    <button type="button" class="js-cart-decrease px-3 py-1 text-lg" data-product-id="${item.id}" data-cart-key="${escapeHtml(item.key)}" data-quantity="${item.quantity}">-</button>
                                     <span class="min-w-10 px-3 text-center text-sm font-semibold">${item.quantity}</span>
-                                    <button type="button" class="js-cart-increase px-3 py-1 text-lg" data-product-id="${item.id}" data-quantity="${item.quantity}" data-stock="${item.stock}">+</button>
+                                    <button type="button" class="js-cart-increase px-3 py-1 text-lg" data-product-id="${item.id}" data-cart-key="${escapeHtml(item.key)}" data-quantity="${item.quantity}" data-stock="${item.stock}">+</button>
                                 </div>
                                 <p class="font-bold text-primary">${money(item.total)}</p>
                             </div>
@@ -366,9 +367,12 @@
                 }
 
                 const productId = button.dataset.productId;
+                const cartKey = button.dataset.cartKey;
+                const keyedBody = new URLSearchParams();
+                keyedBody.append('cart_key', cartKey);
 
                 if (button.classList.contains('js-cart-remove')) {
-                    requestCart(`{{ url('/cart') }}/${productId}`, { method: 'DELETE' });
+                    requestCart(`{{ url('/cart') }}/${productId}`, { method: 'DELETE', body: keyedBody });
                     return;
                 }
 
@@ -379,12 +383,13 @@
                     : currentQuantity - 1;
 
                 if (nextQuantity < 1) {
-                    requestCart(`{{ url('/cart') }}/${productId}`, { method: 'DELETE' });
+                    requestCart(`{{ url('/cart') }}/${productId}`, { method: 'DELETE', body: keyedBody });
                     return;
                 }
 
                 const body = new URLSearchParams();
                 body.append('quantity', nextQuantity);
+                body.append('cart_key', cartKey);
                 requestCart(`{{ url('/cart') }}/${productId}`, { method: 'PATCH', body });
             });
 

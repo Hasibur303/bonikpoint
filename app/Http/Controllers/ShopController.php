@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Festival;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -28,6 +29,13 @@ class ShopController extends Controller
 
         return view('shop.index', [
             'products' => $products,
+            'festivals' => Festival::where('is_active', true)
+                ->where(fn ($query) => $query->whereNull('starts_at')->orWhereDate('starts_at', '<=', now()))
+                ->where(fn ($query) => $query->whereNull('ends_at')->orWhereDate('ends_at', '>=', now()))
+                ->withCount('products')
+                ->latest()
+                ->take(6)
+                ->get(),
             'categories' => Category::where('is_active', true)
                 ->whereNull('parent_id')
                 ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('name')])

@@ -1,4 +1,28 @@
 <x-app-layout>
+    @if($festivals->isNotEmpty())
+        <section class="bg-white pt-6">
+            <div class="container">
+                <div class="overflow-hidden rounded-lg shadow-sm ring-1 ring-gray-100">
+                    <div id="festival-banner-track" class="flex transition-transform duration-700 ease-in-out">
+                        @foreach($festivals as $festival)
+                            <a href="{{ route('festivals.show', $festival) }}" class="relative block min-w-full overflow-hidden">
+                                <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" class="h-56 w-full object-cover md:h-80">
+                                <div class="absolute inset-0 bg-ink/55"></div>
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="px-6 text-white md:px-10">
+                                        <p class="text-sm font-bold uppercase tracking-wide text-accent">{{ number_format($festival->discount_percentage, 0) }}% Discount</p>
+                                        <h2 class="mt-2 max-w-2xl text-3xl font-black md:text-5xl">{{ $festival->title }}</h2>
+                                        <p class="mt-3 text-sm font-semibold text-white/85">{{ $festival->products_count }} selected products</p>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
     <section class="bg-white py-10">
         <div class="container">
             <h1 class="text-4xl font-black text-ink">Shop Products</h1>
@@ -63,4 +87,23 @@
             <div class="mt-8">{{ $products->links() }}</div>
         </div>
     </section>
+
+    @if($festivals->count() > 1)
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const track = document.getElementById('festival-banner-track');
+                const total = {{ $festivals->count() }};
+                let index = 0;
+
+                if (!track || total < 2) {
+                    return;
+                }
+
+                setInterval(function () {
+                    index = (index + 1) % total;
+                    track.style.transform = `translateX(-${index * 100}%)`;
+                }, 3500);
+            });
+        </script>
+    @endif
 </x-app-layout>

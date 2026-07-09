@@ -26,6 +26,7 @@
                 <a href="{{ route('admin.index') }}" class="block rounded px-3 py-2 hover:bg-white/10">Dashboard</a>
                 <a href="{{ route('admin.products.index') }}" class="block rounded px-3 py-2 hover:bg-white/10">Products</a>
                 <a href="{{ route('admin.categories.index') }}" class="block rounded px-3 py-2 hover:bg-white/10">Categories</a>
+                <a href="{{ route('admin.festivals.index') }}" class="block rounded px-3 py-2 hover:bg-white/10">Festivals</a>
                 <a href="{{ route('admin.orders.index') }}" class="block rounded px-3 py-2 hover:bg-white/10">Orders</a>
                 <a href="{{ route('admin.profit.index') }}" class="block rounded px-3 py-2 hover:bg-white/10">Profit</a>
                 <a href="{{ route('admin.users.index') }}" class="block rounded px-3 py-2 hover:bg-white/10">Users</a>

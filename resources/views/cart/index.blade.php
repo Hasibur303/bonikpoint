@@ -9,18 +9,23 @@
                             <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}" class="h-24 w-24 rounded object-cover">
                             <div>
                                 <a href="{{ route('shop.show', $item['product']) }}" class="font-bold text-ink hover:text-primary">{{ $item['product']->name }}</a>
-                                <p class="text-sm text-gray-500">৳{{ number_format($item['product']->price, 2) }} each</p>
+                                @if($item['festival_title'])
+                                    <p class="mt-1 text-xs font-bold uppercase tracking-wide text-accent">{{ $item['festival_title'] }}</p>
+                                @endif
+                                <p class="text-sm text-gray-500">BDT {{ number_format($item['unit_price'], 2) }} each</p>
                             </div>
                             <div class="flex items-center gap-3">
                                 <form method="POST" action="{{ route('cart.update', $item['product']) }}" class="flex gap-2">
                                     @csrf
                                     @method('PATCH')
+                                    <input type="hidden" name="cart_key" value="{{ $item['key'] }}">
                                     <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1" max="{{ $item['product']->stock }}" class="w-20 rounded border-gray-200 text-sm">
                                     <button class="rounded bg-gray-100 px-3 text-sm font-semibold hover:bg-gray-200">Update</button>
                                 </form>
                                 <form method="POST" action="{{ route('cart.destroy', $item['product']) }}">
                                     @csrf
                                     @method('DELETE')
+                                    <input type="hidden" name="cart_key" value="{{ $item['key'] }}">
                                     <button class="text-red-500 hover:text-red-700" title="Remove"><i class="fa-solid fa-trash"></i></button>
                                 </form>
                             </div>
@@ -30,9 +35,9 @@
                 <aside class="h-fit rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-100">
                     <h2 class="text-xl font-black text-ink">Order Summary</h2>
                     <div class="mt-5 space-y-3 text-sm">
-                        <div class="flex justify-between"><span>Subtotal</span><span>৳{{ number_format(\App\Http\Controllers\CartController::subtotal(), 2) }}</span></div>
-                        <div class="flex justify-between"><span>Shipping</span><span>৳0.00</span></div>
-                        <div class="border-t pt-3 flex justify-between text-lg font-black text-ink"><span>Total</span><span>৳{{ number_format(\App\Http\Controllers\CartController::subtotal(), 2) }}</span></div>
+                        <div class="flex justify-between"><span>Subtotal</span><span>BDT {{ number_format(\App\Http\Controllers\CartController::subtotal(), 2) }}</span></div>
+                        <div class="flex justify-between"><span>Shipping</span><span>BDT 0.00</span></div>
+                        <div class="border-t pt-3 flex justify-between text-lg font-black text-ink"><span>Total</span><span>BDT {{ number_format(\App\Http\Controllers\CartController::subtotal(), 2) }}</span></div>
                     </div>
                     <a href="{{ route('checkout.create') }}" class="mt-6 block rounded-lg bg-primary px-6 py-3 text-center font-semibold text-white hover:bg-ink">Proceed to Checkout</a>
                 </aside>

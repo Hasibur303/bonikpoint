@@ -8,9 +8,11 @@ use App\Http\Middleware\AuthAdmin;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\FestivalController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\FestivalController as AdminFestivalController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProfitController as AdminProfitController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -22,6 +24,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+Route::get('/festivals/{festival:slug}', [FestivalController::class, 'show'])->name('festivals.show');
 Route::get('/products/{product}', [ShopController::class, 'show'])->name('shop.show');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::get('/cart/snapshot', [CartController::class, 'snapshotResponse'])->name('cart.snapshot');
@@ -52,6 +55,7 @@ Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(fu
     Route::get('/', [AdminComtroller::class, 'index'])->name('index');
     Route::resource('categories', AdminCategoryController::class)->except('show');
     Route::resource('products', AdminProductController::class)->except('show');
+    Route::resource('festivals', AdminFestivalController::class)->except('show');
     Route::get('profit', [AdminProfitController::class, 'index'])->name('profit.index');
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');

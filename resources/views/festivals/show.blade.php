@@ -1,0 +1,53 @@
+<x-app-layout>
+    <section class="bg-white">
+        <div class="relative min-h-[340px] overflow-hidden">
+            <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" class="absolute inset-0 h-full w-full object-cover">
+            <div class="absolute inset-0 bg-ink/60"></div>
+            <div class="container relative flex min-h-[340px] flex-col justify-center py-12 text-white">
+                <p class="text-sm font-bold uppercase tracking-wide text-accent">{{ number_format($festival->discount_percentage, 0) }}% Festival Discount</p>
+                <h1 class="mt-2 max-w-3xl text-4xl font-black md:text-6xl">{{ $festival->title }}</h1>
+                @if($festival->description)
+                    <p class="mt-4 max-w-2xl text-lg leading-8 text-white/85">{{ $festival->description }}</p>
+                @endif
+            </div>
+        </div>
+    </section>
+
+    <section class="py-12">
+        <div class="container">
+            <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <p class="text-sm font-bold uppercase tracking-wide text-primary">Festival Products</p>
+                    <h2 class="text-3xl font-black text-ink">Special Offer Price</h2>
+                </div>
+                <a href="{{ route('shop.index') }}" class="rounded-full border border-gray-200 px-5 py-2 font-semibold text-ink hover:border-primary hover:text-primary">Back to Shop</a>
+            </div>
+
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                @forelse($festival->products as $product)
+                    @php($offerPrice = $festival->discountedPrice($product))
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-100 transition hover:-translate-y-1 hover:shadow-lg">
+                        <a href="{{ route('shop.show', $product) }}" class="block aspect-square overflow-hidden bg-gray-100">
+                            <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="h-full w-full object-cover transition duration-500 hover:scale-105">
+                        </a>
+                        <div class="p-4">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-primary">{{ $product->category?->name }}</p>
+                            <a href="{{ route('shop.show', $product) }}" class="mt-1 block font-semibold text-ink hover:text-primary">{{ $product->name }}</a>
+                            <div class="mt-3">
+                                <span class="font-bold text-primary">BDT {{ number_format($offerPrice, 2) }}</span>
+                                <span class="ml-2 text-sm text-gray-400 line-through">BDT {{ number_format($product->price, 2) }}</span>
+                            </div>
+                            <form method="POST" action="{{ route('cart.store', $product) }}" class="js-add-to-cart mt-4">
+                                @csrf
+                                <input type="hidden" name="festival_id" value="{{ $festival->id }}">
+                                <button class="w-full rounded bg-accent px-4 py-2 font-semibold text-white hover:bg-primary">Add Festival Offer</button>
+                            </form>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full rounded-lg bg-white p-10 text-center text-gray-500">No products selected for this festival yet.</div>
+                @endforelse
+            </div>
+        </div>
+    </section>
+</x-app-layout>
