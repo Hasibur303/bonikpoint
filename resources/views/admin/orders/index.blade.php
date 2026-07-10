@@ -1,5 +1,20 @@
 <x-admin-layout>
-    <div class="mb-6"><p class="text-sm font-bold uppercase tracking-wide text-primary">Sales</p><h1 class="text-4xl font-black text-ink">Orders</h1></div>
+    <div class="mb-6">
+        <p class="text-sm font-bold uppercase tracking-wide text-primary">Sales</p>
+        <h1 class="text-4xl font-black text-ink">Orders</h1>
+    </div>
+
+    <div class="mb-6 flex flex-wrap gap-2 rounded-lg bg-white p-3 shadow-sm">
+        <a href="{{ route('admin.orders.index') }}" class="rounded px-4 py-2 text-sm font-semibold {{ $selectedStatus ? 'bg-gray-100 text-ink hover:bg-gray-200' : 'bg-primary text-white' }}">
+            All Orders
+        </a>
+        @foreach($statuses as $status)
+            <a href="{{ route('admin.orders.index', ['status' => $status]) }}" class="rounded px-4 py-2 text-sm font-semibold capitalize {{ $selectedStatus === $status ? 'bg-primary text-white' : 'bg-gray-100 text-ink hover:bg-gray-200' }}">
+                {{ str($status)->replace('_', ' ') }}
+            </a>
+        @endforeach
+    </div>
+
     <div class="overflow-hidden rounded-lg bg-white shadow-sm">
         <table class="w-full text-left text-sm">
             <thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="p-4">Order</th><th class="p-4">Customer</th><th class="p-4">Total</th><th class="p-4">Status</th><th class="p-4">Date</th><th class="p-4"></th></tr></thead>

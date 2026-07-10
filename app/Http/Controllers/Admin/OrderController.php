@@ -10,10 +10,32 @@ use Illuminate\View\View;
 
 class OrderController extends Controller
 {
-    public function index(): View
+    private const STATUSES = [
+        'waiting_delivery_charge',
+        'pending',
+        'confirmed',
+        'processing',
+        'delivered',
+        'completed',
+        'cancelled',
+    ];
+
+    public function index(Request $request): View
     {
+        $status = $request->input('status');
+
+        if (! in_array($status, self::STATUSES, true)) {
+            $status = null;
+        }
+
         return view('admin.orders.index', [
-            'orders' => Order::with('user')->latest()->paginate(12),
+            'orders' => Order::with('user')
+                ->when($status, fn ($query) => $query->where('status', $status))
+                ->latest()
+                ->paginate(12)
+                ->withQueryString(),
+            'selectedStatus' => $status,
+            'statuses' => self::STATUSES,
         ]);
     }
 
