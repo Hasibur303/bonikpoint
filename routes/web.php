@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+Route::view('/return-refund-policy', 'pages.return-policy')->name('return-policy');
 Route::get('/festivals/{festival:slug}', [FestivalController::class, 'show'])->name('festivals.show');
 Route::get('/products/{product}', [ShopController::class, 'show'])->name('shop.show');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');

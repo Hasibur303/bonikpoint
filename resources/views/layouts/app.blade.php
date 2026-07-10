@@ -232,6 +232,7 @@
                     <a href="{{ route('shop.index') }}" class="block hover:text-accent">All Products</a>
                     <a href="{{ route('cart.index') }}" class="block hover:text-accent">Cart</a>
                     <a href="{{ route('orders.index') }}" class="block hover:text-accent">Orders</a>
+                    <a href="{{ route('return-policy') }}" class="block hover:text-accent">রিটার্ন ও রিফান্ড পলিসি</a>
                 </div>
             </div>
             <div>

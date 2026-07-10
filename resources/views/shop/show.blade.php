@@ -49,6 +49,13 @@
                     {{ $product->stock > 0 ? $product->stock.' in stock' : 'Out of stock' }}
                 </p>
                 <p class="mt-6 leading-8 text-gray-600">{{ $product->description ?: 'No product description yet.' }}</p>
+                <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                    <h2 class="font-black text-ink">রিটার্ন পলিসি</h2>
+                    <p class="mt-2 text-sm leading-7 text-gray-700">
+                        পণ্য ডেলিভারির সময় ডেলিভারি ম্যানের সামনে খুলে চেক করুন। কোনো সমস্যা থাকলে সঙ্গে সঙ্গে ছবি/ভিডিও প্রমাণ নিয়ে রিটার্ন করুন।
+                    </p>
+                    <a href="{{ route('return-policy') }}" class="mt-3 inline-block text-sm font-bold text-primary hover:text-ink">সম্পূর্ণ পলিসি দেখুন</a>
+                </div>
                 @if($product->stock > 0)
                     <form method="POST" action="{{ route('cart.store', $product) }}" class="js-add-to-cart mt-8 flex gap-3">
                         @csrf

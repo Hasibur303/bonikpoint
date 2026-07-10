@@ -35,6 +35,15 @@
                         <textarea name="notes" rows="3" class="w-full rounded-lg border-gray-200 focus:border-primary focus:ring-primary">{{ old('notes') }}</textarea>
                     </div>
 
+                    <div class="md:col-span-2 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                        <h2 class="font-black text-ink">রিটার্ন পলিসি</h2>
+                        <p class="mt-2 text-sm leading-7 text-gray-700">
+                            ডেলিভারির সময় ডেলিভারি ম্যানের সামনে পণ্য খুলে দেখে নিন। ভুল, ক্ষতিগ্রস্ত, অসম্পূর্ণ, বা অর্ডারের সাথে না মিললে
+                            সঙ্গে সঙ্গে ছবি/ভিডিও প্রমাণ নিয়ে ডেলিভারি ম্যানের কাছেই রিটার্ন করুন। ডেলিভারি ম্যান চলে যাওয়ার পর রিটার্ন গ্রহণযোগ্য নাও হতে পারে।
+                        </p>
+                        <a href="{{ route('return-policy') }}" class="mt-3 inline-block text-sm font-bold text-primary hover:text-ink">সম্পূর্ণ পলিসি দেখুন</a>
+                    </div>
+
                     @if($advanceDeliveryRequired)
                         <div class="md:col-span-2 rounded-lg border border-accent/40 bg-accent/10 p-4">
                             <h2 class="text-lg font-black text-ink">Advance Delivery Charge Required</h2>
