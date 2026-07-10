@@ -21,7 +21,7 @@
             <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <p class="text-sm font-bold uppercase tracking-wide text-primary">Festival Products</p>
-                    <h2 class="text-3xl font-black text-ink">Special Offer Price</h2>
+                    <h2 class="text-3xl font-black text-ink">Available Products</h2>
                 </div>
             </div>
 
