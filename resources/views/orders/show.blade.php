@@ -6,6 +6,9 @@
                 <h1 class="text-4xl font-black text-ink">{{ $order->order_number }}</h1>
             </div>
             <div class="flex items-center gap-3">
+                @if($order->advance_delivery_required && $order->delivery_charge_payment_option === 'pay_later')
+                    <a href="{{ route('orders.delivery-payment', $order) }}" class="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">Pay Delivery Charge</a>
+                @endif
                 <a href="{{ route('orders.receipt', $order) }}" class="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-ink hover:border-primary hover:text-primary">Receipt</a>
                 <span class="rounded-full bg-gray-100 px-4 py-2 text-sm font-semibold capitalize">{{ str($order->status)->replace('_', ' ') }}</span>
             </div>

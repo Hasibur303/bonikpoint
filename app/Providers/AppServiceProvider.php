@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Http\Controllers\CartController;
 use App\Models\Category;
+use App\Models\Order;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,6 +30,17 @@ class AppServiceProvider extends ServiceProvider
                 ->orderBy('name')
                 ->get())
                 ->with('drawerCart', app(CartController::class)->snapshot());
+        });
+
+        View::composer('components.user-dashboard-layout', function ($view) {
+            $view->with('unpaidDeliveryOrders', auth()->check()
+                ? Order::where('user_id', auth()->id())
+                    ->where('advance_delivery_required', true)
+                    ->where('delivery_charge_payment_option', 'pay_later')
+                    ->latest()
+                    ->take(3)
+                    ->get()
+                : collect());
         });
     }
 }

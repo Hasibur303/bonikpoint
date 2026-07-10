@@ -45,6 +45,18 @@
                 </div>
             @endif
 
+            @if(($unpaidDeliveryOrders ?? collect())->isNotEmpty())
+                <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <p class="font-bold">You have unpaid delivery charge order{{ $unpaidDeliveryOrders->count() > 1 ? 's' : '' }}.</p>
+                            <p class="mt-1">Please pay the delivery charge so admin can fully confirm your order.</p>
+                        </div>
+                        <a href="{{ route('orders.delivery-payment', $unpaidDeliveryOrders->first()) }}" class="rounded bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700">Pay Now</a>
+                    </div>
+                </div>
+            @endif
+
             {{ $slot }}
         </main>
     </div>

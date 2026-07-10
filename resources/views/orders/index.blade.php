@@ -21,6 +21,9 @@
                             <td class="p-4 capitalize">{{ str($order->status)->replace('_', ' ') }}</td>
                             <td class="p-4">{{ $order->created_at->format('d M Y') }}</td>
                             <td class="p-4 text-right">
+                                @if($order->advance_delivery_required && $order->delivery_charge_payment_option === 'pay_later')
+                                    <a href="{{ route('orders.delivery-payment', $order) }}" class="mr-3 rounded bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700">Pay Delivery</a>
+                                @endif
                                 <a href="{{ route('orders.show', $order) }}" class="font-semibold text-primary">View</a>
                             </td>
                         </tr>
