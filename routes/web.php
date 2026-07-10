@@ -10,6 +10,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FestivalController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\FestivalController as AdminFestivalController;
@@ -50,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/{order}/delivery-payment', [OrderController::class, 'deliveryPayment'])->name('orders.delivery-payment');
     Route::patch('/orders/{order}/delivery-payment', [OrderController::class, 'updateDeliveryPayment'])->name('orders.delivery-payment.update');
     Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
+    Route::post('/orders/{order}/reviews', [ProductReviewController::class, 'store'])->name('orders.reviews.store');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

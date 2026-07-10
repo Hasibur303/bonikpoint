@@ -56,6 +56,11 @@ class Product extends Model
         return $this->belongsToMany(Festival::class)->withTimestamps();
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
     public function getImageUrlAttribute(): string
     {
         if (! $this->image) {

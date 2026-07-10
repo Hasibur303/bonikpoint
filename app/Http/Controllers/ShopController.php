@@ -60,7 +60,15 @@ class ShopController extends Controller
         abort_unless($product->is_active, 404);
 
         return view('shop.show', [
-            'product' => $product->load('category.parent'),
+            'product' => $product->load('category.parent')
+                ->loadCount(['reviews' => fn ($query) => $query->where('is_approved', true)])
+                ->loadAvg(['reviews' => fn ($query) => $query->where('is_approved', true)], 'rating'),
+            'reviews' => $product->reviews()
+                ->with('user')
+                ->where('is_approved', true)
+                ->latest()
+                ->take(12)
+                ->get(),
             'relatedProducts' => Product::where('is_active', true)
                 ->where('category_id', $product->category_id)
                 ->whereKeyNot($product->id)

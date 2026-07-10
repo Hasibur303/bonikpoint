@@ -23,6 +23,26 @@
                             <div>
                                 <p class="font-semibold text-ink">{{ $item->product_name }}</p>
                                 <p class="text-sm text-gray-500">BDT {{ number_format($item->unit_price, 2) }} x {{ $item->quantity }}</p>
+                                @if($order->status === 'delivered' && $item->product_id)
+                                    @php($review = $order->reviews->firstWhere('product_id', $item->product_id))
+                                    <form method="POST" action="{{ route('orders.reviews.store', $order) }}" class="mt-4 rounded bg-gray-50 p-4">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $item->product_id }}">
+                                        <label class="mb-1 block text-sm font-semibold text-ink">Rate this product</label>
+                                        <div class="grid gap-3 md:grid-cols-[140px_1fr_auto]">
+                                            <select name="rating" class="rounded border-gray-200 text-sm" required>
+                                                <option value="">Rating</option>
+                                                @for($rating = 5; $rating >= 1; $rating--)
+                                                    <option value="{{ $rating }}" @selected(old('rating', $review?->rating) == $rating)>{{ $rating }} out of 5</option>
+                                                @endfor
+                                            </select>
+                                            <input name="comment" value="{{ old('comment', $review?->comment) }}" placeholder="Write a short comment" class="rounded border-gray-200 text-sm">
+                                            <button class="rounded bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-ink">{{ $review ? 'Update' : 'Submit' }}</button>
+                                        </div>
+                                        @error('rating')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                        @error('comment')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                    </form>
+                                @endif
                             </div>
                             <p class="font-semibold">BDT {{ number_format($item->total, 2) }}</p>
                         </div>

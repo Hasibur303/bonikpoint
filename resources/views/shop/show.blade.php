@@ -28,6 +28,17 @@
             <div>
                 <p class="text-sm font-bold uppercase tracking-wide text-primary">{{ $product->category?->name }}</p>
                 <h1 class="mt-2 text-4xl font-black text-ink">{{ $product->name }}</h1>
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <div class="text-lg text-accent">
+                        @php($averageRating = round((float) ($product->reviews_avg_rating ?? 0), 1))
+                        @for($star = 1; $star <= 5; $star++)
+                            <span>{{ $averageRating >= $star ? '★' : '☆' }}</span>
+                        @endfor
+                    </div>
+                    <p class="text-sm text-gray-500">
+                        {{ $product->reviews_count ? $averageRating.' / 5 from '.$product->reviews_count.' review'.($product->reviews_count > 1 ? 's' : '') : 'No ratings yet' }}
+                    </p>
+                </div>
                 <div class="mt-4 flex items-center gap-3">
                     <span class="text-3xl font-black text-primary">BDT {{ number_format($product->price, 2) }}</span>
                     @if($product->compare_price)
@@ -45,6 +56,41 @@
                         <button class="rounded-lg bg-primary px-8 py-3 font-semibold text-white hover:bg-ink">Add to Cart</button>
                     </form>
                 @endif
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-white py-12">
+        <div class="container">
+            <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <p class="text-sm font-bold uppercase tracking-wide text-primary">Customer Reviews</p>
+                    <h2 class="text-2xl font-black text-ink">Ratings & Comments</h2>
+                </div>
+                <p class="text-sm text-gray-500">{{ $product->reviews_count }} review{{ $product->reviews_count === 1 ? '' : 's' }}</p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+                @forelse($reviews as $review)
+                    <article class="rounded-lg border border-gray-100 bg-gray-50 p-5">
+                        <div class="flex items-center justify-between gap-4">
+                            <div>
+                                <p class="font-bold text-ink">{{ $review->user?->name ?? 'Customer' }}</p>
+                                <p class="text-xs text-gray-500">{{ $review->created_at->format('d M Y') }}</p>
+                            </div>
+                            <div class="text-accent">
+                                @for($star = 1; $star <= 5; $star++)
+                                    <span>{{ $review->rating >= $star ? '★' : '☆' }}</span>
+                                @endfor
+                            </div>
+                        </div>
+                        @if($review->comment)
+                            <p class="mt-4 leading-7 text-gray-600">{{ $review->comment }}</p>
+                        @endif
+                    </article>
+                @empty
+                    <div class="col-span-full rounded-lg border border-gray-100 bg-gray-50 p-8 text-center text-gray-500">No customer reviews yet.</div>
+                @endforelse
             </div>
         </div>
     </section>
