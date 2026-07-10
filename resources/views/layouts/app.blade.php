@@ -239,6 +239,7 @@
                 <p class="text-sm text-gray-300">Shimrail Zero point, Siddirganj, Narayanganj</p>
                 <p class="text-sm text-gray-300">Contact: 01540381020</p>
                 <p class="text-sm text-gray-300">WhatsApp: 01540381020</p>
+                <p class="text-sm text-gray-300">24 Hours Customer Service: 01540381020</p>
             </div>
         </div>
     </footer>
