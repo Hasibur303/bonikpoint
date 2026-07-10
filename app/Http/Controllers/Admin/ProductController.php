@@ -69,6 +69,9 @@ class ProductController extends Controller
             'sku' => ['nullable', 'string', 'max:120', 'unique:products,sku,'.($product?->id ?? 'NULL')],
             'image' => ['nullable', 'image', 'max:2048'],
             'advance_delivery_charge' => ['nullable', 'boolean'],
+            'warranty_type' => ['required', 'in:none,guarantee,service_warranty,replacement_warranty,brand_warranty'],
+            'warranty_duration' => ['nullable', 'string', 'max:120'],
+            'warranty_details' => ['nullable', 'string'],
             'is_featured' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
         ]);
@@ -76,6 +79,8 @@ class ProductController extends Controller
         $data['slug'] = Str::slug($data['name']).($product?->exists ? '' : '-'.Str::random(5));
         $data['buying_price'] = $data['buying_price'] ?? 0;
         $data['advance_delivery_charge'] = $request->boolean('advance_delivery_charge');
+        $data['warranty_duration'] = $data['warranty_type'] === 'none' ? null : $data['warranty_duration'];
+        $data['warranty_details'] = $data['warranty_type'] === 'none' ? null : $data['warranty_details'];
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_active'] = $request->boolean('is_active');
 

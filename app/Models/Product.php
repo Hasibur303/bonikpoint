@@ -25,6 +25,9 @@ class Product extends Model
         'sku',
         'image',
         'advance_delivery_charge',
+        'warranty_type',
+        'warranty_duration',
+        'warranty_details',
         'is_featured',
         'is_active',
     ];
@@ -39,6 +42,22 @@ class Product extends Model
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function hasWarranty(): bool
+    {
+        return $this->warranty_type && $this->warranty_type !== 'none';
+    }
+
+    public function getWarrantyLabelAttribute(): string
+    {
+        return match ($this->warranty_type) {
+            'guarantee' => 'Guarantee',
+            'service_warranty' => 'Service Warranty',
+            'replacement_warranty' => 'Replacement Warranty',
+            'brand_warranty' => 'Brand Warranty',
+            default => 'No Warranty',
+        };
     }
 
     public function category(): BelongsTo

@@ -5,7 +5,7 @@
     </div>
     <div class="overflow-hidden rounded-lg bg-white shadow-sm">
         <table class="w-full text-left text-sm">
-            <thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="p-4">Product</th><th class="p-4">Category</th><th class="p-4">Price</th><th class="p-4">Buying</th><th class="p-4">Advance DC</th><th class="p-4">Stock</th><th class="p-4">Status</th><th class="p-4"></th></tr></thead>
+            <thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="p-4">Product</th><th class="p-4">Category</th><th class="p-4">Price</th><th class="p-4">Buying</th><th class="p-4">Warranty</th><th class="p-4">Advance DC</th><th class="p-4">Stock</th><th class="p-4">Status</th><th class="p-4"></th></tr></thead>
             <tbody class="divide-y">
                 @forelse($products as $product)
                     <tr>
@@ -13,6 +13,7 @@
                         <td class="p-4">{{ $product->category?->name }}</td>
                         <td class="p-4">BDT {{ number_format($product->price, 2) }}</td>
                         <td class="p-4">BDT {{ number_format($product->buying_price ?? 0, 2) }}</td>
+                        <td class="p-4">{{ $product->hasWarranty() ? $product->warranty_label : 'No' }}</td>
                         <td class="p-4">{{ $product->advance_delivery_charge ? 'On' : 'Off' }}</td>
                         <td class="p-4">{{ $product->stock }}</td>
                         <td class="p-4">{{ $product->is_active ? 'Active' : 'Hidden' }}</td>
@@ -25,7 +26,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="8" class="p-8 text-center text-gray-500">No products yet.</td></tr>
+                    <tr><td colspan="9" class="p-8 text-center text-gray-500">No products yet.</td></tr>
                 @endforelse
             </tbody>
         </table>

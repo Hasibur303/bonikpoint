@@ -48,6 +48,32 @@
                 <textarea name="description" rows="5" class="w-full rounded border-gray-200">{{ old('description', $product->description) }}</textarea>
             </div>
             <div>
+                <label class="mb-1 block text-sm font-semibold">Warranty / Guarantee</label>
+                <select name="warranty_type" class="w-full rounded border-gray-200">
+                    @foreach([
+                        'none' => 'No Warranty',
+                        'guarantee' => 'Guarantee',
+                        'service_warranty' => 'Service Warranty',
+                        'replacement_warranty' => 'Replacement Warranty',
+                        'brand_warranty' => 'Brand Warranty',
+                    ] as $value => $label)
+                        <option value="{{ $value }}" @selected(old('warranty_type', $product->warranty_type ?? 'none') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+                @error('warranty_type')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-semibold">Warranty Duration</label>
+                <input name="warranty_duration" value="{{ old('warranty_duration', $product->warranty_duration) }}" placeholder="Example: 7 Days, 6 Months, 1 Year" class="w-full rounded border-gray-200">
+                @error('warranty_duration')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-semibold">Warranty Details</label>
+                <textarea name="warranty_details" rows="3" placeholder="Write what is covered, what is not covered, and how customer can claim." class="w-full rounded border-gray-200">{{ old('warranty_details', $product->warranty_details) }}</textarea>
+                <p class="mt-1 text-xs text-gray-500">This section will show on product details page only when warranty/guarantee is selected.</p>
+                @error('warranty_details')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div>
                 <label class="mb-1 block text-sm font-semibold">Image</label>
                 <input type="file" name="image" class="w-full rounded border border-gray-200 p-2">
             </div>

@@ -49,6 +49,20 @@
                     {{ $product->stock > 0 ? $product->stock.' in stock' : 'Out of stock' }}
                 </p>
                 <p class="mt-6 leading-8 text-gray-600">{{ $product->description ?: 'No product description yet.' }}</p>
+                @if($product->hasWarranty())
+                    <div class="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                        <p class="text-sm font-bold uppercase tracking-wide text-primary">Warranty / Guarantee</p>
+                        <h2 class="mt-1 text-xl font-black text-ink">
+                            {{ $product->warranty_label }}
+                            @if($product->warranty_duration)
+                                <span class="text-base font-semibold text-gray-600">- {{ $product->warranty_duration }}</span>
+                            @endif
+                        </h2>
+                        @if($product->warranty_details)
+                            <p class="mt-3 whitespace-pre-line text-sm leading-7 text-gray-700">{{ $product->warranty_details }}</p>
+                        @endif
+                    </div>
+                @endif
                 <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
                     <h2 class="font-black text-ink">রিটার্ন পলিসি</h2>
                     <p class="mt-2 text-sm leading-7 text-gray-700">
