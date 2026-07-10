@@ -171,13 +171,13 @@ class CartController extends Controller
             return null;
         }
 
-        $festival = Festival::with('products')->find($request->integer('festival_id'));
+        $festival = Festival::find($request->integer('festival_id'));
 
         if (! $festival || ! $festival->isRunning()) {
             return null;
         }
 
-        return $festival->products->contains('id', $product->id) ? $festival : null;
+        return $festival->includesProduct($product) ? $festival : null;
     }
 
     private function cartKey(int $productId, int $festivalId): string

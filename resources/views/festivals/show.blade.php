@@ -1,16 +1,20 @@
 <x-app-layout>
-    <section class="bg-white">
-        <div class="relative min-h-[340px] overflow-hidden">
-            <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" class="absolute inset-0 h-full w-full object-cover">
-            <div class="absolute inset-0 bg-ink/60"></div>
-            <div class="container relative flex min-h-[340px] flex-col justify-center py-12 text-white">
-                @if($festival->discount_percentage > 0)
-                    <p class="text-sm font-bold uppercase tracking-wide text-accent">{{ number_format($festival->discount_percentage, 0) }}% Festival Discount</p>
-                @endif
-                <h1 class="mt-2 max-w-3xl text-4xl font-black md:text-6xl">{{ $festival->title }}</h1>
-                @if($festival->description)
-                    <p class="mt-4 max-w-2xl text-lg leading-8 text-white/85">{{ $festival->description }}</p>
-                @endif
+    <section class="bg-white py-8">
+        <div class="container">
+            <div class="overflow-hidden rounded-lg bg-gray-100 shadow-sm ring-1 ring-gray-100">
+                <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" class="w-full object-cover">
+            </div>
+            <div class="mt-6 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    @if($festival->discount_percentage > 0)
+                        <p class="text-sm font-bold uppercase tracking-wide text-primary">{{ number_format($festival->discount_percentage, 0) }}% Festival Discount</p>
+                    @endif
+                    <h1 class="mt-2 text-3xl font-black text-ink md:text-4xl">{{ $festival->title }}</h1>
+                    @if($festival->description)
+                        <p class="mt-3 max-w-3xl leading-8 text-gray-600">{{ $festival->description }}</p>
+                    @endif
+                </div>
+                <a href="{{ route('shop.index') }}" class="rounded-full border border-gray-200 px-5 py-2 font-semibold text-ink hover:border-primary hover:text-primary">Back to Shop</a>
             </div>
         </div>
     </section>
@@ -22,11 +26,10 @@
                     <p class="text-sm font-bold uppercase tracking-wide text-primary">Festival Products</p>
                     <h2 class="text-3xl font-black text-ink">Special Offer Price</h2>
                 </div>
-                <a href="{{ route('shop.index') }}" class="rounded-full border border-gray-200 px-5 py-2 font-semibold text-ink hover:border-primary hover:text-primary">Back to Shop</a>
             </div>
 
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                @forelse($festival->products as $product)
+                @forelse($offerProducts as $product)
                     @php($offerPrice = $festival->discountedPrice($product))
                     <div class="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-100 transition hover:-translate-y-1 hover:shadow-lg">
                         <a href="{{ route('shop.show', $product) }}" class="block aspect-square overflow-hidden bg-gray-100">
@@ -47,7 +50,7 @@
                         </div>
                     </div>
                 @empty
-                    <div class="col-span-full rounded-lg bg-white p-10 text-center text-gray-500">No products selected for this festival yet.</div>
+                    <div class="col-span-full rounded-lg bg-white p-10 text-center text-gray-500">No products available for this festival yet.</div>
                 @endforelse
             </div>
         </div>

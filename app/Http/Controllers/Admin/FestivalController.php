@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Festival;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +16,7 @@ class FestivalController extends Controller
     public function index(): View
     {
         return view('admin.festivals.index', [
-            'festivals' => Festival::withCount('products')->latest()->paginate(10),
+            'festivals' => Festival::withCount(['products', 'categories'])->latest()->paginate(10),
         ]);
     }
 
@@ -23,7 +24,9 @@ class FestivalController extends Controller
     {
         return view('admin.festivals.form', [
             'festival' => new Festival(),
+            'categories' => Category::with('children')->whereNull('parent_id')->orderBy('name')->get(),
             'products' => Product::with('category')->where('is_active', true)->orderBy('name')->get(),
+            'selectedCategories' => [],
             'selectedProducts' => [],
         ]);
     }
@@ -31,6 +34,7 @@ class FestivalController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $festival = Festival::create($this->validated($request));
+        $festival->categories()->sync($request->input('categories', []));
         $festival->products()->sync($request->input('products', []));
 
         return redirect()->route('admin.festivals.index')->with('success', 'Festival offer created.');
@@ -40,7 +44,9 @@ class FestivalController extends Controller
     {
         return view('admin.festivals.form', [
             'festival' => $festival,
+            'categories' => Category::with('children')->whereNull('parent_id')->orderBy('name')->get(),
             'products' => Product::with('category')->where('is_active', true)->orderBy('name')->get(),
+            'selectedCategories' => $festival->categories()->pluck('categories.id')->all(),
             'selectedProducts' => $festival->products()->pluck('products.id')->all(),
         ]);
     }
@@ -48,6 +54,7 @@ class FestivalController extends Controller
     public function update(Request $request, Festival $festival): RedirectResponse
     {
         $festival->update($this->validated($request, $festival));
+        $festival->categories()->sync($request->input('categories', []));
         $festival->products()->sync($request->input('products', []));
 
         return redirect()->route('admin.festivals.index')->with('success', 'Festival offer updated.');
@@ -72,9 +79,12 @@ class FestivalController extends Controller
             'is_active' => ['nullable', 'boolean'],
             'products' => ['nullable', 'array'],
             'products.*' => ['exists:products,id'],
+            'categories' => ['nullable', 'array'],
+            'categories.*' => ['exists:categories,id'],
         ]);
 
         unset($data['products']);
+        unset($data['categories']);
 
         $data['slug'] = $festival?->exists ? $festival->slug : Str::slug($data['title']).'-'.Str::random(5);
         $data['is_active'] = $request->boolean('is_active');

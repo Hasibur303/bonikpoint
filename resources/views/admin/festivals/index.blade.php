@@ -13,7 +13,8 @@
                 <tr>
                     <th class="p-4">Offer</th>
                     <th class="p-4">Discount</th>
-                    <th class="p-4">Products</th>
+                    <th class="p-4">Categories</th>
+                    <th class="p-4">Extra Products</th>
                     <th class="p-4">Dates</th>
                     <th class="p-4">Status</th>
                     <th class="p-4"></th>
@@ -24,6 +25,7 @@
                     <tr>
                         <td class="p-4 font-semibold text-ink">{{ $festival->title }}</td>
                         <td class="p-4">{{ number_format($festival->discount_percentage, 2) }}%</td>
+                        <td class="p-4">{{ $festival->categories_count }}</td>
                         <td class="p-4">{{ $festival->products_count }}</td>
                         <td class="p-4">
                             {{ $festival->starts_at?->format('d M Y') ?? 'Any time' }}
@@ -42,7 +44,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="p-8 text-center text-gray-500">No festival offers yet.</td></tr>
+                    <tr><td colspan="7" class="p-8 text-center text-gray-500">No festival offers yet.</td></tr>
                 @endforelse
             </tbody>
         </table>

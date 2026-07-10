@@ -8,16 +8,6 @@
                             <a href="{{ route('festivals.show', $festival) }}" class="block min-w-full px-2 md:min-w-[50%] lg:min-w-[33.333333%]">
                                 <div class="relative overflow-hidden rounded-lg shadow-sm ring-1 ring-gray-100">
                                     <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" class="h-48 w-full object-cover md:h-64">
-                                    <div class="absolute inset-0 bg-ink/55"></div>
-                                    <div class="absolute inset-0 flex items-center">
-                                        <div class="px-5 text-white">
-                                            @if($festival->discount_percentage > 0)
-                                                <p class="text-xs font-bold uppercase tracking-wide text-accent md:text-sm">{{ number_format($festival->discount_percentage, 0) }}% Discount</p>
-                                            @endif
-                                            <h2 class="mt-2 line-clamp-2 text-2xl font-black md:text-3xl">{{ $festival->title }}</h2>
-                                            <p class="mt-3 text-sm font-semibold text-white/85">{{ $festival->products_count }} selected products</p>
-                                        </div>
-                                    </div>
                                 </div>
                             </a>
                         @endforeach
