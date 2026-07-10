@@ -25,7 +25,7 @@
                 </div>
             </div>
 
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                 @forelse($offerProducts as $product)
                     @php($offerPrice = $festival->discountedPrice($product))
                     <div class="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-100 transition hover:-translate-y-1 hover:shadow-lg">

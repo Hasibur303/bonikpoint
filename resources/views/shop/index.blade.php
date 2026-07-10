@@ -88,7 +88,7 @@
 
     <section class="py-12">
         <div class="container">
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                 @forelse($products as $product)
                     <x-product-card :product="$product" />
                 @empty

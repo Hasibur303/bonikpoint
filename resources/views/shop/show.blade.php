@@ -119,7 +119,7 @@
     <section class="py-12">
         <div class="container">
             <h2 class="mb-6 text-2xl font-black text-ink">Related Products</h2>
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                 @forelse($relatedProducts as $related)
                     <x-product-card :product="$related" />
                 @empty
