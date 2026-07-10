@@ -31,10 +31,25 @@
         <div class="container">
             <h1 class="text-4xl font-black text-ink">Shop Products</h1>
 
+            <form action="{{ route('shop.index') }}" class="mt-6 grid gap-3 rounded-lg bg-gray-50 p-4 ring-1 ring-gray-100 md:grid-cols-[1fr_130px_130px_160px_auto]">
+                <input name="search" value="{{ $search }}" placeholder="Search products" class="rounded-lg border-gray-200 focus:border-primary focus:ring-primary">
+                <input name="min_price" type="number" min="0" value="{{ $minPrice }}" placeholder="Min price" class="rounded-lg border-gray-200 focus:border-primary focus:ring-primary">
+                <input name="max_price" type="number" min="0" value="{{ $maxPrice }}" placeholder="Max price" class="rounded-lg border-gray-200 focus:border-primary focus:ring-primary">
+                <select name="sort" class="rounded-lg border-gray-200 focus:border-primary focus:ring-primary">
+                    <option value="">Newest</option>
+                    <option value="price_low" @selected($sort === 'price_low')>Price low to high</option>
+                    <option value="price_high" @selected($sort === 'price_high')>Price high to low</option>
+                </select>
+                @if($selectedCategory)
+                    <input type="hidden" name="category" value="{{ $selectedCategory }}">
+                @endif
+                <button class="rounded-lg bg-primary px-6 py-2 font-semibold text-white hover:bg-ink">Filter</button>
+            </form>
+
             <div class="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-4">
                 <div class="mb-3 flex items-center justify-between gap-4">
                     <h2 class="font-black text-ink">Categories</h2>
-                    <a href="{{ route('shop.index', array_filter(['search' => $search])) }}" class="text-sm font-semibold {{ $selectedCategory ? 'text-primary hover:text-ink' : 'text-gray-400' }}">
+                    <a href="{{ route('shop.index', array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="text-sm font-semibold {{ $selectedCategory ? 'text-primary hover:text-ink' : 'text-gray-400' }}">
                         All Categories
                     </a>
                 </div>
@@ -48,7 +63,7 @@
 
                         <details class="group rounded-lg bg-white shadow-sm ring-1 ring-gray-100" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
                             <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
-                                <a href="{{ route('shop.index', array_filter(['category' => $category->slug, 'search' => $search])) }}" class="font-semibold {{ $isMainActive ? 'text-primary' : 'text-ink hover:text-primary' }}">
+                                <a href="{{ route('shop.index', array_filter(['category' => $category->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="font-semibold {{ $isMainActive ? 'text-primary' : 'text-ink hover:text-primary' }}">
                                     {{ $category->name }}
                                 </a>
                                 @if($category->children->count())
@@ -59,7 +74,7 @@
                             @if($category->children->count())
                                 <div class="border-t border-gray-100 px-4 py-2">
                                     @foreach($category->children->sortBy('name') as $child)
-                                        <a href="{{ route('shop.index', array_filter(['category' => $child->slug, 'search' => $search])) }}" class="block rounded px-3 py-2 text-sm {{ $selectedCategory === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
+                                        <a href="{{ route('shop.index', array_filter(['category' => $child->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="block rounded px-3 py-2 text-sm {{ $selectedCategory === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
                                             {{ $child->name }}
                                         </a>
                                     @endforeach

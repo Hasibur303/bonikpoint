@@ -5,7 +5,10 @@
                 <p class="text-sm font-bold uppercase tracking-wide text-primary">Order Details</p>
                 <h1 class="text-4xl font-black text-ink">{{ $order->order_number }}</h1>
             </div>
-            <span class="rounded-full bg-gray-100 px-4 py-2 text-sm font-semibold capitalize">{{ $order->status }}</span>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('orders.receipt', $order) }}" class="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-ink hover:border-primary hover:text-primary">Receipt</a>
+                <span class="rounded-full bg-gray-100 px-4 py-2 text-sm font-semibold capitalize">{{ str($order->status)->replace('_', ' ') }}</span>
+            </div>
         </div>
 
         <div class="grid gap-8 lg:grid-cols-[1fr_360px]">

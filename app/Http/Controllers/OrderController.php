@@ -20,4 +20,11 @@ class OrderController extends Controller
 
         return view('orders.show', ['order' => $order->load('items')]);
     }
+
+    public function receipt(Order $order): View
+    {
+        abort_unless($order->user_id === auth()->id() || auth()->user()->isAdmin(), 403);
+
+        return view('orders.receipt', ['order' => $order->load('items')]);
+    }
 }

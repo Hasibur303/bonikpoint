@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\StoreSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,7 @@ class CheckoutController extends Controller
             'subtotal' => CartController::subtotal(),
             'shipping' => $this->deliveryCharge(old('delivery_area', 'inside_dhaka')),
             'advanceDeliveryRequired' => $this->advanceDeliveryRequired($cartItems),
+            'deliverySettings' => StoreSetting::deliverySettings(),
         ]);
     }
 
@@ -65,6 +67,7 @@ class CheckoutController extends Controller
                 ...$data,
                 'user_id' => auth()->id(),
                 'order_number' => 'BP-'.now()->format('YmdHis').'-'.auth()->id(),
+                'status' => $advanceDeliveryRequired && $data['delivery_charge_payment_option'] === 'pay_later' ? 'waiting_delivery_charge' : 'pending',
                 'subtotal' => $subtotal,
                 'shipping' => $shipping,
                 'total' => $subtotal + $shipping,
@@ -107,6 +110,10 @@ class CheckoutController extends Controller
 
     private function deliveryCharge(?string $area): int
     {
-        return $area === 'outside_dhaka' ? 120 : 60;
+        $settings = StoreSetting::deliverySettings();
+
+        return $area === 'outside_dhaka'
+            ? $settings['outside_dhaka_delivery_charge']
+            : $settings['inside_dhaka_delivery_charge'];
     }
 }

@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\FestivalController as AdminFestivalController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProfitController as AdminProfitController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 // Route::get('/', function () {
@@ -46,6 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -62,6 +64,8 @@ Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(fu
     Route::patch('orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
     Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
     Route::patch('users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+    Route::get('settings', [AdminSettingController::class, 'edit'])->name('settings.edit');
+    Route::patch('settings', [AdminSettingController::class, 'update'])->name('settings.update');
 });
 
 

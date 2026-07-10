@@ -4,8 +4,8 @@
         <form method="POST" action="{{ route('admin.orders.update', $order) }}" class="flex gap-2">
             @csrf @method('PATCH')
             <select name="status" class="rounded border-gray-200">
-                @foreach(['pending', 'processing', 'completed', 'cancelled'] as $status)
-                    <option value="{{ $status }}" @selected($order->status === $status)>{{ ucfirst($status) }}</option>
+                @foreach(['waiting_delivery_charge', 'pending', 'confirmed', 'processing', 'delivered', 'completed', 'cancelled'] as $status)
+                    <option value="{{ $status }}" @selected($order->status === $status)>{{ str($status)->replace('_', ' ')->title() }}</option>
                 @endforeach
             </select>
             <button class="rounded bg-primary px-4 py-2 font-semibold text-white">Update</button>

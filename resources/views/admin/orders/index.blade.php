@@ -9,7 +9,7 @@
                         <td class="p-4 font-semibold text-ink">{{ $order->order_number }}</td>
                         <td class="p-4">{{ $order->customer_name }}</td>
                         <td class="p-4">৳{{ number_format($order->total, 2) }}</td>
-                        <td class="p-4 capitalize">{{ $order->status }}</td>
+                        <td class="p-4 capitalize">{{ str($order->status)->replace('_', ' ') }}</td>
                         <td class="p-4">{{ $order->created_at->format('d M Y') }}</td>
                         <td class="p-4 text-right"><a href="{{ route('admin.orders.show', $order) }}" class="font-semibold text-primary">Manage</a></td>
                     </tr>

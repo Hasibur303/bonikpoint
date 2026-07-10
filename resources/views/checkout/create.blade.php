@@ -42,12 +42,12 @@
 
                             <div class="mt-4 grid gap-3 md:grid-cols-2">
                                 <label class="rounded bg-white p-3 ring-1 ring-gray-100">
-                                    <input type="radio" name="delivery_area" value="inside_dhaka" data-delivery-charge="60" @checked(old('delivery_area', 'inside_dhaka') === 'inside_dhaka')>
-                                    <span class="ml-2 font-semibold">Inside Dhaka - BDT 60</span>
+                                    <input type="radio" name="delivery_area" value="inside_dhaka" data-delivery-charge="{{ $deliverySettings['inside_dhaka_delivery_charge'] }}" @checked(old('delivery_area', 'inside_dhaka') === 'inside_dhaka')>
+                                    <span class="ml-2 font-semibold">Inside Dhaka - BDT {{ number_format($deliverySettings['inside_dhaka_delivery_charge'], 2) }}</span>
                                 </label>
                                 <label class="rounded bg-white p-3 ring-1 ring-gray-100">
-                                    <input type="radio" name="delivery_area" value="outside_dhaka" data-delivery-charge="120" @checked(old('delivery_area') === 'outside_dhaka')>
-                                    <span class="ml-2 font-semibold">Outside Dhaka - BDT 120</span>
+                                    <input type="radio" name="delivery_area" value="outside_dhaka" data-delivery-charge="{{ $deliverySettings['outside_dhaka_delivery_charge'] }}" @checked(old('delivery_area') === 'outside_dhaka')>
+                                    <span class="ml-2 font-semibold">Outside Dhaka - BDT {{ number_format($deliverySettings['outside_dhaka_delivery_charge'], 2) }}</span>
                                 </label>
                             </div>
                             @error('delivery_area')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -55,9 +55,9 @@
                             <div class="mt-4 rounded bg-white p-4 ring-1 ring-gray-100">
                                 <p class="font-bold text-ink">Payment instruction: send money to this number</p>
                                 <div class="mt-2 grid gap-2 text-sm text-gray-700 md:grid-cols-3">
-                                    <p><span class="font-semibold">Bkash:</span> 01832510343</p>
-                                    <p><span class="font-semibold">Nagad:</span> 01832510343</p>
-                                    <p><span class="font-semibold">Rocket:</span> 018325103435</p>
+                                    <p><span class="font-semibold">Bkash:</span> {{ $deliverySettings['bkash_number'] }}</p>
+                                    <p><span class="font-semibold">Nagad:</span> {{ $deliverySettings['nagad_number'] }}</p>
+                                    <p><span class="font-semibold">Rocket:</span> {{ $deliverySettings['rocket_number'] }}</p>
                                 </div>
                             </div>
 
@@ -97,7 +97,7 @@
                             </div>
 
                             <div id="delivery-pay-later-note" class="mt-4 hidden rounded border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
-                                ডেলিভারি চার্জ পরিশোধ না করা পর্যন্ত আপনার অর্ডার সম্পূর্ণভাবে কনফার্ম হবে না।
+                                {{ $deliverySettings['delivery_pay_later_note_bn'] }}
                             </div>
                         </div>
                     @endif

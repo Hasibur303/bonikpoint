@@ -18,7 +18,7 @@
                         <tr>
                             <td class="p-4 font-semibold text-ink">{{ $order->order_number }}</td>
                             <td class="p-4">BDT {{ number_format($order->total, 2) }}</td>
-                            <td class="p-4 capitalize">{{ $order->status }}</td>
+                            <td class="p-4 capitalize">{{ str($order->status)->replace('_', ' ') }}</td>
                             <td class="p-4">{{ $order->created_at->format('d M Y') }}</td>
                             <td class="p-4 text-right">
                                 <a href="{{ route('orders.show', $order) }}" class="font-semibold text-primary">View</a>

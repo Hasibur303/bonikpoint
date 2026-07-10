@@ -30,6 +30,7 @@
                 <a href="{{ route('admin.orders.index') }}" class="block rounded px-3 py-2 hover:bg-white/10">Orders</a>
                 <a href="{{ route('admin.profit.index') }}" class="block rounded px-3 py-2 hover:bg-white/10">Profit</a>
                 <a href="{{ route('admin.users.index') }}" class="block rounded px-3 py-2 hover:bg-white/10">Users</a>
+                <a href="{{ route('admin.settings.edit') }}" class="block rounded px-3 py-2 hover:bg-white/10">Settings</a>
                 <a href="{{ route('home.index') }}" class="block rounded px-3 py-2 hover:bg-white/10">View Store</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
