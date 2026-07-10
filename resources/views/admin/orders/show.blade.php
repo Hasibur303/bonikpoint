@@ -4,7 +4,7 @@
         <form method="POST" action="{{ route('admin.orders.update', $order) }}" class="flex gap-2">
             @csrf @method('PATCH')
             <select name="status" class="rounded border-gray-200">
-                @foreach(['waiting_delivery_charge', 'pending', 'confirmed', 'processing', 'delivered', 'completed', 'cancelled'] as $status)
+                @foreach(['waiting_delivery_charge', 'pending', 'confirmed', 'processing', 'delivered', 'cancelled'] as $status)
                     <option value="{{ $status }}" @selected($order->status === $status)>{{ str($status)->replace('_', ' ')->title() }}</option>
                 @endforeach
             </select>
