@@ -1,10 +1,7 @@
 <x-app-layout>
     <section class="bg-white py-8">
         <div class="container">
-            <div class="overflow-hidden rounded-lg bg-gray-100 shadow-sm ring-1 ring-gray-100">
-                <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" class="w-full object-cover">
-            </div>
-            <div class="mt-6 flex flex-wrap items-end justify-between gap-4">
+            <div class="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     @if($festival->discount_percentage > 0)
                         <p class="text-sm font-bold uppercase tracking-wide text-primary">{{ number_format($festival->discount_percentage, 0) }}% Festival Discount</p>
