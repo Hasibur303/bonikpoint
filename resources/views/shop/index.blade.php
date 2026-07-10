@@ -36,13 +36,13 @@
                 <button class="rounded-lg bg-primary px-6 py-2 font-semibold text-white hover:bg-ink">Filter</button>
             </form>
 
-            <div class="mt-6 rounded-lg border border-gray-100 bg-white p-5 shadow-sm ring-1 ring-gray-100">
+            <div class="mt-6 rounded-lg border border-primary/10 bg-gradient-to-br from-white via-white to-primary/5 p-5 shadow-xl shadow-primary/10 ring-1 ring-primary/10">
                 <div class="mb-3 flex items-center justify-between gap-4">
                     <div>
                         <p class="text-xs font-bold uppercase tracking-wide text-primary">Browse By</p>
                         <h2 class="text-xl font-black text-ink">Categories</h2>
                     </div>
-                    <a href="{{ route('shop.index', array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-gray-100 {{ $selectedCategory ? 'bg-gray-50 text-primary hover:text-ink' : 'bg-gray-50 text-gray-400' }}">
+                    <a href="{{ route('shop.index', array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="rounded-full px-4 py-2 text-sm font-semibold shadow-sm ring-1 ring-primary/10 {{ $selectedCategory ? 'bg-white text-primary hover:text-ink' : 'bg-primary/5 text-gray-500' }}">
                         All Categories
                     </a>
                 </div>
@@ -54,7 +54,7 @@
                             $hasActiveChild = $category->children->contains(fn ($child) => $selectedCategory === $child->slug);
                         @endphp
 
-                        <details class="group overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-100 transition hover:-translate-y-0.5 hover:shadow-md {{ $isMainActive || $hasActiveChild ? 'ring-primary/30 shadow-md' : '' }}" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
+                        <details class="group overflow-hidden rounded-lg border border-gray-100 bg-white shadow-lg shadow-gray-200/70 ring-1 ring-gray-100 transition hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/10 {{ $isMainActive || $hasActiveChild ? 'border-primary/30 ring-primary/40 shadow-xl shadow-primary/15' : '' }}" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
                             <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3">
                                 <a href="{{ route('shop.index', array_filter(['category' => $category->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="flex min-w-0 items-center gap-3">
                                     <img src="{{ $category->image_url }}" alt="{{ $category->name }}" class="h-14 w-14 shrink-0 rounded-md object-cover shadow-sm ring-1 ring-gray-100">
