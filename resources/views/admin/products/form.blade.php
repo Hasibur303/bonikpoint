@@ -54,6 +54,7 @@
             <div class="flex items-center gap-6">
                 <label class="flex items-center gap-2"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $product->exists ? $product->is_active : true))> Active</label>
                 <label class="flex items-center gap-2"><input type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $product->is_featured))> Featured</label>
+                <label class="flex items-center gap-2"><input type="checkbox" name="advance_delivery_charge" value="1" @checked(old('advance_delivery_charge', $product->exists ? $product->advance_delivery_charge : true))> Advance Delivery Charge</label>
             </div>
         </div>
         <button class="mt-6 rounded bg-primary px-6 py-3 font-semibold text-white">Save Product</button>

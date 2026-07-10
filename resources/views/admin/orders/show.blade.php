@@ -30,7 +30,22 @@
             <p class="text-sm text-gray-600">{{ $order->mobile }}</p>
             <p class="mt-3 text-sm text-gray-600">{{ $order->address }}, {{ $order->city }}</p>
             @if($order->notes)<p class="mt-3 rounded bg-gray-50 p-3 text-sm">{{ $order->notes }}</p>@endif
-            <div class="mt-5 border-t pt-5 text-lg font-black text-ink">Total: ৳{{ number_format($order->total, 2) }}</div>
+            @if($order->advance_delivery_required)
+                <div class="mt-5 rounded border border-accent/40 bg-accent/10 p-4 text-sm">
+                    <p class="font-bold text-ink">Advance Delivery Charge</p>
+                    <p class="mt-1">Area: {{ $order->delivery_area === 'outside_dhaka' ? 'Outside Dhaka' : 'Inside Dhaka' }}</p>
+                    <p>Charge: BDT {{ number_format($order->shipping, 2) }}</p>
+                    <p>Option: {{ $order->delivery_charge_payment_option === 'pay_later' ? 'Pay Later' : 'Paid Now' }}</p>
+                    @if($order->delivery_charge_payment_option === 'pay_now')
+                        <p>Method: {{ $order->delivery_payment_method }}</p>
+                        <p>Payment Mobile: {{ $order->delivery_payment_mobile }}</p>
+                        <p>Transaction ID: {{ $order->delivery_transaction_id }}</p>
+                    @else
+                        <p class="mt-2 rounded bg-red-50 p-2 font-semibold text-red-700">ডেলিভারি চার্জ পরিশোধ না করা পর্যন্ত অর্ডার সম্পূর্ণভাবে কনফার্ম নয়।</p>
+                    @endif
+                </div>
+            @endif
+            <div class="mt-5 border-t pt-5 text-lg font-black text-ink">Total: BDT {{ number_format($order->total, 2) }}</div>
         </aside>
     </div>
 </x-admin-layout>

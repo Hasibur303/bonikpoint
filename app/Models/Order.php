@@ -23,6 +23,12 @@ class Order extends Model
         'subtotal',
         'shipping',
         'total',
+        'advance_delivery_required',
+        'delivery_area',
+        'delivery_charge_payment_option',
+        'delivery_payment_method',
+        'delivery_payment_mobile',
+        'delivery_transaction_id',
         'notes',
     ];
 
@@ -32,6 +38,7 @@ class Order extends Model
             'subtotal' => 'decimal:2',
             'shipping' => 'decimal:2',
             'total' => 'decimal:2',
+            'advance_delivery_required' => 'boolean',
         ];
     }
 

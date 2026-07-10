@@ -24,6 +24,7 @@ class Product extends Model
         'stock',
         'sku',
         'image',
+        'advance_delivery_charge',
         'is_featured',
         'is_active',
     ];
@@ -34,6 +35,7 @@ class Product extends Model
             'price' => 'decimal:2',
             'buying_price' => 'decimal:2',
             'compare_price' => 'decimal:2',
+            'advance_delivery_charge' => 'boolean',
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
         ];

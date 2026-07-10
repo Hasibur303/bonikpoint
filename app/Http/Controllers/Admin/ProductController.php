@@ -68,12 +68,14 @@ class ProductController extends Controller
             'stock' => ['required', 'integer', 'min:0'],
             'sku' => ['nullable', 'string', 'max:120', 'unique:products,sku,'.($product?->id ?? 'NULL')],
             'image' => ['nullable', 'image', 'max:2048'],
+            'advance_delivery_charge' => ['nullable', 'boolean'],
             'is_featured' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
         $data['slug'] = Str::slug($data['name']).($product?->exists ? '' : '-'.Str::random(5));
         $data['buying_price'] = $data['buying_price'] ?? 0;
+        $data['advance_delivery_charge'] = $request->boolean('advance_delivery_charge');
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_active'] = $request->boolean('is_active');
 
