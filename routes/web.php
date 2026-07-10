@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(function () {
     Route::get('/', [AdminComtroller::class, 'index'])->name('index');
-    Route::resource('categories', AdminCategoryController::class)->except('show');
+    Route::resource('categories', AdminCategoryController::class);
     Route::resource('products', AdminProductController::class)->except('show');
     Route::resource('festivals', AdminFestivalController::class)->except('show');
     Route::get('profit', [AdminProfitController::class, 'index'])->name('profit.index');
