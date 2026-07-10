@@ -51,13 +51,19 @@
                             $hasActiveChild = $category->children->contains(fn ($child) => $selectedCategory === $child->slug);
                         @endphp
 
-                        <details class="group rounded-lg bg-white shadow-sm ring-1 ring-gray-100" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
-                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
-                                <a href="{{ route('shop.index', array_filter(['category' => $category->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="font-semibold {{ $isMainActive ? 'text-primary' : 'text-ink hover:text-primary' }}">
-                                    {{ $category->name }}
+                        <details class="group overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-100" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3">
+                                <a href="{{ route('shop.index', array_filter(['category' => $category->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="flex min-w-0 items-center gap-3">
+                                    <img src="{{ $category->image_url }}" alt="{{ $category->name }}" class="h-14 w-14 shrink-0 rounded-md object-cover ring-1 ring-gray-100">
+                                    <span class="min-w-0">
+                                        <span class="block truncate font-semibold {{ $isMainActive ? 'text-primary' : 'text-ink group-hover:text-primary' }}">{{ $category->name }}</span>
+                                        @if($category->children->count())
+                                            <span class="mt-1 block text-xs font-medium text-gray-400">{{ $category->children->count() }} subcategories</span>
+                                        @endif
+                                    </span>
                                 </a>
                                 @if($category->children->count())
-                                    <span class="text-gray-400 transition group-open:rotate-90">&#9656;</span>
+                                    <span class="shrink-0 text-gray-400 transition group-open:rotate-90">&#9656;</span>
                                 @endif
                             </summary>
 

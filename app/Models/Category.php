@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Category extends Model
 {
@@ -40,5 +41,18 @@ class Category extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function getImageUrlAttribute(): string
+    {
+        if (! $this->image) {
+            return asset('assets/images/page-banner.jpg');
+        }
+
+        if (str_starts_with($this->image, 'assets/')) {
+            return asset($this->image);
+        }
+
+        return Storage::url($this->image);
     }
 }
