@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminComtroller;
 use App\Http\Middleware\AuthAdmin;
 use App\Http\Controllers\UserController;
@@ -24,7 +23,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 //     return view('welcome');
 // });
 
-Route::get('/', [HomeController::class, 'index'])->name('home.index');
+Route::get('/', [ShopController::class, 'index'])->name('home.index');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::view('/return-refund-policy', 'pages.return-policy')->name('return-policy');
 Route::get('/festivals/{festival:slug}', [FestivalController::class, 'show'])->name('festivals.show');
