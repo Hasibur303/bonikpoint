@@ -44,8 +44,9 @@
             </x-primary-button>
         </div>
 
-        <div class="mt-6 border-t border-gray-200 pt-5">
-            <a href="{{ route('register') }}" class="inline-flex w-full items-center justify-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-gray-400/50 transition hover:bg-primary hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+        <div class="mt-6 border-t border-gray-200 pt-5 text-center">
+            <p class="mb-3 text-sm text-gray-600">{{ __("Don't have an account?") }}</p>
+            <a href="{{ route('register') }}" class="inline-flex w-full items-center justify-center rounded-md bg-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-600/30 transition hover:bg-teal-700 hover:shadow-xl hover:shadow-teal-700/30 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
                 {{ __('Create Account') }}
             </a>
         </div>
