@@ -1,3 +1,5 @@
+@props(['wide' => false])
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -15,14 +17,18 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
+        <div class="flex min-h-screen flex-col items-center justify-center bg-slate-100 px-4 py-6 sm:px-6 lg:px-8">
+            @unless($wide)
+                <a href="{{ route('home.index') }}" class="mb-6" aria-label="Bonik Point home">
                     <x-application-logo class="h-24 w-auto" />
                 </a>
-            </div>
+            @endunless
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <div @class([
+                'w-full overflow-hidden bg-white',
+                'max-w-5xl rounded-lg shadow-2xl shadow-slate-300/70' => $wide,
+                'max-w-md rounded-lg px-6 py-5 shadow-lg shadow-slate-300/60' => ! $wide,
+            ])>
                 {{ $slot }}
             </div>
         </div>
