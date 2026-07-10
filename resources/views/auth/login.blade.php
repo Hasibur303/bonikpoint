@@ -44,9 +44,11 @@
             </x-primary-button>
         </div>
 
-        <div class="mt-6 border-t border-gray-200 pt-5 text-center">
-            <p class="text-sm text-gray-600">{{ __("Don't have an account?") }}</p>
-            <a href="{{ route('register') }}" class="mt-3 inline-flex items-center justify-center rounded-md bg-ink px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary">
+        <div class="mt-6 rounded-lg border border-primary/20 bg-gradient-to-br from-primary/10 via-white to-accent/10 p-4 text-center shadow-lg shadow-primary/10">
+            <p class="text-xs font-bold uppercase tracking-wide text-primary">New to Bonik Point?</p>
+            <h2 class="mt-1 text-xl font-black text-ink">Create your account</h2>
+            <p class="mt-2 text-sm leading-6 text-gray-600">Track orders, save your details, and shop faster next time.</p>
+            <a href="{{ route('register') }}" class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-primary px-5 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-md shadow-primary/20 transition hover:bg-ink">
                 {{ __('Create Account') }}
             </a>
         </div>
