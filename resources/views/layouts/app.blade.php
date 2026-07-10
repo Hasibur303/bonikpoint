@@ -40,7 +40,7 @@
                     <a href="{{ route('home.index') }}" class="{{ request()->routeIs('home.index') ? 'text-primary' : 'hover:text-primary' }}">Home</a>
                     <a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*') ? 'text-primary' : 'hover:text-primary' }}">Shop</a>
                     <div class="group relative">
-                        <button type="button" class="{{ request('category') ? 'text-primary' : 'hover:text-primary' }}">
+                        <button type="button" class="uppercase {{ request('category') ? 'text-primary' : 'hover:text-primary' }}">
                             Categories
                         </button>
                         <div class="invisible absolute left-0 top-full z-50 w-64 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
