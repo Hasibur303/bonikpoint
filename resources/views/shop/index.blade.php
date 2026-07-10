@@ -36,10 +36,13 @@
                 <button class="rounded-lg bg-primary px-6 py-2 font-semibold text-white hover:bg-ink">Filter</button>
             </form>
 
-            <div class="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-4">
+            <div class="mt-6 rounded-lg border border-gray-100 bg-white p-5 shadow-sm ring-1 ring-gray-100">
                 <div class="mb-3 flex items-center justify-between gap-4">
-                    <h2 class="font-black text-ink">Categories</h2>
-                    <a href="{{ route('shop.index', array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="text-sm font-semibold {{ $selectedCategory ? 'text-primary hover:text-ink' : 'text-gray-400' }}">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wide text-primary">Browse By</p>
+                        <h2 class="text-xl font-black text-ink">Categories</h2>
+                    </div>
+                    <a href="{{ route('shop.index', array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-gray-100 {{ $selectedCategory ? 'bg-gray-50 text-primary hover:text-ink' : 'bg-gray-50 text-gray-400' }}">
                         All Categories
                     </a>
                 </div>
@@ -51,10 +54,10 @@
                             $hasActiveChild = $category->children->contains(fn ($child) => $selectedCategory === $child->slug);
                         @endphp
 
-                        <details class="group overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-100" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
+                        <details class="group overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-100 transition hover:-translate-y-0.5 hover:shadow-md {{ $isMainActive || $hasActiveChild ? 'ring-primary/30 shadow-md' : '' }}" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
                             <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3">
                                 <a href="{{ route('shop.index', array_filter(['category' => $category->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="flex min-w-0 items-center gap-3">
-                                    <img src="{{ $category->image_url }}" alt="{{ $category->name }}" class="h-14 w-14 shrink-0 rounded-md object-cover ring-1 ring-gray-100">
+                                    <img src="{{ $category->image_url }}" alt="{{ $category->name }}" class="h-14 w-14 shrink-0 rounded-md object-cover shadow-sm ring-1 ring-gray-100">
                                     <span class="min-w-0">
                                         <span class="block truncate font-semibold {{ $isMainActive ? 'text-primary' : 'text-ink group-hover:text-primary' }}">{{ $category->name }}</span>
                                         @if($category->children->count())
@@ -68,7 +71,7 @@
                             </summary>
 
                             @if($category->children->count())
-                                <div class="border-t border-gray-100 px-4 py-2">
+                                <div class="border-t border-gray-100 bg-gray-50/70 px-4 py-2">
                                     @foreach($category->children->sortBy('name') as $child)
                                         <a href="{{ route('shop.index', array_filter(['category' => $child->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="block rounded px-3 py-2 text-sm {{ $selectedCategory === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
                                             {{ $child->name }}
