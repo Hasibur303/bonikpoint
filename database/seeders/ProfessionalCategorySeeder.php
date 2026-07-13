@@ -26,46 +26,6 @@ class ProfessionalCategorySeeder extends Seeder
                 ],
             ],
             [
-                'name' => 'Winter Collection',
-                'children' => [
-                    'Winter Jackets',
-                    'Hoodies & Sweatshirts',
-                    'Sweaters & Cardigans',
-                    'Thermal Wear',
-                    'Winter Caps',
-                    'Gloves',
-                    'Scarves & Mufflers',
-                    'Socks',
-                    'Blankets & Comforters',
-                ],
-            ],
-            [
-                'name' => 'Kitchen Essentials',
-                'children' => [
-                    'Cookware',
-                    'Kitchen Tools',
-                    'Storage Containers',
-                    'Dinnerware',
-                    'Drinkware',
-                    'Small Appliances',
-                    'Cleaning Supplies',
-                    'Baking Tools',
-                    'Spice & Condiment Storage',
-                ],
-            ],
-            [
-                'name' => 'Home & Living',
-                'children' => [
-                    'Home Decor',
-                    'Lighting',
-                    'Bedding',
-                    'Bathroom Essentials',
-                    'Storage & Organization',
-                    'Furniture',
-                    'Cleaning Essentials',
-                ],
-            ],
-            [
                 'name' => 'Electronics & Gadgets',
                 'children' => [
                     'Mobile Accessories',

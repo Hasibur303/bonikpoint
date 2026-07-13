@@ -74,8 +74,91 @@
                 @error('warranty_details')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label class="mb-1 block text-sm font-semibold">Image</label>
-                <input type="file" name="image" class="w-full rounded border border-gray-200 p-2">
+                <label class="mb-1 block text-sm font-semibold">Main Image</label>
+                <input type="file" name="image" accept="image/*" class="w-full rounded border border-gray-200 p-2">
+                <p class="mt-1 text-xs text-gray-500">This image shows first on product cards and cart.</p>
+                @if($product->exists && $product->image)
+                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="mt-3 h-24 w-24 rounded-md object-cover ring-1 ring-gray-100">
+                @endif
+                @error('image')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-semibold">Gallery Images</label>
+                <input type="file" name="gallery_images[]" accept="image/*" multiple class="w-full rounded border border-gray-200 p-2">
+                <p class="mt-1 text-xs text-gray-500">Upload multiple extra photos for the product details page.</p>
+                @error('gallery_images')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                @error('gallery_images.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            @if($product->exists && $product->images->isNotEmpty())
+                <div class="md:col-span-2">
+                    <label class="mb-2 block text-sm font-semibold">Current Gallery</label>
+                    <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                        @foreach($product->images as $image)
+                            <label class="group rounded-lg border border-gray-100 bg-gray-50 p-2">
+                                <img src="{{ $image->image_url }}" alt="{{ $product->name }}" class="aspect-square w-full rounded-md object-cover ring-1 ring-gray-100">
+                                <span class="mt-2 flex items-center gap-2 text-xs font-semibold text-red-600">
+                                    <input type="checkbox" name="delete_gallery_images[]" value="{{ $image->id }}" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                                    Delete image
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <p class="mt-2 text-xs text-gray-500">Tick images you want to remove, then save product.</p>
+                </div>
+            @endif
+            <div class="md:col-span-2 rounded-lg border border-gray-100 bg-gray-50 p-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <label class="block text-sm font-semibold">Product Colors</label>
+                        <p class="mt-1 text-xs text-gray-500">Add this only when customers need to choose a color before buying.</p>
+                    </div>
+                    <button type="button" id="add-color-row" class="rounded bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-primary">Add Color</button>
+                </div>
+
+                @if($product->exists && $product->colors->isNotEmpty())
+                    <div class="mt-4 grid gap-3 md:grid-cols-2">
+                        @foreach($product->colors as $color)
+                            <div class="rounded-md border border-gray-200 bg-white p-3">
+                                <div class="grid gap-3 sm:grid-cols-[1fr_130px]">
+                                    <div>
+                                        <label class="mb-1 block text-xs font-bold uppercase text-gray-500">Color Name</label>
+                                        <input name="existing_colors[{{ $color->id }}][name]" value="{{ old('existing_colors.'.$color->id.'.name', $color->name) }}" placeholder="Example: Black" class="w-full rounded border-gray-200">
+                                    </div>
+                                    <div>
+                                        <label class="mb-1 block text-xs font-bold uppercase text-gray-500">Swatch</label>
+                                        <input type="color" name="existing_colors[{{ $color->id }}][hex_code]" value="{{ old('existing_colors.'.$color->id.'.hex_code', $color->hex_code ?: '#087C7F') }}" class="h-10 w-full rounded border border-gray-200 bg-white p-1">
+                                    </div>
+                                </div>
+                                <label class="mt-2 flex items-center gap-2 text-xs font-semibold text-red-600">
+                                    <input type="checkbox" name="delete_colors[]" value="{{ $color->id }}" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                                    Delete this color
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                @php($newColorRows = old('colors', [['name' => '', 'hex_code' => '#087C7F']]))
+                <div id="color-rows" class="mt-4 grid gap-3 md:grid-cols-2">
+                    @foreach($newColorRows as $index => $color)
+                        <div class="color-row rounded-md border border-dashed border-gray-300 bg-white p-3">
+                            <div class="grid gap-3 sm:grid-cols-[1fr_130px]">
+                                <div>
+                                    <label class="mb-1 block text-xs font-bold uppercase text-gray-500">New Color Name</label>
+                                    <input name="colors[{{ $index }}][name]" value="{{ $color['name'] ?? '' }}" placeholder="Example: Black" class="w-full rounded border-gray-200">
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-xs font-bold uppercase text-gray-500">Swatch</label>
+                                    <input type="color" name="colors[{{ $index }}][hex_code]" value="{{ $color['hex_code'] ?? '#087C7F' }}" class="h-10 w-full rounded border border-gray-200 bg-white p-1">
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                @error('existing_colors.*.name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                @error('existing_colors.*.hex_code')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                @error('colors.*.name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                @error('colors.*.hex_code')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div class="flex items-center gap-6">
                 <label class="flex items-center gap-2"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $product->exists ? $product->is_active : true))> Active</label>
@@ -85,4 +168,34 @@
         </div>
         <button class="mt-6 rounded bg-primary px-6 py-3 font-semibold text-white">Save Product</button>
     </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addButton = document.getElementById('add-color-row');
+            const rows = document.getElementById('color-rows');
+
+            if (!addButton || !rows) {
+                return;
+            }
+
+            addButton.addEventListener('click', function () {
+                const index = rows.querySelectorAll('.color-row').length;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'color-row rounded-md border border-dashed border-gray-300 bg-white p-3';
+                wrapper.innerHTML = `
+                    <div class="grid gap-3 sm:grid-cols-[1fr_130px]">
+                        <div>
+                            <label class="mb-1 block text-xs font-bold uppercase text-gray-500">New Color Name</label>
+                            <input name="colors[${index}][name]" placeholder="Example: Black" class="w-full rounded border-gray-200">
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs font-bold uppercase text-gray-500">Swatch</label>
+                            <input type="color" name="colors[${index}][hex_code]" value="#087C7F" class="h-10 w-full rounded border border-gray-200 bg-white p-1">
+                        </div>
+                    </div>
+                `;
+                rows.appendChild(wrapper);
+            });
+        });
+    </script>
 </x-admin-layout>

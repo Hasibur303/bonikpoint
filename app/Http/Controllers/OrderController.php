@@ -31,6 +31,20 @@ class OrderController extends Controller
         return view('orders.receipt', ['order' => $order->load('items')]);
     }
 
+    public function guestShow(Order $order, string $token): View
+    {
+        $this->authorizeGuestOrder($order, $token);
+
+        return view('orders.guest-show', ['order' => $order->load('items.product')]);
+    }
+
+    public function guestReceipt(Order $order, string $token): View
+    {
+        $this->authorizeGuestOrder($order, $token);
+
+        return view('orders.receipt', ['order' => $order->load('items')]);
+    }
+
     public function deliveryPayment(Order $order): View
     {
         $this->authorizeDeliveryPayment($order);
@@ -64,5 +78,10 @@ class OrderController extends Controller
     {
         abort_unless($order->user_id === auth()->id(), 403);
         abort_unless($order->advance_delivery_required && $order->delivery_charge_payment_option === 'pay_later', 404);
+    }
+
+    private function authorizeGuestOrder(Order $order, string $token): void
+    {
+        abort_unless($order->user_id === null && $order->guest_token && hash_equals($order->guest_token, $token), 403);
     }
 }

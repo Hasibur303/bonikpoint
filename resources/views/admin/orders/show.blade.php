@@ -18,7 +18,20 @@
                 <thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="p-3">Product</th><th class="p-3">Qty</th><th class="p-3">Price</th><th class="p-3 text-right">Total</th></tr></thead>
                 <tbody class="divide-y">
                     @foreach($order->items as $item)
-                        <tr><td class="p-3">{{ $item->product_name }}</td><td class="p-3">{{ $item->quantity }}</td><td class="p-3">৳{{ number_format($item->unit_price, 2) }}</td><td class="p-3 text-right">৳{{ number_format($item->total, 2) }}</td></tr>
+                        <tr>
+                            <td class="p-3">
+                                {{ $item->product_name }}
+                                @if($item->selected_color_name)
+                                    <span class="mt-1 flex items-center gap-2 text-xs font-semibold text-gray-500">
+                                        <span class="h-3 w-3 rounded-full border border-black/10" style="background-color: {{ $item->selected_color_hex ?: '#E5E7EB' }}"></span>
+                                        Color: {{ $item->selected_color_name }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="p-3">{{ $item->quantity }}</td>
+                            <td class="p-3">৳{{ number_format($item->unit_price, 2) }}</td>
+                            <td class="p-3 text-right">৳{{ number_format($item->total, 2) }}</td>
+                        </tr>
                     @endforeach
                 </tbody>
             </table>

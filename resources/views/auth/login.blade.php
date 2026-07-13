@@ -1,9 +1,22 @@
 <x-guest-layout :wide="true">
+    <style>
+        @media (min-width: 1024px) {
+            .login-brand-panel {
+                background-color: #0f172a !important;
+            }
+        }
+    </style>
     <div class="grid lg:min-h-[620px] lg:grid-cols-[0.9fr_1.1fr]">
-        <section class="relative flex flex-col justify-between overflow-hidden bg-slate-900 px-7 py-7 text-white sm:px-10 lg:px-12 lg:py-12">
-            <div class="absolute inset-x-0 top-0 h-1.5 bg-lime-500"></div>
+        <section class="login-brand-panel relative overflow-hidden bg-white px-6 py-4 text-white lg:flex lg:flex-col lg:justify-between lg:px-12 lg:py-12">
+            <div class="absolute inset-x-0 top-0 hidden h-1.5 bg-lime-500 lg:block"></div>
 
-            <div>
+            <div class="flex justify-center lg:hidden">
+                <a href="{{ route('home.index') }}" class="inline-flex" aria-label="Bonik Point home">
+                    <x-application-logo class="h-12 max-h-12 w-auto object-contain" style="height: 48px; max-height: 48px; width: auto;" />
+                </a>
+            </div>
+
+            <div class="hidden lg:block">
                 <a href="{{ route('home.index') }}" class="inline-flex rounded-md bg-white p-2 shadow-lg" aria-label="Bonik Point home">
                     <x-application-logo class="h-14 w-auto sm:h-16 lg:h-20" />
                 </a>
@@ -72,6 +85,14 @@
                         <a href="{{ route('register') }}" class="mt-3 inline-flex w-full items-center justify-center rounded-md border-2 border-lime-500 bg-lime-50 px-5 py-3 text-sm font-bold text-slate-900 shadow-lg shadow-lime-500/20 transition hover:bg-lime-500 hover:shadow-lime-500/30 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:ring-offset-2">
                             Create Account
                         </a>
+                        @if(\App\Http\Controllers\CartController::count() > 0)
+                            <div class="mt-5 rounded-md border border-teal-100 bg-teal-50 p-4">
+                                <p class="text-sm font-semibold text-slate-800">Want to order without an account?</p>
+                                <a href="{{ route('guest.checkout.create') }}" class="mt-3 inline-flex w-full items-center justify-center rounded-md border-2 border-teal-700 bg-teal-50 px-5 py-3 text-sm font-bold text-teal-900 shadow-lg shadow-teal-700/20 transition hover:bg-teal-700 hover:text-white hover:shadow-teal-700/30 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2">
+                                    Order Without Account
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 </form>
             </div>

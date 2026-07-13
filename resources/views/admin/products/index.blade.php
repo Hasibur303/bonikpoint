@@ -18,7 +18,8 @@
                         <td class="p-4">{{ $product->stock }}</td>
                         <td class="p-4">{{ $product->is_active ? 'Active' : 'Hidden' }}</td>
                         <td class="p-4 text-right">
-                            <a href="{{ route('admin.products.edit', $product) }}" class="font-semibold text-primary">Edit</a>
+                            <a href="{{ route('admin.products.faqs.edit', $product) }}" class="font-semibold text-ink hover:text-primary">FAQ {{ $product->faqs_count ? '('.$product->faqs_count.')' : '' }}</a>
+                            <a href="{{ route('admin.products.edit', $product) }}" class="ml-3 font-semibold text-primary">Edit</a>
                             <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="ml-3 inline" onsubmit="return confirm('Delete this product?')">
                                 @csrf @method('DELETE')
                                 <button class="font-semibold text-red-600">Delete</button>

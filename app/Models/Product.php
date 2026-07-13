@@ -80,6 +80,21 @@ class Product extends Model
         return $this->hasMany(ProductReview::class);
     }
 
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function faqs(): HasMany
+    {
+        return $this->hasMany(ProductFaq::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function colors(): HasMany
+    {
+        return $this->hasMany(ProductColor::class)->orderBy('sort_order')->orderBy('id');
+    }
+
     public function getImageUrlAttribute(): string
     {
         if (! $this->image) {

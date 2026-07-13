@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\FestivalController as AdminFestivalController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProfitController as AdminProfitController;
+use App\Http\Controllers\Admin\ProductFaqController as AdminProductFaqController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 Route::get('/', [ShopController::class, 'index'])->name('home.index');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::view('/return-refund-policy', 'pages.return-policy')->name('return-policy');
+Route::view('/order-instructions', 'pages.order-instructions')->name('order-instructions');
 Route::get('/festivals/{festival:slug}', [FestivalController::class, 'show'])->name('festivals.show');
 Route::get('/products/{product}', [ShopController::class, 'show'])->name('shop.show');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -33,6 +35,10 @@ Route::get('/cart/snapshot', [CartController::class, 'snapshotResponse'])->name(
 Route::post('/cart/{product}', [CartController::class, 'store'])->name('cart.store');
 Route::patch('/cart/{product}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{product}', [CartController::class, 'destroy'])->name('cart.destroy');
+Route::get('/guest-checkout', [CheckoutController::class, 'guestCreate'])->name('guest.checkout.create');
+Route::post('/guest-checkout', [CheckoutController::class, 'guestStore'])->name('guest.checkout.store');
+Route::get('/guest-orders/{order:order_number}/{token}', [OrderController::class, 'guestShow'])->name('guest.orders.show');
+Route::get('/guest-orders/{order:order_number}/{token}/receipt', [OrderController::class, 'guestReceipt'])->name('guest.orders.receipt');
 
 Route::get('/dashboard', function () {
     if (auth()->user()?->utype === 'adm') {
@@ -60,6 +66,8 @@ Route::middleware('auth')->group(function () {
 Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(function () {
     Route::get('/', [AdminComtroller::class, 'index'])->name('index');
     Route::resource('categories', AdminCategoryController::class);
+    Route::get('products/{product}/faqs', [AdminProductFaqController::class, 'edit'])->name('products.faqs.edit');
+    Route::patch('products/{product}/faqs', [AdminProductFaqController::class, 'update'])->name('products.faqs.update');
     Route::resource('products', AdminProductController::class)->except('show');
     Route::resource('festivals', AdminFestivalController::class)->except('show');
     Route::get('profit', [AdminProfitController::class, 'index'])->name('profit.index');

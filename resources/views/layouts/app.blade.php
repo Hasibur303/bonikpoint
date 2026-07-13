@@ -33,7 +33,7 @@
         <div class="container">
             <div class="flex h-20 items-center justify-between gap-6">
                 <a href="{{ route('home.index') }}" class="flex items-center gap-3">
-                    <img src="{{ asset('assets/images/logo.jpg') }}" alt="Bonik Point" class="h-14 w-auto object-contain">
+                    <img src="{{ asset('assets/images/logo.jpg') }}" alt="Bonik Point" class="h-[76px] w-auto object-contain">
                 </a>
 
                 <nav class="hidden items-center gap-8 text-sm font-semibold uppercase tracking-wide text-ink md:flex">
@@ -84,7 +84,7 @@
                     @endauth
                 </nav>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 sm:gap-4">
                     <form action="{{ route('shop.index') }}" class="hidden xl:block">
                         <input name="search" value="{{ request('search') }}" placeholder="Search products" class="w-56 rounded-full border-gray-200 text-sm focus:border-primary focus:ring-primary">
                     </form>
@@ -93,6 +93,11 @@
                         <i class="fa-solid fa-bag-shopping"></i>
                         <span id="cart-count-badge" class="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-xs font-bold text-white">{{ $drawerCart['count'] ?? 0 }}</span>
                     </button>
+
+                    <a href="tel:01540381020" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary transition hover:border-primary hover:bg-primary hover:text-white lg:w-auto lg:px-4" title="Call customer service">
+                        <i class="fa-solid fa-phone"></i>
+                        <span class="ml-2 hidden text-sm font-bold lg:inline">Call</span>
+                    </a>
 
                     @auth
                         <div class="group relative">
@@ -220,28 +225,48 @@
         </div>
     </aside>
 
-    <footer class="mt-16 bg-ink py-12 text-gray-100">
-        <div class="container grid gap-8 md:grid-cols-4">
-            <div class="md:col-span-2">
-                <img src="{{ asset('assets/images/logo.jpg') }}" alt="Bonik Point" class="mb-5 h-20 w-auto rounded bg-white p-2">
-                <p class="max-w-lg text-sm leading-6 text-gray-300">Bonik Point brings stylish products, simple ordering, and admin-managed stock in one Laravel ecommerce platform.</p>
+    <footer class="mt-6 bg-ink py-4 text-gray-100 md:mt-16 md:py-12">
+        <div class="container grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-8">
+            <div class="col-span-2 md:col-span-2">
+                <img src="{{ asset('assets/images/logo.jpg') }}" alt="Bonik Point" class="mb-2 h-10 w-auto rounded bg-white p-1 md:mb-5 md:h-20 md:p-2">
+                <p class="hidden max-w-lg text-sm leading-6 text-gray-300 md:block">Bonik Point brings stylish products and simple ordering in one place.</p>
             </div>
             <div>
-                <h3 class="mb-4 font-bold text-white">Shop</h3>
-                <div class="space-y-2 text-sm">
+                <h3 class="mb-2 text-sm font-bold text-white md:mb-4 md:text-base">Shop</h3>
+                <div class="space-y-1 text-[11px] md:space-y-2 md:text-sm">
                     <a href="{{ route('shop.index') }}" class="block hover:text-accent">All Products</a>
                     <a href="{{ route('cart.index') }}" class="block hover:text-accent">Cart</a>
                     <a href="{{ route('orders.index') }}" class="block hover:text-accent">Orders</a>
+                    <a href="{{ route('order-instructions') }}" class="block hover:text-accent">Order Instructions</a>
                     <a href="{{ route('return-policy') }}" class="block hover:text-accent">Return & Refund Policy</a>
                 </div>
             </div>
             <div>
-                <h3 class="mb-4 font-bold text-white">Contact</h3>
-                <p class="text-sm text-gray-300">Shimrail Zero point, Siddirganj, Narayanganj</p>
-                <p class="text-sm text-gray-300">Contact: 01540381020</p>
-                <p class="text-sm text-gray-300">WhatsApp: 01540381020</p>
-                <p class="text-sm text-gray-300">24 Hours Customer Service: 01540381020</p>
+                <h3 class="mb-2 text-sm font-bold text-white md:mb-4 md:text-base">Contact</h3>
+                <p class="text-[11px] leading-4 text-gray-300 md:text-sm md:leading-5">Shimrail Zero point, Siddirganj, Narayanganj</p>
+                <p class="mt-1 text-[11px] text-gray-300 md:text-sm">WhatsApp: 01540381020</p>
+                <p class="mt-1 text-[11px] text-gray-300 md:text-sm"><span class="md:hidden">Service:</span><span class="hidden md:inline">24 Hours Customer Service:</span> 01540381020</p>
             </div>
+            <div class="col-span-2 md:col-span-1">
+                <h3 class="mb-2 text-sm font-bold text-white md:mb-4 md:text-base">Follow</h3>
+                <div class="grid grid-cols-3 gap-2 text-[11px] md:block md:space-y-3 md:text-sm">
+                    <a href="https://www.facebook.com/share/1EGD8CxUS9/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 text-gray-300 hover:text-accent" title="Facebook">
+                        <i class="fa-brands fa-facebook-f w-4 text-sm md:text-base"></i>
+                        <span class="truncate">Facebook</span>
+                    </a>
+                    <a href="https://youtube.com/@dailyvlogsbynayeem?si=FjjidXNIp0SrnIfI" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 text-gray-300 hover:text-accent" title="Daily Vlogs by Nayeem on YouTube">
+                        <i class="fa-brands fa-youtube w-4 text-sm md:text-base"></i>
+                        <span class="truncate">Daily Vlogs</span>
+                    </a>
+                    <a href="https://youtube.com/@nayeemrahmanvlogs?si=Usa-_Z8h8J_p32JP" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 text-gray-300 hover:text-accent" title="Nayeem Rahman Vlogs on YouTube">
+                        <i class="fa-brands fa-youtube w-4 text-sm md:text-base"></i>
+                        <span class="truncate">Nayeem Vlogs</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="container mt-4 border-t border-white/15 pt-3 text-center text-[10px] text-gray-400 md:mt-10 md:pt-5 md:text-xs">
+            &copy; {{ now()->year }} Bonik Point. All rights reserved.
         </div>
     </footer>
     <script>
@@ -307,24 +332,28 @@
                 }
 
                 cartItems.innerHTML = cartState.items.map((item) => `
-                    <div class="mb-4 grid grid-cols-[72px_1fr] gap-4 rounded-lg border border-gray-100 p-3" data-cart-item="${escapeHtml(item.key)}">
-                        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" class="h-20 w-20 rounded object-cover">
-                        <div>
-                            <div class="flex gap-3">
+                    <div class="mb-4 grid grid-cols-[64px_minmax(0,1fr)] gap-3 rounded-lg border border-gray-100 p-3 sm:grid-cols-[72px_minmax(0,1fr)] sm:gap-4" data-cart-item="${escapeHtml(item.key)}">
+                        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" class="h-16 w-16 rounded-md object-cover sm:h-20 sm:w-20">
+                        <div class="min-w-0">
+                            <div class="flex items-start gap-2">
                                 <div class="min-w-0 flex-1">
-                                    <p class="truncate font-semibold text-ink">${escapeHtml(item.name)}</p>
+                                    <p class="line-clamp-2 text-sm font-black leading-5 text-ink sm:truncate sm:text-base sm:font-semibold">${escapeHtml(item.name)}</p>
                                     ${item.festival_title ? `<p class="text-xs font-bold uppercase tracking-wide text-accent">${escapeHtml(item.festival_title)}</p>` : ''}
-                                    <p class="text-sm text-gray-500">${money(item.price)}</p>
+                                    ${item.product_color_name ? `<p class="mt-1 flex items-center gap-1.5 text-xs font-semibold text-gray-500"><span class="h-3 w-3 rounded-full border border-black/10" style="background-color: ${escapeHtml(item.product_color_hex || '#E5E7EB')}"></span>Color: ${escapeHtml(item.product_color_name)}</p>` : ''}
+                                    <p class="text-xs font-semibold text-gray-500 sm:text-sm">${money(item.price)}</p>
                                 </div>
-                                <button type="button" class="js-cart-remove text-sm font-semibold text-red-500 hover:text-red-700" data-product-id="${item.id}" data-cart-key="${escapeHtml(item.key)}">Remove</button>
+                                <button type="button" class="js-cart-remove grid h-8 w-8 shrink-0 place-items-center rounded-md bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 sm:w-auto sm:bg-transparent sm:text-sm sm:font-semibold" data-product-id="${item.id}" data-cart-key="${escapeHtml(item.key)}" title="Remove" aria-label="Remove ${escapeHtml(item.name)}">
+                                    <span class="sr-only sm:not-sr-only">Remove</span>
+                                    <i class="fa-solid fa-trash text-xs sm:hidden"></i>
+                                </button>
                             </div>
-                            <div class="mt-3 flex items-center justify-between gap-3">
+                            <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
                                 <div class="flex items-center overflow-hidden rounded border border-gray-200">
-                                    <button type="button" class="js-cart-decrease px-3 py-1 text-lg" data-product-id="${item.id}" data-cart-key="${escapeHtml(item.key)}" data-quantity="${item.quantity}">-</button>
-                                    <span class="min-w-10 px-3 text-center text-sm font-semibold">${item.quantity}</span>
-                                    <button type="button" class="js-cart-increase px-3 py-1 text-lg" data-product-id="${item.id}" data-cart-key="${escapeHtml(item.key)}" data-quantity="${item.quantity}" data-stock="${item.stock}">+</button>
+                                    <button type="button" class="js-cart-decrease px-2.5 py-1 text-lg sm:px-3" data-product-id="${item.id}" data-cart-key="${escapeHtml(item.key)}" data-quantity="${item.quantity}">-</button>
+                                    <span class="min-w-8 px-2 text-center text-sm font-semibold sm:min-w-10 sm:px-3">${item.quantity}</span>
+                                    <button type="button" class="js-cart-increase px-2.5 py-1 text-lg sm:px-3" data-product-id="${item.id}" data-cart-key="${escapeHtml(item.key)}" data-quantity="${item.quantity}" data-stock="${item.stock}">+</button>
                                 </div>
-                                <p class="font-bold text-primary">${money(item.total)}</p>
+                                <p class="text-sm font-black text-primary sm:text-base">${money(item.total)}</p>
                             </div>
                         </div>
                     </div>

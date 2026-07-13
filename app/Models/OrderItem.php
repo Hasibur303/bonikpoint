@@ -14,6 +14,8 @@ class OrderItem extends Model
         'order_id',
         'product_id',
         'product_name',
+        'selected_color_name',
+        'selected_color_hex',
         'buying_price',
         'unit_price',
         'quantity',

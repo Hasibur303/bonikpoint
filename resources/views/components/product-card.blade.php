@@ -1,25 +1,48 @@
 @props(['product'])
 
-<div class="group overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-100 transition hover:-translate-y-1 hover:shadow-lg">
-    <a href="{{ route('shop.show', $product) }}" class="block aspect-square overflow-hidden bg-gray-100">
-        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+@php
+    $discount = $product->compare_price && $product->compare_price > $product->price
+        ? (int) round((1 - ($product->price / $product->compare_price)) * 100)
+        : null;
+@endphp
+
+<article class="group flex h-full flex-col overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl sm:rounded-lg">
+    <a href="{{ route('shop.show', $product) }}" class="relative block aspect-square overflow-hidden bg-[#fafbfa] p-1 sm:p-4">
+        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="h-full w-full object-contain transition duration-500 group-hover:scale-[1.04]">
+        @if($discount)
+            <span class="absolute left-1.5 top-1.5 rounded bg-[#f2b84b] px-1.5 py-0.5 text-[9px] font-black leading-none text-[#3b2b06] sm:left-3 sm:top-3 sm:rounded-md sm:px-2.5 sm:py-1 sm:text-xs">{{ $discount }}% OFF</span>
+        @endif
+        @if($product->is_featured)
+            <span class="absolute right-1.5 top-1.5 hidden h-7 w-7 place-items-center rounded-md bg-white text-accent shadow-md sm:grid sm:right-3 sm:top-3 sm:h-8 sm:w-8" title="Featured product">
+                <i class="fa-solid fa-star text-xs"></i>
+            </span>
+        @endif
     </a>
-    <div class="p-3">
-        <p class="text-[11px] font-semibold uppercase tracking-wide text-primary">{{ $product->category?->name }}</p>
-        <a href="{{ route('shop.show', $product) }}" class="mt-1 block line-clamp-2 text-sm font-semibold leading-5 text-ink hover:text-primary">{{ $product->name }}</a>
-        <div class="mt-2 flex items-center justify-between gap-3">
+
+    <div class="flex flex-1 flex-col p-1.5 sm:p-4">
+        <div class="hidden items-center justify-between gap-3 sm:flex">
+            <p class="truncate text-[11px] font-bold uppercase tracking-wide text-primary">{{ $product->category?->name }}</p>
+            <span class="flex shrink-0 items-center gap-1.5 text-[11px] font-semibold {{ $product->stock > 0 ? 'text-green-700' : 'text-red-600' }}">
+                <span class="h-1.5 w-1.5 rounded-full {{ $product->stock > 0 ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                {{ $product->stock > 0 ? 'In stock' : 'Sold out' }}
+            </span>
+        </div>
+
+        <a href="{{ route('shop.show', $product) }}" class="line-clamp-2 min-h-7 text-[10px] font-extrabold leading-[1.35] text-ink hover:text-primary sm:mt-2 sm:min-h-12 sm:text-base sm:font-black sm:leading-6">{{ $product->name }}</a>
+
+        <div class="mt-auto flex items-end justify-between gap-1 pt-1.5 sm:gap-4 sm:pt-5">
             <div class="min-w-0">
-                <span class="block text-sm font-bold text-primary">BDT {{ number_format($product->price, 2) }}</span>
+                <span class="block text-[10px] font-black leading-tight text-primary sm:text-lg">BDT {{ number_format($product->price) }}</span>
                 @if($product->compare_price)
-                    <span class="block text-xs text-gray-400 line-through">BDT {{ number_format($product->compare_price, 2) }}</span>
+                    <span class="mt-0.5 hidden text-xs font-medium text-gray-400 line-through sm:block">BDT {{ number_format($product->compare_price) }}</span>
                 @endif
             </div>
             <form method="POST" action="{{ route('cart.store', $product) }}" class="js-add-to-cart">
                 @csrf
-                <button class="grid h-8 w-8 place-items-center rounded-full bg-accent text-sm text-white hover:bg-primary" title="Add to cart">
-                    <i class="fa-solid fa-plus"></i>
+                <button class="grid h-7 w-7 place-items-center rounded bg-ink text-[10px] text-white transition hover:bg-primary disabled:cursor-not-allowed disabled:bg-gray-300 sm:h-11 sm:w-11 sm:rounded-md sm:text-sm" title="Add to cart" aria-label="Add {{ $product->name }} to cart" @disabled($product->stock < 1)>
+                    <i class="fa-solid fa-cart-plus"></i>
                 </button>
             </form>
         </div>
     </div>
-</div>
+</article>

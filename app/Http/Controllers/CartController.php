@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Festival;
 use App\Models\Product;
+use App\Models\ProductColor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +24,8 @@ class CartController extends Controller
         $quantity = max(1, min((int) $request->input('quantity', 1), $product->stock));
         $cart = session('cart', []);
         $festival = $this->festivalFor($request, $product);
-        $cartKey = $festival ? $this->cartKey($product->id, $festival->id) : (string) $product->id;
+        $selectedColor = $this->selectedColorFor($request, $product);
+        $cartKey = $this->cartKey($product->id, $festival?->id, $selectedColor?->id);
         $currentQuantity = $cart[$cartKey]['quantity'] ?? 0;
         $otherQuantity = $this->quantityForProduct($cart, $product->id, $cartKey);
         $allowedQuantity = max(0, $product->stock - $otherQuantity);
@@ -44,9 +46,16 @@ class CartController extends Controller
             'festival_id' => $festival?->id,
             'unit_price' => $festival ? $festival->discountedPrice($product) : (float) $product->price,
             'festival_title' => $festival?->title,
+            'product_color_id' => $selectedColor?->id,
+            'product_color_name' => $selectedColor?->name,
+            'product_color_hex' => $selectedColor?->hex_code,
         ];
 
         session(['cart' => $cart]);
+
+        if ($request->boolean('buy_now') && ! $request->expectsJson()) {
+            return redirect()->route('checkout.create');
+        }
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -138,6 +147,9 @@ class CartController extends Controller
                 'unit_price' => $unitPrice,
                 'festival_id' => $item['festival_id'] ?? null,
                 'festival_title' => $item['festival_title'] ?? null,
+                'product_color_id' => $item['product_color_id'] ?? null,
+                'product_color_name' => $item['product_color_name'] ?? null,
+                'product_color_hex' => $item['product_color_hex'] ?? null,
                 'total' => $unitPrice * $quantity,
             ];
         })->filter()->values()->all();
@@ -153,6 +165,8 @@ class CartController extends Controller
             'price' => $item['unit_price'],
             'regular_price' => (float) $item['product']->price,
             'festival_title' => $item['festival_title'],
+            'product_color_name' => $item['product_color_name'],
+            'product_color_hex' => $item['product_color_hex'],
             'quantity' => $item['quantity'],
             'stock' => $item['product']->stock,
             'total' => $item['total'],
@@ -180,9 +194,32 @@ class CartController extends Controller
         return $festival->includesProduct($product) ? $festival : null;
     }
 
-    private function cartKey(int $productId, int $festivalId): string
+    private function selectedColorFor(Request $request, Product $product): ?ProductColor
     {
-        return $productId.':'.$festivalId;
+        $colors = $product->colors()->get();
+
+        if ($colors->isEmpty()) {
+            return null;
+        }
+
+        if (! $request->filled('product_color_id')) {
+            return $colors->first();
+        }
+
+        $selectedColor = $colors->firstWhere('id', $request->integer('product_color_id'));
+
+        if (! $selectedColor) {
+            abort(422, 'Please select a valid color.');
+        }
+
+        return $selectedColor;
+    }
+
+    private function cartKey(int $productId, ?int $festivalId = null, ?int $colorId = null): string
+    {
+        return collect([$productId, $festivalId ? 'festival-'.$festivalId : null, $colorId ? 'color-'.$colorId : null])
+            ->filter()
+            ->join(':');
     }
 
     private function quantityForProduct(array $cart, int $productId, string $exceptKey): int

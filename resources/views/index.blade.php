@@ -67,11 +67,11 @@
                 <p class="text-sm font-bold uppercase tracking-wide text-primary">New Arrivals</p>
                 <h2 class="text-3xl font-black text-ink">Latest Products</h2>
             </div>
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
                 @forelse($newProducts as $product)
                     <x-product-card :product="$product" />
                 @empty
-                    <p class="text-gray-500">No products added yet.</p>
+                    <p class="col-span-full text-gray-500">No products added yet.</p>
                 @endforelse
             </div>
         </div>
@@ -83,11 +83,11 @@
                 <p class="text-sm font-bold uppercase tracking-wide text-primary">Featured</p>
                 <h2 class="text-3xl font-black text-ink">Admin Picks</h2>
             </div>
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
                 @forelse($featuredProducts as $product)
                     <x-product-card :product="$product" />
                 @empty
-                    <p class="text-gray-500">Mark products as featured from the admin panel.</p>
+                    <p class="col-span-full text-gray-500">Mark products as featured from the admin panel.</p>
                 @endforelse
             </div>
         </div>
