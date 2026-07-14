@@ -28,7 +28,7 @@
 @section('title', $shopTitle)
 @section('meta_description', Str::limit(strip_tags($shopDescription), 155, ''))
 @section('canonical', $shopCanonical)
-@section('meta_image', asset('assets/images/logo.jpg'))
+@section('meta_image', asset('assets/images/logo.webp'))
 @section('robots', $shopRobots)
 
 <x-app-layout>
@@ -41,7 +41,7 @@
                             <div class="festival-mosaic" aria-hidden="{{ $copy === 1 ? 'true' : 'false' }}">
                                 @foreach($festivals as $festival)
                                     <a href="{{ route('festivals.show', $festival) }}" class="festival-mosaic-card group">
-                                        <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" draggable="false" onload="if (this.naturalWidth / Math.max(this.naturalHeight, 1) > 2.1) this.closest('.festival-mosaic-card')?.classList.add('is-wide')" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]">
+                                        <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" width="1200" height="1200" decoding="async" @if($copy === 1) loading="lazy" @endif draggable="false" onload="if (this.naturalWidth / Math.max(this.naturalHeight, 1) > 2.1) this.closest('.festival-mosaic-card')?.classList.add('is-wide')" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]">
                                     </a>
                                 @endforeach
                             </div>
@@ -188,7 +188,7 @@
                                         <details class="group/category rounded-md {{ $isMainActive || $hasActiveChild ? 'bg-primary/5' : '' }}" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
                                             <summary class="flex cursor-pointer list-none items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f7f9f8]">
                                                 @if($category->image)
-                                                    <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                                                    <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
                                                 @else
                                                     <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
                                                 @endif
@@ -208,7 +208,7 @@
                                     @else
                                         <a href="{{ $category->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f7f9f8] {{ $isMainActive ? 'bg-primary/5' : '' }}">
                                             @if($category->image)
-                                                <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                                                <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
                                             @else
                                                 <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
                                             @endif

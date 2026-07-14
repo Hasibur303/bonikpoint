@@ -78,7 +78,7 @@
                 <input type="file" name="image" accept="image/*" class="w-full rounded border border-gray-200 p-2">
                 <p class="mt-1 text-xs text-gray-500">This image shows first on product cards and cart.</p>
                 @if($product->exists && $product->image)
-                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="mt-3 h-24 w-24 rounded-md object-cover ring-1 ring-gray-100">
+                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" width="96" height="96" loading="lazy" decoding="async" class="mt-3 h-24 w-24 rounded-md object-cover ring-1 ring-gray-100">
                 @endif
                 @error('image')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
@@ -121,7 +121,7 @@
                     <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
                         @foreach($product->images as $image)
                             <label class="group rounded-lg border border-gray-100 bg-gray-50 p-2">
-                                <img src="{{ $image->image_url }}" alt="{{ $product->name }}" class="aspect-square w-full rounded-md object-cover ring-1 ring-gray-100">
+                                <img src="{{ $image->image_url }}" alt="{{ $product->name }}" width="240" height="240" loading="lazy" decoding="async" class="aspect-square w-full rounded-md object-cover ring-1 ring-gray-100">
                                 <span class="mt-2 flex items-center gap-2 text-xs font-semibold text-red-600">
                                     <input type="checkbox" name="delete_gallery_images[]" value="{{ $image->id }}" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
                                     Delete image

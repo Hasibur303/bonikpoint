@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\ImageUploadOptimizer;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Festival;
@@ -90,7 +91,7 @@ class FestivalController extends Controller
         $data['is_active'] = $request->boolean('is_active');
 
         if ($request->hasFile('banner')) {
-            $data['banner'] = $request->file('banner')->store('festivals', 'public');
+            $data['banner'] = ImageUploadOptimizer::store($request->file('banner'), 'festivals');
         }
 
         return $data;

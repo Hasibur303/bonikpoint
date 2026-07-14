@@ -13,7 +13,7 @@
                 @forelse($spotlightProducts as $product)
                     <div class="flex gap-4 rounded-lg border border-gray-100 bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
                         <a href="{{ route('shop.show', $product) }}" class="h-28 w-28 shrink-0 overflow-hidden rounded bg-gray-100">
-                            <img src="{{ $product->image_url }}" alt="{{ $product->image_alt ?: $product->name }}" class="h-full w-full object-cover">
+                            <img src="{{ $product->image_url }}" alt="{{ $product->image_alt ?: $product->name }}" width="640" height="640" loading="lazy" decoding="async" class="h-full w-full object-cover">
                         </a>
                         <div class="flex min-w-0 flex-1 flex-col">
                             <p class="text-xs font-semibold uppercase tracking-wide text-primary">{{ $product->category?->name }}</p>

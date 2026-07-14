@@ -41,7 +41,7 @@
                 <label class="mb-1 block text-sm font-semibold">Banner / Photo</label>
                 <input type="file" name="banner" class="w-full rounded border border-gray-200 p-2">
                 @if($festival->banner)
-                    <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" class="mt-3 h-36 rounded object-cover">
+                    <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" width="640" height="360" loading="lazy" decoding="async" class="mt-3 h-36 rounded object-cover">
                 @endif
             </div>
 

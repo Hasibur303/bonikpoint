@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\ImageUploadOptimizer;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
@@ -110,7 +111,7 @@ class ProductController extends Controller
         $data['is_active'] = $request->boolean('is_active');
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
+            $data['image'] = ImageUploadOptimizer::store($request->file('image'), 'products');
         }
 
         unset($data['gallery_images'], $data['delete_gallery_images'], $data['existing_colors'], $data['colors'], $data['delete_colors']);
@@ -128,7 +129,7 @@ class ProductController extends Controller
 
         foreach ($request->file('gallery_images') as $image) {
             $product->images()->create([
-                'image' => $image->store('products/gallery', 'public'),
+                'image' => ImageUploadOptimizer::store($image, 'products/gallery'),
                 'sort_order' => $nextSortOrder++,
             ]);
         }

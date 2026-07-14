@@ -8,7 +8,7 @@
         $seoTitle = html_entity_decode(trim($__env->yieldContent('title', config('app.name', 'Bonik Point'))), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $seoDescription = html_entity_decode(trim($__env->yieldContent('meta_description', 'Shop authentic lifestyle, vape, gadget, home, and daily-use products from Bonik Point with simple ordering and customer support.')), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $seoCanonical = trim($__env->yieldContent('canonical', url()->current()));
-        $seoImage = trim($__env->yieldContent('meta_image', asset('assets/images/logo.jpg')));
+        $seoImage = trim($__env->yieldContent('meta_image', asset('assets/images/logo.webp')));
         $seoRobots = trim($__env->yieldContent('robots', 'index,follow'));
     @endphp
     <title>{{ $seoTitle }}</title>
@@ -26,25 +26,7 @@
     <meta name="twitter:description" content="{{ $seoDescription }}">
     <meta name="twitter:image" content="{{ $seoImage }}">
     <link href="{{ asset('favicon.jpg') }}" rel="shortcut icon" type="image/x-icon">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#087c7f',
-                        accent: '#9fbb18',
-                        ink: '#103f44',
-                    },
-                    container: {
-                        center: true,
-                        padding: '1rem',
-                        screens: { xl: '1200px' },
-                    },
-                },
-            },
-        }
-    </script>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @if(request()->routeIs('home.index'))
@@ -54,7 +36,7 @@
                 '@type' => 'Organization',
                 'name' => 'Bonik Point',
                 'url' => route('home.index'),
-                'logo' => asset('assets/images/logo.jpg'),
+                'logo' => asset('assets/images/logo.webp'),
                 'contactPoint' => [
                     '@type' => 'ContactPoint',
                     'telephone' => '01540381020',
@@ -77,7 +59,7 @@
         <div class="container">
             <div class="flex h-20 items-center justify-between gap-6">
                 <a href="{{ route('home.index') }}" class="flex items-center gap-3">
-                    <img src="{{ asset('assets/images/logo.jpg') }}" alt="Bonik Point" class="h-[76px] w-auto object-contain">
+                    <img src="{{ asset('assets/images/logo.webp') }}" alt="Bonik Point" width="160" height="80" decoding="async" class="h-[76px] w-auto object-contain">
                 </a>
 
                 @php
@@ -276,7 +258,7 @@
     <footer class="mt-6 bg-ink py-4 text-gray-100 md:mt-16 md:py-12">
         <div class="container grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-8">
             <div class="col-span-2 md:col-span-2">
-                <img src="{{ asset('assets/images/logo.jpg') }}" alt="Bonik Point" class="mb-2 h-10 w-auto rounded bg-white p-1 md:mb-5 md:h-20 md:p-2">
+                <img src="{{ asset('assets/images/logo.webp') }}" alt="Bonik Point" width="160" height="80" loading="lazy" decoding="async" class="mb-2 h-10 w-auto rounded bg-white p-1 md:mb-5 md:h-20 md:p-2">
                 <p class="hidden max-w-lg text-sm leading-6 text-gray-300 md:block">Bonik Point brings stylish products and simple ordering in one place.</p>
             </div>
             <div>
@@ -381,7 +363,7 @@
 
                 cartItems.innerHTML = cartState.items.map((item) => `
                     <div class="mb-4 grid grid-cols-[64px_minmax(0,1fr)] gap-3 rounded-lg border border-gray-100 p-3 sm:grid-cols-[72px_minmax(0,1fr)] sm:gap-4" data-cart-item="${escapeHtml(item.key)}">
-                        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" class="h-16 w-16 rounded-md object-cover sm:h-20 sm:w-20">
+                        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" width="80" height="80" loading="lazy" decoding="async" class="h-16 w-16 rounded-md object-cover sm:h-20 sm:w-20">
                         <div class="min-w-0">
                             <div class="flex items-start gap-2">
                                 <div class="min-w-0 flex-1">

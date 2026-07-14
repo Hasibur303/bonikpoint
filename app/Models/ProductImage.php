@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Support\OptimizedImage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class ProductImage extends Model
 {
@@ -24,10 +24,6 @@ class ProductImage extends Model
 
     public function getImageUrlAttribute(): string
     {
-        if (str_starts_with($this->image, 'assets/')) {
-            return asset($this->image);
-        }
-
-        return Storage::url($this->image);
+        return OptimizedImage::url($this->image);
     }
 }

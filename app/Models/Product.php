@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use App\Support\OptimizedImage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
@@ -122,13 +122,9 @@ class Product extends Model
     public function getImageUrlAttribute(): string
     {
         if (! $this->image) {
-            return asset('assets/images/product/product-01.jpg');
+            return OptimizedImage::url('assets/images/product/product-01.jpg');
         }
 
-        if (str_starts_with($this->image, 'assets/')) {
-            return asset($this->image);
-        }
-
-        return Storage::url($this->image);
+        return OptimizedImage::url($this->image);
     }
 }

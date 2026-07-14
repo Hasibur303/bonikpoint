@@ -182,7 +182,7 @@
                         <div class="divide-y divide-gray-100 px-5">
                             @foreach($cartItems as $item)
                                 <div class="grid grid-cols-[56px_1fr_auto] items-center gap-3 py-4">
-                                    <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}" class="h-14 w-14 rounded-md bg-[#f7f9f8] object-contain p-1">
+                                    <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}" width="56" height="56" loading="lazy" decoding="async" class="h-14 w-14 rounded-md bg-[#f7f9f8] object-contain p-1">
                                     <div class="min-w-0">
                                         <p class="line-clamp-2 text-sm font-bold leading-5 text-ink">{{ $item['product']->name }}</p>
                                         @if($item['product_color_name'])
