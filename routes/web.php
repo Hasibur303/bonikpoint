@@ -29,7 +29,9 @@ use App\Models\Product;
 Route::get('/', [ShopController::class, 'index'])->name('home.index');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/category/{category:slug}', [ShopController::class, 'category'])->name('categories.show');
-Route::get('/category/{parent:slug}/{category:slug}', [ShopController::class, 'subcategory'])->name('categories.subcategory');
+Route::get('/category/{parent:slug}/{category:slug}', [ShopController::class, 'subcategory'])
+    ->withoutScopedBindings()
+    ->name('categories.subcategory');
 Route::get('/robots.txt', function () {
     return response("User-agent: *\nAllow: /\nSitemap: ".url('/sitemap.xml')."\n", 200)
         ->header('Content-Type', 'text/plain');
