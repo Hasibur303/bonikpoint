@@ -1,4 +1,9 @@
+@section('title', 'Create Account | Bonik Point')
+@section('meta_description', 'Create a Bonik Point customer account for faster checkout and order tracking.')
+@section('canonical', route('register'))
+
 <x-guest-layout>
+    <h1 class="mb-5 text-2xl font-black text-ink">Create your account</h1>
     <form method="POST" action="{{ route('register') }}">
         @csrf
 

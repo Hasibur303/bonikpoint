@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\ImageUploadOptimizer;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
@@ -106,7 +107,10 @@ class CategoryController extends Controller
                 Rule::exists('categories', 'id')->whereNull('parent_id'),
             ],
             'description' => ['nullable', 'string'],
+            'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string', 'max:500'],
             'image' => ['nullable', 'image', 'max:2048'],
+            'image_alt' => ['nullable', 'string', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
@@ -116,12 +120,12 @@ class CategoryController extends Controller
             ]);
         }
 
-        $data['slug'] = Str::slug($data['name']).($category?->exists ? '' : '-'.Str::random(5));
+        $data['slug'] = Str::slug($data['name']).($category?->exists ? '' : '-'.Str::lower(Str::random(5)));
         $data['parent_id'] = $data['parent_id'] ?? null;
         $data['is_active'] = $request->boolean('is_active');
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('categories', 'public');
+            $data['image'] = ImageUploadOptimizer::store($request->file('image'), 'categories');
         }
 
         return $data;

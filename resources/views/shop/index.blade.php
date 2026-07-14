@@ -1,3 +1,82 @@
+@php
+    $currentPage = $products->currentPage();
+    $hasFilterParameters = collect([$search, $minPrice, $maxPrice, $sort])->contains(fn ($value) => filled($value));
+    $shopHeading = $selectedCategoryModel?->name
+        ?? ($selectedBrand ? $selectedBrand.' Products' : 'Bonik Point Products');
+    $categoryDescription = $selectedCategoryModel?->seo_description ?: $selectedCategoryModel?->description;
+    $shopDescription = $categoryDescription
+        ?: ($selectedCategoryModel
+            ? 'Browse '.$selectedCategoryModel->name.' products at Bonik Point with simple ordering, customer support, and reliable delivery options in Bangladesh.'
+            : ($selectedBrand
+                ? 'Shop authentic '.$selectedBrand.' products at Bonik Point with delivery and customer support across Bangladesh.'
+                : 'Shop Bonik Point products including vape items, gadgets, kitchen essentials, toys, fashion, and daily-use collections with simple ordering in Bangladesh.'));
+    $shopTitle = $selectedCategoryModel
+        ? ($selectedCategoryModel->seo_title ?: $selectedCategoryModel->name.' Products in Bangladesh | Bonik Point')
+        : ($selectedBrand
+            ? $selectedBrand.' Products in Bangladesh | Bonik Point'
+            : (request()->routeIs('home.index') ? 'Bonik Point Store | Shop Products in Bangladesh' : 'Shop Products in Bangladesh | Bonik Point'));
+    $shopCanonical = $selectedCategoryModel
+        ? $selectedCategoryModel->public_url
+        : ($selectedBrand
+            ? route('brands.show', Str::slug($selectedBrand))
+            : route(request()->routeIs('home.index') ? 'home.index' : 'shop.index'));
+
+    if (! $hasFilterParameters && $currentPage > 1) {
+        $shopTitle .= ' - Page '.$currentPage;
+        $shopDescription = 'Page '.$currentPage.'. '.$shopDescription;
+        $shopCanonical .= '?page='.$currentPage;
+    }
+
+    $shopRobots = $hasFilterParameters || ($currentPage > 1 && $products->isEmpty())
+        ? 'noindex,follow'
+        : 'index,follow';
+
+    $listingBreadcrumbItems = collect([
+        [
+            '@type' => 'ListItem',
+            'position' => 1,
+            'name' => 'Home',
+            'item' => route('home.index'),
+        ],
+    ]);
+
+    if (! request()->routeIs('home.index')) {
+        $listingBreadcrumbItems->push([
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => $selectedCategoryModel?->parent?->name ?? ($selectedBrand ?: 'Shop'),
+            'item' => $selectedCategoryModel?->parent?->public_url ?? $shopCanonical,
+        ]);
+
+        if ($selectedCategoryModel?->parent) {
+            $listingBreadcrumbItems->push([
+                '@type' => 'ListItem',
+                'position' => 3,
+                'name' => $selectedCategoryModel->name,
+                'item' => $selectedCategoryModel->public_url,
+            ]);
+        }
+    }
+@endphp
+
+@section('title', $shopTitle)
+@section('meta_description', Str::limit(strip_tags($shopDescription), 155, ''))
+@section('canonical', $shopCanonical)
+@section('meta_image', asset('assets/images/logo.webp'))
+@section('robots', $shopRobots)
+
+@if($listingBreadcrumbItems->count() > 1)
+    @push('schema')
+        <script type="application/ld+json">
+            {!! json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => $listingBreadcrumbItems->values()->all(),
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+        </script>
+    @endpush
+@endif
+
 <x-app-layout>
     @if($festivals->isNotEmpty())
         <section class="border-b border-gray-100 bg-[#f4f7f6] py-3 md:py-4">
@@ -7,8 +86,8 @@
                         @for($copy = 0; $copy < 2; $copy++)
                             <div class="festival-mosaic" aria-hidden="{{ $copy === 1 ? 'true' : 'false' }}">
                                 @foreach($festivals as $festival)
-                                    <a href="{{ route('festivals.show', $festival) }}" class="festival-mosaic-card group">
-                                        <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" draggable="false" onload="if (this.naturalWidth / Math.max(this.naturalHeight, 1) > 2.1) this.closest('.festival-mosaic-card')?.classList.add('is-wide')" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]">
+                                    <a href="{{ route('festivals.show', $festival) }}" class="festival-mosaic-card group" @if($copy === 1) tabindex="-1" @endif>
+                                        <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" width="1200" height="1200" decoding="async" @if($copy === 1) loading="lazy" @endif draggable="false" onload="if (this.naturalWidth / Math.max(this.naturalHeight, 1) > 2.1) this.closest('.festival-mosaic-card')?.classList.add('is-wide')" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]">
                                     </a>
                                 @endforeach
                             </div>
@@ -107,25 +186,34 @@
                                 @endif
                             </div>
 
-                            <form action="{{ route('shop.index') }}" class="mt-4 space-y-3">
+                            <form action="{{ $categoryActionUrl }}" class="mt-4 space-y-3">
                                 <label class="relative block">
                                     <span class="sr-only">Search products</span>
                                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
-                                    <input name="search" value="{{ $search }}" placeholder="Search products" class="h-11 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 text-sm focus:border-primary focus:ring-primary">
+                                    <input name="search" value="{{ $search }}" placeholder="Search products" aria-label="Search products" class="h-11 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 text-sm focus:border-primary focus:ring-primary">
                                 </label>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <input name="min_price" type="number" min="0" value="{{ $minPrice }}" placeholder="Min price" class="h-10 min-w-0 rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
-                                    <input name="max_price" type="number" min="0" value="{{ $maxPrice }}" placeholder="Max price" class="h-10 min-w-0 rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
+                                    <label>
+                                        <span class="sr-only">Minimum price</span>
+                                        <input name="min_price" type="number" min="0" value="{{ $minPrice }}" placeholder="Min price" class="h-10 w-full min-w-0 rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
+                                    </label>
+                                    <label>
+                                        <span class="sr-only">Maximum price</span>
+                                        <input name="max_price" type="number" min="0" value="{{ $maxPrice }}" placeholder="Max price" class="h-10 w-full min-w-0 rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
+                                    </label>
                                 </div>
-                                <select name="sort" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] py-0 text-sm focus:border-primary focus:ring-primary">
-                                    <option value="">Newest arrivals</option>
-                                    <option value="price_low" @selected($sort === 'price_low')>Price: low to high</option>
-                                    <option value="price_high" @selected($sort === 'price_high')>Price: high to low</option>
-                                </select>
-                                @if($selectedCategory)
+                                <label>
+                                    <span class="sr-only">Sort products</span>
+                                    <select name="sort" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] py-0 text-sm focus:border-primary focus:ring-primary">
+                                        <option value="">Newest arrivals</option>
+                                        <option value="price_low" @selected($sort === 'price_low')>Price: low to high</option>
+                                        <option value="price_high" @selected($sort === 'price_high')>Price: high to low</option>
+                                    </select>
+                                </label>
+                                @if($selectedCategory && ! $selectedCategoryModel)
                                     <input type="hidden" name="category" value="{{ $selectedCategory }}">
                                 @endif
-                                <button class="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-black text-white hover:bg-ink">
+                                <button type="submit" class="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-black text-white hover:bg-ink">
                                     <i class="fa-solid fa-sliders"></i>
                                     Apply filters
                                 </button>
@@ -155,7 +243,7 @@
                                         <details class="group/category rounded-md {{ $isMainActive || $hasActiveChild ? 'bg-primary/5' : '' }}" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
                                             <summary class="flex cursor-pointer list-none items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f7f9f8]">
                                                 @if($category->image)
-                                                    <img src="{{ $category->image_url }}" alt="{{ $category->name }}" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                                                    <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
                                                 @else
                                                     <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
                                                 @endif
@@ -166,16 +254,16 @@
                                                 <i class="fa-solid fa-chevron-right text-xs text-gray-400 transition group-open/category:rotate-90"></i>
                                             </summary>
                                             <div class="space-y-1 px-3 pb-2 pl-14">
-                                                <a href="{{ route('shop.index', array_filter(['category' => $category->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="block rounded px-2 py-1.5 text-xs font-bold {{ $isMainActive ? 'bg-primary text-white' : 'text-primary hover:bg-white' }}">All {{ $category->name }}</a>
+                                                <a href="{{ $category->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="block rounded px-2 py-1.5 text-xs font-bold {{ $isMainActive ? 'bg-primary text-white' : 'text-primary hover:bg-white' }}">All {{ $category->name }}</a>
                                                 @foreach($category->children->sortBy('name') as $child)
-                                                    <a href="{{ route('shop.index', array_filter(['category' => $child->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="block rounded px-2 py-1.5 text-xs font-semibold {{ $selectedCategory === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-white hover:text-primary' }}">{{ $child->name }}</a>
+                                                    <a href="{{ $child->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="block rounded px-2 py-1.5 text-xs font-semibold {{ $selectedCategory === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-white hover:text-primary' }}">{{ $child->name }}</a>
                                                 @endforeach
                                             </div>
                                         </details>
                                     @else
-                                        <a href="{{ route('shop.index', array_filter(['category' => $category->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f7f9f8] {{ $isMainActive ? 'bg-primary/5' : '' }}">
+                                        <a href="{{ $category->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f7f9f8] {{ $isMainActive ? 'bg-primary/5' : '' }}">
                                             @if($category->image)
-                                                <img src="{{ $category->image_url }}" alt="{{ $category->name }}" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                                                <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
                                             @else
                                                 <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
                                             @endif
@@ -193,10 +281,11 @@
                 <div class="flex items-end justify-between gap-4">
                     <div>
                         <p class="text-xs font-bold uppercase tracking-wide text-primary">Available now</p>
-                        <h2 class="mt-1 text-2xl font-black text-ink">{{ $selectedCategory ? 'Filtered products' : 'Products' }}</h2>
+                        <h1 class="mt-1 text-2xl font-black text-ink">{{ $shopHeading }}</h1>
                     </div>
                     <p class="text-sm font-semibold text-gray-500">{{ $products->total() }} results</p>
                 </div>
+                <p class="mt-3 max-w-3xl text-sm leading-6 text-gray-600">{{ $shopDescription }}</p>
 
                 <div class="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
                     @forelse($products as $product)

@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use App\Support\OptimizedImage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
@@ -16,14 +16,18 @@ class Product extends Model
     protected $fillable = [
         'category_id',
         'name',
+        'brand',
         'slug',
         'description',
+        'seo_title',
+        'seo_description',
         'buying_price',
         'price',
         'compare_price',
         'stock',
         'sku',
         'image',
+        'image_alt',
         'advance_delivery_charge',
         'warranty_type',
         'warranty_duration',
@@ -42,6 +46,27 @@ class Product extends Model
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    public function getRouteKey(): mixed
+    {
+        return $this->slug ?: $this->getKey();
+    }
+
+    public function resolveRouteBinding($value, $field = null): ?self
+    {
+        $query = $this->where('slug', $value);
+
+        if (ctype_digit((string) $value)) {
+            $query->orWhere($this->getKeyName(), $value);
+        }
+
+        return $query->first();
     }
 
     public function hasWarranty(): bool
@@ -98,13 +123,9 @@ class Product extends Model
     public function getImageUrlAttribute(): string
     {
         if (! $this->image) {
-            return asset('assets/images/product/product-01.jpg');
+            return OptimizedImage::url('assets/images/product/product-01.jpg');
         }
 
-        if (str_starts_with($this->image, 'assets/')) {
-            return asset($this->image);
-        }
-
-        return Storage::url($this->image);
+        return OptimizedImage::url($this->image);
     }
 }

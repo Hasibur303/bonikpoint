@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Support\OptimizedImage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Storage;
 
 class Festival extends Model
 {
@@ -93,14 +93,10 @@ class Festival extends Model
     public function getBannerUrlAttribute(): string
     {
         if (! $this->banner) {
-            return asset('assets/images/slider/slider-item-1.png');
+            return OptimizedImage::url('assets/images/slider/slider-item-1.png');
         }
 
-        if (str_starts_with($this->banner, 'assets/')) {
-            return asset($this->banner);
-        }
-
-        return Storage::url($this->banner);
+        return OptimizedImage::url($this->banner);
     }
 
     public function discountedPrice(Product $product): float

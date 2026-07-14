@@ -7,7 +7,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Bonik Point') }}</title>
+        @php
+            $pageTitle = html_entity_decode(trim($__env->yieldContent('title', config('app.name', 'Bonik Point'))), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $pageDescription = html_entity_decode(trim($__env->yieldContent('meta_description', 'Access your Bonik Point customer account securely.')), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        @endphp
+        <title>{{ $pageTitle }}</title>
+        <meta name="description" content="{{ $pageDescription }}">
+        <meta name="robots" content="@yield('robots', 'noindex,follow')">
+        <link rel="canonical" href="@yield('canonical', url()->current())">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

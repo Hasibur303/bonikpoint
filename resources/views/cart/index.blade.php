@@ -1,3 +1,8 @@
+@section('title', 'Shopping Cart | Bonik Point')
+@section('meta_description', 'Review the products in your Bonik Point shopping cart before checkout.')
+@section('canonical', route('cart.index'))
+@section('robots', 'noindex,follow')
+
 <x-app-layout>
     <section class="container py-6 md:py-12">
         <h1 class="mb-5 text-2xl font-black uppercase text-ink md:mb-8 md:text-4xl">Shopping Cart</h1>
@@ -6,7 +11,7 @@
                 <div class="space-y-3 md:space-y-4">
                     @foreach($cartItems as $item)
                         <div class="grid grid-cols-[72px_minmax(0,1fr)] gap-3 rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-100 md:grid-cols-[96px_minmax(0,1fr)_auto] md:items-center md:gap-4 md:p-4">
-                            <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}" class="h-[72px] w-[72px] rounded-md object-cover md:h-24 md:w-24">
+                            <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}" width="96" height="96" loading="lazy" decoding="async" class="h-[72px] w-[72px] rounded-md object-cover md:h-24 md:w-24">
                             <div class="min-w-0">
                                 <a href="{{ route('shop.show', $item['product']) }}" class="line-clamp-2 text-sm font-black leading-5 text-ink hover:text-primary md:text-base">{{ $item['product']->name }}</a>
                                 @if($item['festival_title'])

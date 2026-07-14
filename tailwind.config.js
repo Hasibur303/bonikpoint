@@ -11,6 +11,18 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                primary: '#087c7f',
+                accent: '#9fbb18',
+                ink: '#103f44',
+            },
+            container: {
+                center: true,
+                padding: '1rem',
+                screens: {
+                    xl: '1200px',
+                },
+            },
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },

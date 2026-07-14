@@ -23,6 +23,12 @@
                 </select>
             </div>
             <div>
+                <label for="product-brand" class="mb-1 block text-sm font-semibold">Brand</label>
+                <input id="product-brand" name="brand" value="{{ old('brand', $product->brand) }}" placeholder="Example: SMOK, Rincoe, Samsung" class="w-full rounded border-gray-200">
+                <p class="mt-1 text-xs text-gray-500">Optional. Adds correct brand information and a searchable brand page.</p>
+                @error('brand')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div>
                 <label class="mb-1 block text-sm font-semibold">Price</label>
                 <input name="price" type="number" step="0.01" value="{{ old('price', $product->price) }}" class="w-full rounded border-gray-200" required>
             </div>
@@ -78,9 +84,15 @@
                 <input type="file" name="image" accept="image/*" class="w-full rounded border border-gray-200 p-2">
                 <p class="mt-1 text-xs text-gray-500">This image shows first on product cards and cart.</p>
                 @if($product->exists && $product->image)
-                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="mt-3 h-24 w-24 rounded-md object-cover ring-1 ring-gray-100">
+                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" width="96" height="96" loading="lazy" decoding="async" class="mt-3 h-24 w-24 rounded-md object-cover ring-1 ring-gray-100">
                 @endif
                 @error('image')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-semibold">Image Alt Text</label>
+                <input name="image_alt" value="{{ old('image_alt', $product->image_alt) }}" placeholder="Example: Rincoe Manto Nano A4 rechargeable pod device" class="w-full rounded border-gray-200">
+                <p class="mt-1 text-xs text-gray-500">Shortly describe the main image for Google and screen readers.</p>
+                @error('image_alt')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label class="mb-1 block text-sm font-semibold">Gallery Images</label>
@@ -89,13 +101,33 @@
                 @error('gallery_images')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 @error('gallery_images.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
+            <div class="md:col-span-2 rounded-lg border border-primary/15 bg-primary/5 p-4">
+                <div class="mb-4">
+                    <p class="text-sm font-black uppercase tracking-wide text-primary">SEO Settings</p>
+                    <p class="mt-1 text-xs text-gray-600">Optional. Leave blank to use automatic SEO from product name and description.</p>
+                </div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold">SEO Title</label>
+                        <input name="seo_title" value="{{ old('seo_title', $product->seo_title) }}" maxlength="255" placeholder="Example: Rincoe Manto Nano A4 Price in Bangladesh | Bonik Point" class="w-full rounded border-gray-200">
+                        <p class="mt-1 text-xs text-gray-500">Best around 50-60 characters.</p>
+                        @error('seo_title')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold">Meta Description</label>
+                        <textarea name="seo_description" rows="3" maxlength="500" placeholder="Example: Buy Rincoe Manto Nano A4 rechargeable pod system in Bangladesh with fast support from Bonik Point." class="w-full rounded border-gray-200">{{ old('seo_description', $product->seo_description) }}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">Best around 140-160 characters.</p>
+                        @error('seo_description')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
             @if($product->exists && $product->images->isNotEmpty())
                 <div class="md:col-span-2">
                     <label class="mb-2 block text-sm font-semibold">Current Gallery</label>
                     <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
                         @foreach($product->images as $image)
                             <label class="group rounded-lg border border-gray-100 bg-gray-50 p-2">
-                                <img src="{{ $image->image_url }}" alt="{{ $product->name }}" class="aspect-square w-full rounded-md object-cover ring-1 ring-gray-100">
+                                <img src="{{ $image->image_url }}" alt="{{ $product->name }}" width="240" height="240" loading="lazy" decoding="async" class="aspect-square w-full rounded-md object-cover ring-1 ring-gray-100">
                                 <span class="mt-2 flex items-center gap-2 text-xs font-semibold text-red-600">
                                     <input type="checkbox" name="delete_gallery_images[]" value="{{ $image->id }}" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
                                     Delete image

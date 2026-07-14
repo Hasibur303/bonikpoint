@@ -1,4 +1,9 @@
+@section('title', 'Verify Email | Bonik Point')
+@section('meta_description', 'Verify your email address to finish setting up your Bonik Point account.')
+@section('canonical', route('verification.notice'))
+
 <x-guest-layout>
+    <h1 class="mb-4 text-2xl font-black text-ink">Verify your email address</h1>
     <div class="mb-4 text-sm text-gray-600">
         {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
     </div>

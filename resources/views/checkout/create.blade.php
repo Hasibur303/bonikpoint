@@ -1,3 +1,8 @@
+@section('title', ($isGuestCheckout ? 'Guest Checkout' : 'Checkout').' | Bonik Point')
+@section('meta_description', 'Enter your delivery information and confirm your Bonik Point order securely.')
+@section('canonical', $isGuestCheckout ? route('guest.checkout.create') : route('checkout.create'))
+@section('robots', 'noindex,follow')
+
 <x-app-layout>
     <section class="bg-[#f4f7f6] py-4 md:py-12">
         <div class="container">
@@ -32,22 +37,22 @@
 
                     <div class="grid gap-3 p-4 sm:grid-cols-2 sm:gap-4 sm:p-6">
                         <div>
-                            <label class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Full name</label>
-                            <input name="customer_name" value="{{ old('customer_name', auth()->user()?->name) }}" autocomplete="name" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                            <label for="checkout-name" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Full name</label>
+                            <input id="checkout-name" name="customer_name" value="{{ old('customer_name', auth()->user()?->name) }}" autocomplete="name" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
                             @error('customer_name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Mobile number</label>
-                            <input name="mobile" value="{{ old('mobile', auth()->user()?->mobile) }}" autocomplete="tel" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                            <label for="checkout-mobile" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Mobile number</label>
+                            <input id="checkout-mobile" name="mobile" value="{{ old('mobile', auth()->user()?->mobile) }}" autocomplete="tel" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
                             @error('mobile')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Email address</label>
-                            <input name="email" type="email" value="{{ old('email', auth()->user()?->email) }}" autocomplete="email" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                            <label for="checkout-email" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Email address</label>
+                            <input id="checkout-email" name="email" type="email" value="{{ old('email', auth()->user()?->email) }}" autocomplete="email" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
                             @error('email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">City or district</label>
+                            <label for="checkout-city" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">City or district</label>
                             <div class="relative">
                                 <i class="fa-solid fa-location-dot absolute left-4 top-1/2 -translate-y-1/2 text-sm text-primary"></i>
                                 <input id="checkout-city" name="city" list="bangladesh-cities" value="{{ old('city') }}" placeholder="Search city or district" autocomplete="address-level2" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 pr-4 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
@@ -60,13 +65,13 @@
                             @error('city')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div class="sm:col-span-2">
-                            <label class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Full delivery address</label>
-                            <textarea name="address" rows="2" autocomplete="street-address" placeholder="House, road, area, and any delivery details" class="w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20" required>{{ old('address') }}</textarea>
+                            <label for="checkout-address" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Full delivery address</label>
+                            <textarea id="checkout-address" name="address" rows="2" autocomplete="street-address" placeholder="House, road, area, and any delivery details" class="w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20" required>{{ old('address') }}</textarea>
                             @error('address')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div class="sm:col-span-2">
-                            <label class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Order note <span class="font-medium text-gray-400">(optional)</span></label>
-                            <textarea name="notes" rows="1" placeholder="Add a helpful note for the delivery team" class="w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20">{{ old('notes') }}</textarea>
+                            <label for="checkout-notes" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Order note <span class="font-medium text-gray-400">(optional)</span></label>
+                            <textarea id="checkout-notes" name="notes" rows="1" placeholder="Add a helpful note for the delivery team" class="w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20">{{ old('notes') }}</textarea>
                         </div>
                     </div>
 
@@ -90,7 +95,7 @@
                                 <p class="text-sm font-black text-ink sm:text-base">Payment instruction</p>
                                 <p id="delivery-payment-instruction" class="mt-1 text-xs text-gray-600 sm:text-sm">Choose a city to see the required delivery payment amount.</p>
                                 <div id="delivery-payment-account-panel" class="mt-3">
-                                    <label class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Send money account</label>
+                                    <label for="delivery-payment-account" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Send money account</label>
                                     <select id="delivery-payment-account" name="delivery_payment_method" class="h-10 w-full rounded-md border-gray-200 bg-white py-0 text-sm shadow-sm focus:border-primary focus:ring-primary sm:h-11">
                                         <option value="">Select payment number</option>
                                         <option value="Bkash" data-number="{{ $deliverySettings['bkash_number'] }}" @selected(old('delivery_payment_method') === 'Bkash')>Bkash - {{ $deliverySettings['bkash_number'] }}</option>
@@ -126,13 +131,13 @@
 
                             <div id="delivery-payment-fields" class="mt-4 grid gap-3 rounded-lg border border-gray-200 bg-[#f1f6f5] p-3 sm:mt-5 sm:grid-cols-2 sm:gap-4 sm:p-4">
                                 <div>
-                                    <label class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Payment mobile</label>
-                                    <input name="delivery_payment_mobile" value="{{ old('delivery_payment_mobile') }}" inputmode="tel" class="h-10 w-full rounded-md border-gray-200 bg-white text-sm shadow-sm focus:border-primary focus:ring-primary sm:h-11">
+                                    <label for="delivery-payment-mobile" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Payment mobile</label>
+                                    <input id="delivery-payment-mobile" name="delivery_payment_mobile" value="{{ old('delivery_payment_mobile') }}" inputmode="tel" class="h-10 w-full rounded-md border-gray-200 bg-white text-sm shadow-sm focus:border-primary focus:ring-primary sm:h-11">
                                     @error('delivery_payment_mobile')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                                 </div>
                                 <div>
-                                    <label class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Transaction ID</label>
-                                    <input name="delivery_transaction_id" value="{{ old('delivery_transaction_id') }}" class="h-10 w-full rounded-md border-gray-200 bg-white text-sm shadow-sm focus:border-primary focus:ring-primary sm:h-11">
+                                    <label for="delivery-transaction-id" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Transaction ID</label>
+                                    <input id="delivery-transaction-id" name="delivery_transaction_id" value="{{ old('delivery_transaction_id') }}" class="h-10 w-full rounded-md border-gray-200 bg-white text-sm shadow-sm focus:border-primary focus:ring-primary sm:h-11">
                                     @error('delivery_transaction_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                                 </div>
                             </div>
@@ -177,7 +182,7 @@
                         <div class="divide-y divide-gray-100 px-5">
                             @foreach($cartItems as $item)
                                 <div class="grid grid-cols-[56px_1fr_auto] items-center gap-3 py-4">
-                                    <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}" class="h-14 w-14 rounded-md bg-[#f7f9f8] object-contain p-1">
+                                    <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}" width="56" height="56" loading="lazy" decoding="async" class="h-14 w-14 rounded-md bg-[#f7f9f8] object-contain p-1">
                                     <div class="min-w-0">
                                         <p class="line-clamp-2 text-sm font-bold leading-5 text-ink">{{ $item['product']->name }}</p>
                                         @if($item['product_color_name'])

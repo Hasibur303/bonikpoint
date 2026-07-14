@@ -19,6 +19,10 @@ use App\Http\Controllers\Admin\ProductFaqController as AdminProductFaqController
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Models\Category;
+use App\Models\Festival;
+use App\Models\Product;
+use Illuminate\Support\Str;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -26,6 +30,74 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 Route::get('/', [ShopController::class, 'index'])->name('home.index');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+Route::get('/brands/{brand}', [ShopController::class, 'brand'])->where('brand', '[a-z0-9-]+')->name('brands.show');
+Route::get('/category/{category:slug}', [ShopController::class, 'category'])->name('categories.show');
+Route::get('/category/{parent:slug}/{category:slug}', [ShopController::class, 'subcategory'])
+    ->withoutScopedBindings()
+    ->name('categories.subcategory');
+Route::get('/robots.txt', function () {
+    return response("User-agent: *\nAllow: /\nSitemap: ".url('/sitemap.xml')."\n", 200)
+        ->header('Content-Type', 'text/plain');
+})->name('robots');
+Route::get('/sitemap.xml', function () {
+    $today = today()->toDateString();
+    $urls = collect([
+        ['loc' => route('home.index'), 'priority' => '1.0'],
+        ['loc' => route('shop.index'), 'priority' => '0.9'],
+        ['loc' => route('order-instructions'), 'priority' => '0.5'],
+        ['loc' => route('return-policy'), 'priority' => '0.5'],
+    ]);
+
+    Category::where('is_active', true)
+        ->orderBy('updated_at', 'desc')
+        ->get()
+        ->each(function (Category $category) use ($urls) {
+            $urls->push([
+                'loc' => $category->public_url,
+                'lastmod' => optional($category->updated_at)->toAtomString(),
+                'priority' => $category->parent_id ? '0.7' : '0.8',
+            ]);
+        });
+
+    Product::where('is_active', true)
+        ->orderBy('updated_at', 'desc')
+        ->get()
+        ->each(function (Product $product) use ($urls) {
+            $urls->push([
+                'loc' => route('shop.show', $product),
+                'lastmod' => optional($product->updated_at)->toAtomString(),
+                'priority' => '0.8',
+            ]);
+        });
+
+    Product::where('is_active', true)
+        ->whereNotNull('brand')
+        ->distinct()
+        ->pluck('brand')
+        ->each(function (string $brand) use ($urls) {
+            $urls->push([
+                'loc' => route('brands.show', Str::slug($brand)),
+                'priority' => '0.7',
+            ]);
+        });
+
+    Festival::where('is_active', true)
+        ->where(fn ($query) => $query->whereNull('starts_at')->orWhereDate('starts_at', '<=', $today))
+        ->where(fn ($query) => $query->whereNull('ends_at')->orWhereDate('ends_at', '>=', $today))
+        ->orderBy('updated_at', 'desc')
+        ->get()
+        ->each(function (Festival $festival) use ($urls) {
+            $urls->push([
+                'loc' => route('festivals.show', $festival),
+                'lastmod' => optional($festival->updated_at)->toAtomString(),
+                'priority' => '0.7',
+            ]);
+        });
+
+    $xml = view('sitemap', ['urls' => $urls])->render();
+
+    return response($xml, 200)->header('Content-Type', 'application/xml');
+})->name('sitemap');
 Route::view('/return-refund-policy', 'pages.return-policy')->name('return-policy');
 Route::view('/order-instructions', 'pages.order-instructions')->name('order-instructions');
 Route::get('/festivals/{festival:slug}', [FestivalController::class, 'show'])->name('festivals.show');

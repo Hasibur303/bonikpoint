@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\ImageUploadOptimizer;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Festival;
@@ -86,11 +87,11 @@ class FestivalController extends Controller
         unset($data['products']);
         unset($data['categories']);
 
-        $data['slug'] = $festival?->exists ? $festival->slug : Str::slug($data['title']).'-'.Str::random(5);
+        $data['slug'] = $festival?->exists ? $festival->slug : Str::slug($data['title']).'-'.Str::lower(Str::random(5));
         $data['is_active'] = $request->boolean('is_active');
 
         if ($request->hasFile('banner')) {
-            $data['banner'] = $request->file('banner')->store('festivals', 'public');
+            $data['banner'] = ImageUploadOptimizer::store($request->file('banner'), 'festivals');
         }
 
         return $data;

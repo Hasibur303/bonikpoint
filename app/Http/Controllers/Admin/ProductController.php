@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\ImageUploadOptimizer;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
@@ -71,13 +72,17 @@ class ProductController extends Controller
         $data = $request->validate([
             'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
+            'brand' => ['nullable', 'string', 'max:120'],
             'description' => ['nullable', 'string'],
+            'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string', 'max:500'],
             'buying_price' => ['nullable', 'numeric', 'min:0'],
             'price' => ['required', 'numeric', 'min:0'],
             'compare_price' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
             'sku' => ['nullable', 'string', 'max:120', 'unique:products,sku,'.($product?->id ?? 'NULL')],
             'image' => ['nullable', 'image', 'max:2048'],
+            'image_alt' => ['nullable', 'string', 'max:255'],
             'gallery_images' => ['nullable', 'array'],
             'gallery_images.*' => ['image', 'max:4096'],
             'delete_gallery_images' => ['nullable', 'array'],
@@ -98,7 +103,7 @@ class ProductController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $data['slug'] = Str::slug($data['name']).($product?->exists ? '' : '-'.Str::random(5));
+        $data['slug'] = Str::slug($data['name']).($product?->exists ? '' : '-'.Str::lower(Str::random(5)));
         $data['buying_price'] = $data['buying_price'] ?? 0;
         $data['advance_delivery_charge'] = $request->boolean('advance_delivery_charge');
         $data['warranty_duration'] = $data['warranty_type'] === 'none' ? null : $data['warranty_duration'];
@@ -107,7 +112,7 @@ class ProductController extends Controller
         $data['is_active'] = $request->boolean('is_active');
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
+            $data['image'] = ImageUploadOptimizer::store($request->file('image'), 'products');
         }
 
         unset($data['gallery_images'], $data['delete_gallery_images'], $data['existing_colors'], $data['colors'], $data['delete_colors']);
@@ -125,7 +130,7 @@ class ProductController extends Controller
 
         foreach ($request->file('gallery_images') as $image) {
             $product->images()->create([
-                'image' => $image->store('products/gallery', 'public'),
+                'image' => ImageUploadOptimizer::store($image, 'products/gallery'),
                 'sort_order' => $nextSortOrder++,
             ]);
         }

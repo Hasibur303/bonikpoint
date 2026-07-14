@@ -1,4 +1,9 @@
+@section('title', 'Choose New Password | Bonik Point')
+@section('meta_description', 'Choose a new secure password for your Bonik Point account.')
+@section('canonical', url()->current())
+
 <x-guest-layout>
+    <h1 class="mb-5 text-2xl font-black text-ink">Choose a new password</h1>
     <form method="POST" action="{{ route('password.store') }}">
         @csrf
 

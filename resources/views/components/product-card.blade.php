@@ -8,7 +8,7 @@
 
 <article class="group flex h-full flex-col overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl sm:rounded-lg">
     <a href="{{ route('shop.show', $product) }}" class="relative block aspect-square overflow-hidden bg-[#fafbfa] p-1 sm:p-4">
-        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="h-full w-full object-contain transition duration-500 group-hover:scale-[1.04]">
+        <img src="{{ $product->image_url }}" alt="{{ $product->image_alt ?: $product->name.' product image' }}" width="640" height="640" loading="lazy" decoding="async" class="h-full w-full object-contain transition duration-500 group-hover:scale-[1.04]">
         @if($discount)
             <span class="absolute left-1.5 top-1.5 rounded bg-[#f2b84b] px-1.5 py-0.5 text-[9px] font-black leading-none text-[#3b2b06] sm:left-3 sm:top-3 sm:rounded-md sm:px-2.5 sm:py-1 sm:text-xs">{{ $discount }}% OFF</span>
         @endif

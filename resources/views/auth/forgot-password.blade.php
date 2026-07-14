@@ -1,4 +1,9 @@
+@section('title', 'Forgot Password | Bonik Point')
+@section('meta_description', 'Request a secure password reset link for your Bonik Point account.')
+@section('canonical', route('password.request'))
+
 <x-guest-layout>
+    <h1 class="mb-4 text-2xl font-black text-ink">Reset your password</h1>
     <div class="mb-4 text-sm text-gray-600">
         {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
     </div>
