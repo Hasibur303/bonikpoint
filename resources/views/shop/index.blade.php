@@ -1,4 +1,6 @@
 @php
+    $currentPage = $products->currentPage();
+    $hasFilterParameters = collect([$search, $minPrice, $maxPrice, $sort])->contains(fn ($value) => filled($value));
     $shopHeading = $selectedCategoryModel?->name ?? 'Bonik Point Products';
     $categoryDescription = $selectedCategoryModel?->seo_description ?: $selectedCategoryModel?->description;
     $shopDescription = $categoryDescription
@@ -11,12 +13,23 @@
     $shopCanonical = $selectedCategoryModel
         ? $selectedCategoryModel->public_url
         : route(request()->routeIs('home.index') ? 'home.index' : 'shop.index');
+
+    if (! $hasFilterParameters && $currentPage > 1) {
+        $shopTitle .= ' - Page '.$currentPage;
+        $shopDescription = 'Page '.$currentPage.'. '.$shopDescription;
+        $shopCanonical .= '?page='.$currentPage;
+    }
+
+    $shopRobots = $hasFilterParameters || ($currentPage > 1 && $products->isEmpty())
+        ? 'noindex,follow'
+        : 'index,follow';
 @endphp
 
 @section('title', $shopTitle)
 @section('meta_description', Str::limit(strip_tags($shopDescription), 155, ''))
 @section('canonical', $shopCanonical)
 @section('meta_image', asset('assets/images/logo.jpg'))
+@section('robots', $shopRobots)
 
 <x-app-layout>
     @if($festivals->isNotEmpty())

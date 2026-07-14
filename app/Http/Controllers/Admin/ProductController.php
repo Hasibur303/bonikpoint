@@ -101,7 +101,7 @@ class ProductController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $data['slug'] = Str::slug($data['name']).($product?->exists ? '' : '-'.Str::random(5));
+        $data['slug'] = Str::slug($data['name']).($product?->exists ? '' : '-'.Str::lower(Str::random(5)));
         $data['buying_price'] = $data['buying_price'] ?? 0;
         $data['advance_delivery_charge'] = $request->boolean('advance_delivery_charge');
         $data['warranty_duration'] = $data['warranty_type'] === 'none' ? null : $data['warranty_duration'];

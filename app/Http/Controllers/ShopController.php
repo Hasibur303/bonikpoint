@@ -11,9 +11,18 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
-        $selectedCategory = $request->category
-            ? Category::with('parent', 'children')->where('slug', $request->category)->first()
+        $selectedCategory = $request->filled('category')
+            ? Category::with('parent', 'children')->where('slug', $request->string('category'))->where('is_active', true)->first()
             : null;
+
+        if ($request->filled('category')) {
+            abort_unless($selectedCategory, 404);
+
+            $query = http_build_query($request->except('category'));
+            $target = $selectedCategory->public_url.($query ? '?'.$query : '');
+
+            return redirect()->to($target, 301);
+        }
 
         return $this->renderIndex($request, $selectedCategory);
     }
@@ -80,9 +89,13 @@ class ShopController extends Controller
         ]);
     }
 
-    public function show(Product $product)
+    public function show(Request $request, Product $product)
     {
         abort_unless($product->is_active, 404);
+
+        if ($request->segment(2) !== $product->getRouteKey()) {
+            return redirect()->route('shop.show', $product, 301);
+        }
 
         return view('shop.show', [
             'product' => $product->load('category.parent', 'images', 'faqs', 'colors')

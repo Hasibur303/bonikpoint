@@ -119,7 +119,7 @@ class CategoryController extends Controller
             ]);
         }
 
-        $data['slug'] = Str::slug($data['name']).($category?->exists ? '' : '-'.Str::random(5));
+        $data['slug'] = Str::slug($data['name']).($category?->exists ? '' : '-'.Str::lower(Str::random(5)));
         $data['parent_id'] = $data['parent_id'] ?? null;
         $data['is_active'] = $request->boolean('is_active');
 

@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Models\Category;
+use App\Models\Festival;
 use App\Models\Product;
 
 // Route::get('/', function () {
@@ -37,6 +38,7 @@ Route::get('/robots.txt', function () {
         ->header('Content-Type', 'text/plain');
 })->name('robots');
 Route::get('/sitemap.xml', function () {
+    $today = today()->toDateString();
     $urls = collect([
         ['loc' => route('home.index'), 'priority' => '1.0'],
         ['loc' => route('shop.index'), 'priority' => '0.9'],
@@ -63,6 +65,19 @@ Route::get('/sitemap.xml', function () {
                 'loc' => route('shop.show', $product),
                 'lastmod' => optional($product->updated_at)->toAtomString(),
                 'priority' => '0.8',
+            ]);
+        });
+
+    Festival::where('is_active', true)
+        ->where(fn ($query) => $query->whereNull('starts_at')->orWhereDate('starts_at', '<=', $today))
+        ->where(fn ($query) => $query->whereNull('ends_at')->orWhereDate('ends_at', '>=', $today))
+        ->orderBy('updated_at', 'desc')
+        ->get()
+        ->each(function (Festival $festival) use ($urls) {
+            $urls->push([
+                'loc' => route('festivals.show', $festival),
+                'lastmod' => optional($festival->updated_at)->toAtomString(),
+                'priority' => '0.7',
             ]);
         });
 
