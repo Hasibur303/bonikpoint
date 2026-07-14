@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @php
-        $seoTitle = trim($__env->yieldContent('title', config('app.name', 'Bonik Point')));
-        $seoDescription = trim($__env->yieldContent('meta_description', 'Shop authentic lifestyle, vape, gadget, home, and daily-use products from Bonik Point with simple ordering and customer support.'));
+        $seoTitle = html_entity_decode(trim($__env->yieldContent('title', config('app.name', 'Bonik Point'))), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $seoDescription = html_entity_decode(trim($__env->yieldContent('meta_description', 'Shop authentic lifestyle, vape, gadget, home, and daily-use products from Bonik Point with simple ordering and customer support.')), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $seoCanonical = trim($__env->yieldContent('canonical', url()->current()));
         $seoImage = trim($__env->yieldContent('meta_image', asset('assets/images/logo.jpg')));
+        $seoRobots = trim($__env->yieldContent('robots', 'index,follow'));
     @endphp
     <title>{{ $seoTitle }}</title>
     <meta name="description" content="{{ $seoDescription }}">
+    <meta name="robots" content="{{ $seoRobots }}">
     <link rel="canonical" href="{{ $seoCanonical }}">
     <meta property="og:site_name" content="Bonik Point">
     <meta property="og:type" content="@yield('og_type', 'website')">

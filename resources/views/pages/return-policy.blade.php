@@ -1,3 +1,7 @@
+@section('title', 'Return and Refund Policy | Bonik Point')
+@section('meta_description', 'Bonik Point পণ্য গ্রহণ, ডেলিভারি ম্যানের সামনে পরীক্ষা, প্রমাণ সংরক্ষণ এবং রিটার্ন ও রিফান্ডের নিয়ম জানুন।')
+@section('canonical', route('return-policy'))
+
 <x-app-layout>
     <section class="bg-white py-12">
         <div class="container max-w-4xl">

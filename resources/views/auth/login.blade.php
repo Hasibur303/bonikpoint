@@ -1,3 +1,7 @@
+@section('title', 'Customer Login | Bonik Point')
+@section('meta_description', 'Sign in securely to view your Bonik Point orders, profile, and delivery payment status.')
+@section('canonical', route('login'))
+
 <x-guest-layout :wide="true">
     <style>
         @media (min-width: 1024px) {

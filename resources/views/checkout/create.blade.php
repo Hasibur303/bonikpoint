@@ -1,3 +1,8 @@
+@section('title', ($isGuestCheckout ? 'Guest Checkout' : 'Checkout').' | Bonik Point')
+@section('meta_description', 'Enter your delivery information and confirm your Bonik Point order securely.')
+@section('canonical', $isGuestCheckout ? route('guest.checkout.create') : route('checkout.create'))
+@section('robots', 'noindex,follow')
+
 <x-app-layout>
     <section class="bg-[#f4f7f6] py-4 md:py-12">
         <div class="container">

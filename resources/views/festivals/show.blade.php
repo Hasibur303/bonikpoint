@@ -1,3 +1,8 @@
+@section('title', $festival->title.' Offers | Bonik Point')
+@section('meta_description', Str::limit(strip_tags($festival->description ?: 'Shop selected '.$festival->title.' products and festival discounts from Bonik Point in Bangladesh.'), 155, ''))
+@section('canonical', route('festivals.show', $festival))
+@section('meta_image', $festival->banner_url)
+
 <x-app-layout>
     <section class="bg-white py-8">
         <div class="container">

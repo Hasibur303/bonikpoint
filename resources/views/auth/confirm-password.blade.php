@@ -1,4 +1,9 @@
+@section('title', 'Confirm Password | Bonik Point')
+@section('meta_description', 'Confirm your password to continue securely in your Bonik Point account.')
+@section('canonical', route('password.confirm'))
+
 <x-guest-layout>
+    <h1 class="mb-4 text-2xl font-black text-ink">Confirm your password</h1>
     <div class="mb-4 text-sm text-gray-600">
         {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
     </div>

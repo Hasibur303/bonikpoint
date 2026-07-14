@@ -1,3 +1,7 @@
+@section('title', 'অর্ডার করার নিয়ম | Bonik Point')
+@section('meta_description', 'Bonik Point থেকে অর্ডার, অগ্রিম ডেলিভারি চার্জ, মোবাইল পেমেন্ট, Transaction ID এবং পণ্য গ্রহণের নিয়ম জানুন।')
+@section('canonical', route('order-instructions'))
+
 <x-app-layout>
     <section class="bg-[#f4f7f6] py-8 md:py-12">
         <div class="container max-w-5xl">

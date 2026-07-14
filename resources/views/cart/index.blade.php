@@ -1,3 +1,8 @@
+@section('title', 'Shopping Cart | Bonik Point')
+@section('meta_description', 'Review the products in your Bonik Point shopping cart before checkout.')
+@section('canonical', route('cart.index'))
+@section('robots', 'noindex,follow')
+
 <x-app-layout>
     <section class="container py-6 md:py-12">
         <h1 class="mb-5 text-2xl font-black uppercase text-ink md:mb-8 md:text-4xl">Shopping Cart</h1>
