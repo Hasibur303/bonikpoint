@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Festival;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ShopController extends Controller
 {
@@ -47,7 +48,20 @@ class ShopController extends Controller
         return $this->renderIndex($request, $category->load('parent', 'children'));
     }
 
-    private function renderIndex(Request $request, ?Category $selectedCategoryModel = null)
+    public function brand(Request $request, string $brand)
+    {
+        $brandName = Product::where('is_active', true)
+            ->whereNotNull('brand')
+            ->distinct()
+            ->pluck('brand')
+            ->first(fn (string $name) => Str::slug($name) === Str::lower($brand));
+
+        abort_unless($brandName, 404);
+
+        return $this->renderIndex($request, null, $brandName);
+    }
+
+    private function renderIndex(Request $request, ?Category $selectedCategoryModel = null, ?string $selectedBrand = null)
     {
         $today = today()->toDateString();
 
@@ -56,6 +70,7 @@ class ShopController extends Controller
             ->when($selectedCategoryModel, function ($query, Category $category) {
                 return $query->whereIn('category_id', $category->children->pluck('id')->push($category->id));
             })
+            ->when($selectedBrand, fn ($query, string $brand) => $query->where('brand', $brand))
             ->when($request->search, fn ($query, $search) => $query->where('name', 'like', "%{$search}%"))
             ->when($request->min_price, fn ($query, $price) => $query->where('price', '>=', (float) $price))
             ->when($request->max_price, fn ($query, $price) => $query->where('price', '<=', (float) $price))
@@ -81,7 +96,9 @@ class ShopController extends Controller
                 ->get(),
             'selectedCategory' => $selectedCategoryModel?->slug,
             'selectedCategoryModel' => $selectedCategoryModel,
-            'categoryActionUrl' => $selectedCategoryModel?->public_url ?? route('shop.index'),
+            'selectedBrand' => $selectedBrand,
+            'categoryActionUrl' => $selectedCategoryModel?->public_url
+                ?? ($selectedBrand ? route('brands.show', Str::slug($selectedBrand)) : route('shop.index')),
             'search' => $request->search,
             'minPrice' => $request->min_price,
             'maxPrice' => $request->max_price,

@@ -23,6 +23,12 @@
                 </select>
             </div>
             <div>
+                <label for="product-brand" class="mb-1 block text-sm font-semibold">Brand</label>
+                <input id="product-brand" name="brand" value="{{ old('brand', $product->brand) }}" placeholder="Example: SMOK, Rincoe, Samsung" class="w-full rounded border-gray-200">
+                <p class="mt-1 text-xs text-gray-500">Optional. Adds correct brand information and a searchable brand page.</p>
+                @error('brand')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div>
                 <label class="mb-1 block text-sm font-semibold">Price</label>
                 <input name="price" type="number" step="0.01" value="{{ old('price', $product->price) }}" class="w-full rounded border-gray-200" required>
             </div>

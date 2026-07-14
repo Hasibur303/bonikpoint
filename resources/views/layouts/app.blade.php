@@ -70,10 +70,10 @@
                     <a href="{{ route('home.index') }}" class="{{ request()->routeIs('home.index') ? 'text-primary' : 'hover:text-primary' }}">Home</a>
                     <a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*') ? 'text-primary' : 'hover:text-primary' }}">Shop</a>
                     <div class="group relative">
-                        <button type="button" class="uppercase {{ $activeCategorySlug ? 'text-primary' : 'hover:text-primary' }}">
+                        <button type="button" aria-haspopup="true" class="uppercase {{ $activeCategorySlug ? 'text-primary' : 'hover:text-primary' }}">
                             Categories
                         </button>
-                        <div class="invisible absolute left-0 top-full z-50 w-64 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
+                        <div class="invisible absolute left-0 top-full z-50 w-64 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                             <div class="max-h-[420px] overflow-y-auto rounded bg-white py-2 shadow-xl ring-1 ring-gray-100">
                                 <a href="{{ route('shop.index') }}" class="block px-4 py-2 text-sm normal-case tracking-normal text-ink hover:bg-gray-50 hover:text-primary">All Categories</a>
                                 @foreach($headerCategories ?? [] as $category)
@@ -116,32 +116,32 @@
 
                 <div class="flex items-center gap-2 sm:gap-4">
                     <form action="{{ route('shop.index') }}" class="hidden xl:block">
-                        <input name="search" value="{{ request('search') }}" placeholder="Search products" class="w-56 rounded-full border-gray-200 text-sm focus:border-primary focus:ring-primary">
+                        <input name="search" value="{{ request('search') }}" placeholder="Search products" aria-label="Search products" class="w-56 rounded-full border-gray-200 text-sm focus:border-primary focus:ring-primary">
                     </form>
 
-                    <button id="open-cart-drawer" type="button" class="relative grid h-10 w-10 place-items-center rounded-full border border-gray-200 text-ink hover:border-primary hover:text-primary" title="Cart">
+                    <button id="open-cart-drawer" type="button" aria-label="Open shopping cart" class="relative grid h-10 w-10 place-items-center rounded-full border border-gray-200 text-ink hover:border-primary hover:text-primary" title="Cart">
                         <i class="fa-solid fa-bag-shopping"></i>
                         <span id="cart-count-badge" class="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-xs font-bold text-white">{{ $drawerCart['count'] ?? 0 }}</span>
                     </button>
 
-                    <a href="tel:01540381020" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary transition hover:border-primary hover:bg-primary hover:text-white lg:w-auto lg:px-4" title="Call customer service">
+                    <a href="tel:01540381020" aria-label="Call Bonik Point customer service" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary transition hover:border-primary hover:bg-primary hover:text-white lg:w-auto lg:px-4" title="Call customer service">
                         <i class="fa-solid fa-phone"></i>
                         <span class="ml-2 hidden text-sm font-bold lg:inline">Call</span>
                     </a>
 
                     @auth
                         <div class="group relative">
-                            <button class="grid h-10 w-10 place-items-center rounded-full bg-primary text-white" title="Account">
+                            <button type="button" aria-label="Open customer account menu" aria-haspopup="true" class="grid h-10 w-10 place-items-center rounded-full bg-primary text-white" title="Account">
                                 <i class="fa-regular fa-user"></i>
                             </button>
-                            <div class="invisible absolute right-0 top-full z-50 w-48 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100">
+                            <div class="invisible absolute right-0 top-full z-50 w-48 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                                 <div class="rounded bg-white py-2 shadow-xl ring-1 ring-gray-100">
                                     <div class="px-4 py-2 text-xs font-semibold uppercase text-gray-400">{{ auth()->user()->name }}</div>
                                     <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Profile</a>
                                     <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">My Orders</a>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-                                        <button class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50">Sign Out</button>
+                                        <button type="submit" class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50">Sign Out</button>
                                     </form>
                                 </div>
                             </div>
@@ -159,7 +159,7 @@
 
             <div id="mobile-menu" class="hidden border-t border-gray-100 py-4 md:hidden">
                 <form action="{{ route('shop.index') }}" class="mb-4">
-                    <input name="search" value="{{ request('search') }}" placeholder="Search products" class="w-full rounded-lg border-gray-200 text-sm focus:border-primary focus:ring-primary">
+                    <input name="search" value="{{ request('search') }}" placeholder="Search products" aria-label="Search products" class="w-full rounded-lg border-gray-200 text-sm focus:border-primary focus:ring-primary">
                 </form>
 
                 <nav class="grid gap-2 text-sm font-semibold uppercase tracking-wide text-ink">
@@ -206,7 +206,7 @@
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button class="w-full rounded px-3 py-2 text-left hover:bg-gray-50 hover:text-primary">Sign Out</button>
+                            <button type="submit" class="w-full rounded px-3 py-2 text-left hover:bg-gray-50 hover:text-primary">Sign Out</button>
                         </form>
                     @else
                         <a href="{{ route('login') }}" class="rounded px-3 py-2 hover:bg-gray-50 hover:text-primary">Sign In</a>

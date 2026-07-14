@@ -1,18 +1,25 @@
 @php
     $currentPage = $products->currentPage();
     $hasFilterParameters = collect([$search, $minPrice, $maxPrice, $sort])->contains(fn ($value) => filled($value));
-    $shopHeading = $selectedCategoryModel?->name ?? 'Bonik Point Products';
+    $shopHeading = $selectedCategoryModel?->name
+        ?? ($selectedBrand ? $selectedBrand.' Products' : 'Bonik Point Products');
     $categoryDescription = $selectedCategoryModel?->seo_description ?: $selectedCategoryModel?->description;
     $shopDescription = $categoryDescription
         ?: ($selectedCategoryModel
             ? 'Browse '.$selectedCategoryModel->name.' products at Bonik Point with simple ordering, customer support, and reliable delivery options in Bangladesh.'
-            : 'Shop Bonik Point products including vape items, gadgets, kitchen essentials, toys, fashion, and daily-use collections with simple ordering in Bangladesh.');
+            : ($selectedBrand
+                ? 'Shop authentic '.$selectedBrand.' products at Bonik Point with delivery and customer support across Bangladesh.'
+                : 'Shop Bonik Point products including vape items, gadgets, kitchen essentials, toys, fashion, and daily-use collections with simple ordering in Bangladesh.'));
     $shopTitle = $selectedCategoryModel
         ? ($selectedCategoryModel->seo_title ?: $selectedCategoryModel->name.' Products in Bangladesh | Bonik Point')
-        : (request()->routeIs('home.index') ? 'Bonik Point Store | Shop Products in Bangladesh' : 'Shop Products in Bangladesh | Bonik Point');
+        : ($selectedBrand
+            ? $selectedBrand.' Products in Bangladesh | Bonik Point'
+            : (request()->routeIs('home.index') ? 'Bonik Point Store | Shop Products in Bangladesh' : 'Shop Products in Bangladesh | Bonik Point'));
     $shopCanonical = $selectedCategoryModel
         ? $selectedCategoryModel->public_url
-        : route(request()->routeIs('home.index') ? 'home.index' : 'shop.index');
+        : ($selectedBrand
+            ? route('brands.show', Str::slug($selectedBrand))
+            : route(request()->routeIs('home.index') ? 'home.index' : 'shop.index'));
 
     if (! $hasFilterParameters && $currentPage > 1) {
         $shopTitle .= ' - Page '.$currentPage;
@@ -23,6 +30,33 @@
     $shopRobots = $hasFilterParameters || ($currentPage > 1 && $products->isEmpty())
         ? 'noindex,follow'
         : 'index,follow';
+
+    $listingBreadcrumbItems = collect([
+        [
+            '@type' => 'ListItem',
+            'position' => 1,
+            'name' => 'Home',
+            'item' => route('home.index'),
+        ],
+    ]);
+
+    if (! request()->routeIs('home.index')) {
+        $listingBreadcrumbItems->push([
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => $selectedCategoryModel?->parent?->name ?? ($selectedBrand ?: 'Shop'),
+            'item' => $selectedCategoryModel?->parent?->public_url ?? $shopCanonical,
+        ]);
+
+        if ($selectedCategoryModel?->parent) {
+            $listingBreadcrumbItems->push([
+                '@type' => 'ListItem',
+                'position' => 3,
+                'name' => $selectedCategoryModel->name,
+                'item' => $selectedCategoryModel->public_url,
+            ]);
+        }
+    }
 @endphp
 
 @section('title', $shopTitle)
@@ -30,6 +64,18 @@
 @section('canonical', $shopCanonical)
 @section('meta_image', asset('assets/images/logo.webp'))
 @section('robots', $shopRobots)
+
+@if($listingBreadcrumbItems->count() > 1)
+    @push('schema')
+        <script type="application/ld+json">
+            {!! json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => $listingBreadcrumbItems->values()->all(),
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+        </script>
+    @endpush
+@endif
 
 <x-app-layout>
     @if($festivals->isNotEmpty())
@@ -40,7 +86,7 @@
                         @for($copy = 0; $copy < 2; $copy++)
                             <div class="festival-mosaic" aria-hidden="{{ $copy === 1 ? 'true' : 'false' }}">
                                 @foreach($festivals as $festival)
-                                    <a href="{{ route('festivals.show', $festival) }}" class="festival-mosaic-card group">
+                                    <a href="{{ route('festivals.show', $festival) }}" class="festival-mosaic-card group" @if($copy === 1) tabindex="-1" @endif>
                                         <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" width="1200" height="1200" decoding="async" @if($copy === 1) loading="lazy" @endif draggable="false" onload="if (this.naturalWidth / Math.max(this.naturalHeight, 1) > 2.1) this.closest('.festival-mosaic-card')?.classList.add('is-wide')" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]">
                                     </a>
                                 @endforeach
@@ -144,21 +190,30 @@
                                 <label class="relative block">
                                     <span class="sr-only">Search products</span>
                                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
-                                    <input name="search" value="{{ $search }}" placeholder="Search products" class="h-11 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 text-sm focus:border-primary focus:ring-primary">
+                                    <input name="search" value="{{ $search }}" placeholder="Search products" aria-label="Search products" class="h-11 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 text-sm focus:border-primary focus:ring-primary">
                                 </label>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <input name="min_price" type="number" min="0" value="{{ $minPrice }}" placeholder="Min price" class="h-10 min-w-0 rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
-                                    <input name="max_price" type="number" min="0" value="{{ $maxPrice }}" placeholder="Max price" class="h-10 min-w-0 rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
+                                    <label>
+                                        <span class="sr-only">Minimum price</span>
+                                        <input name="min_price" type="number" min="0" value="{{ $minPrice }}" placeholder="Min price" class="h-10 w-full min-w-0 rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
+                                    </label>
+                                    <label>
+                                        <span class="sr-only">Maximum price</span>
+                                        <input name="max_price" type="number" min="0" value="{{ $maxPrice }}" placeholder="Max price" class="h-10 w-full min-w-0 rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
+                                    </label>
                                 </div>
-                                <select name="sort" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] py-0 text-sm focus:border-primary focus:ring-primary">
-                                    <option value="">Newest arrivals</option>
-                                    <option value="price_low" @selected($sort === 'price_low')>Price: low to high</option>
-                                    <option value="price_high" @selected($sort === 'price_high')>Price: high to low</option>
-                                </select>
+                                <label>
+                                    <span class="sr-only">Sort products</span>
+                                    <select name="sort" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] py-0 text-sm focus:border-primary focus:ring-primary">
+                                        <option value="">Newest arrivals</option>
+                                        <option value="price_low" @selected($sort === 'price_low')>Price: low to high</option>
+                                        <option value="price_high" @selected($sort === 'price_high')>Price: high to low</option>
+                                    </select>
+                                </label>
                                 @if($selectedCategory && ! $selectedCategoryModel)
                                     <input type="hidden" name="category" value="{{ $selectedCategory }}">
                                 @endif
-                                <button class="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-black text-white hover:bg-ink">
+                                <button type="submit" class="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-black text-white hover:bg-ink">
                                     <i class="fa-solid fa-sliders"></i>
                                     Apply filters
                                 </button>

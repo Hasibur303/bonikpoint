@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Models\Category;
 use App\Models\Festival;
 use App\Models\Product;
+use Illuminate\Support\Str;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -29,6 +30,7 @@ use App\Models\Product;
 
 Route::get('/', [ShopController::class, 'index'])->name('home.index');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+Route::get('/brands/{brand}', [ShopController::class, 'brand'])->where('brand', '[a-z0-9-]+')->name('brands.show');
 Route::get('/category/{category:slug}', [ShopController::class, 'category'])->name('categories.show');
 Route::get('/category/{parent:slug}/{category:slug}', [ShopController::class, 'subcategory'])
     ->withoutScopedBindings()
@@ -65,6 +67,17 @@ Route::get('/sitemap.xml', function () {
                 'loc' => route('shop.show', $product),
                 'lastmod' => optional($product->updated_at)->toAtomString(),
                 'priority' => '0.8',
+            ]);
+        });
+
+    Product::where('is_active', true)
+        ->whereNotNull('brand')
+        ->distinct()
+        ->pluck('brand')
+        ->each(function (string $brand) use ($urls) {
+            $urls->push([
+                'loc' => route('brands.show', Str::slug($brand)),
+                'priority' => '0.7',
             ]);
         });
 
