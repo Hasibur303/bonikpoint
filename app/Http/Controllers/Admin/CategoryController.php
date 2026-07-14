@@ -106,7 +106,10 @@ class CategoryController extends Controller
                 Rule::exists('categories', 'id')->whereNull('parent_id'),
             ],
             'description' => ['nullable', 'string'],
+            'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string', 'max:500'],
             'image' => ['nullable', 'image', 'max:2048'],
+            'image_alt' => ['nullable', 'string', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 

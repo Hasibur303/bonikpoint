@@ -1,20 +1,109 @@
-<x-app-layout>
-    @php
-        $isVapeProduct = in_array($product->category?->slug, ['vape-accessories'], true)
-            || in_array($product->category?->parent?->slug, ['vape-accessories'], true);
+@php
+    $isVapeProduct = in_array($product->category?->slug, ['vape-accessories'], true)
+        || in_array($product->category?->parent?->slug, ['vape-accessories'], true);
 
-        $averageRating = round((float) ($product->reviews_avg_rating ?? 0), 1);
-        $galleryImages = collect([
-            [
-                'url' => $product->image_url,
-                'label' => $product->name.' main image',
-            ],
-        ])->merge($product->images->map(fn ($image) => [
-            'url' => $image->image_url,
-            'label' => $product->name.' gallery image',
-        ]));
-        $firstColor = $product->colors->first();
-    @endphp
+    $averageRating = round((float) ($product->reviews_avg_rating ?? 0), 1);
+    $primaryImageAlt = $product->image_alt ?: $product->name.' main product image';
+    $galleryImages = collect([
+        [
+            'url' => $product->image_url,
+            'label' => $primaryImageAlt,
+        ],
+    ])->merge($product->images->map(fn ($image, $index) => [
+        'url' => $image->image_url,
+        'label' => $product->name.' product image '.($index + 2),
+    ]));
+    $firstColor = $product->colors->first();
+    $productDescription = $product->seo_description
+        ?: ($product->description
+        ? Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags($product->description))), 155, '')
+        : 'Buy '.$product->name.' from Bonik Point with simple ordering and customer support in Bangladesh.');
+    $productTitle = $product->seo_title ?: $product->name.' | Bonik Point';
+    $productCategoryTrail = collect([$product->category?->parent, $product->category])->filter();
+    $productSchema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'Product',
+        'name' => $product->name,
+        'image' => $galleryImages->pluck('url')->values()->all(),
+        'description' => $productDescription,
+        'sku' => $product->sku ?: $product->slug,
+        'category' => $product->category?->name,
+        'brand' => [
+            '@type' => 'Brand',
+            'name' => 'Bonik Point',
+        ],
+        'offers' => [
+            '@type' => 'Offer',
+            'url' => route('shop.show', $product),
+            'priceCurrency' => 'BDT',
+            'price' => (string) $product->price,
+            'availability' => $product->stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            'itemCondition' => 'https://schema.org/NewCondition',
+        ],
+    ];
+
+    if ($product->reviews_count && $averageRating > 0) {
+        $productSchema['aggregateRating'] = [
+            '@type' => 'AggregateRating',
+            'ratingValue' => $averageRating,
+            'reviewCount' => $product->reviews_count,
+            'bestRating' => 5,
+            'worstRating' => 1,
+        ];
+    }
+
+    $breadcrumbItems = [
+        [
+            '@type' => 'ListItem',
+            'position' => 1,
+            'name' => 'Home',
+            'item' => route('home.index'),
+        ],
+        [
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => 'Shop',
+            'item' => route('shop.index'),
+        ],
+    ];
+
+    foreach ($productCategoryTrail as $category) {
+        $breadcrumbItems[] = [
+            '@type' => 'ListItem',
+            'position' => count($breadcrumbItems) + 1,
+            'name' => $category->name,
+            'item' => $category->public_url,
+        ];
+    }
+
+    $breadcrumbItems[] = [
+        '@type' => 'ListItem',
+        'position' => count($breadcrumbItems) + 1,
+        'name' => $product->name,
+        'item' => route('shop.show', $product),
+    ];
+@endphp
+
+@section('title', $productTitle)
+@section('meta_description', $productDescription)
+@section('canonical', route('shop.show', $product))
+@section('meta_image', $product->image_url)
+@section('og_type', 'product')
+
+@push('schema')
+    <script type="application/ld+json">
+        {!! json_encode($productSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => $breadcrumbItems,
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
+@endpush
+
+<x-app-layout>
 
     @if($isVapeProduct)
         <div id="vape-age-warning" class="fixed inset-0 z-[120] hidden bg-ink/90 px-4 py-6 backdrop-blur">
@@ -38,7 +127,7 @@
                 <div>
                     <div class="overflow-hidden rounded-lg bg-white p-2 shadow-[0_18px_45px_rgba(8,28,31,0.10)] ring-1 ring-gray-100 md:p-3">
                         <div class="overflow-hidden rounded-md bg-gray-100">
-                            <img id="product-gallery-main" src="{{ $galleryImages->first()['url'] }}" alt="{{ $product->name }}" class="aspect-square w-full object-cover">
+                            <img id="product-gallery-main" src="{{ $galleryImages->first()['url'] }}" alt="{{ $galleryImages->first()['label'] }}" class="aspect-square w-full object-cover">
                         </div>
                     </div>
 
@@ -46,7 +135,7 @@
                         <div class="mt-3 grid grid-cols-5 gap-2 md:mt-4 md:gap-3">
                             @foreach($galleryImages as $index => $galleryImage)
                                 <button type="button" data-gallery-src="{{ $galleryImage['url'] }}" data-gallery-alt="{{ $galleryImage['label'] }}" class="product-gallery-thumb overflow-hidden rounded-md border bg-white p-1 shadow-sm transition hover:border-primary md:p-1.5 {{ $index === 0 ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200' }}">
-                                    <img src="{{ $galleryImage['url'] }}" alt="{{ $galleryImage['label'] }}" class="aspect-square w-full rounded object-cover">
+                                    <img src="{{ $galleryImage['url'] }}" alt="{{ $galleryImage['label'] }}" loading="lazy" decoding="async" class="aspect-square w-full rounded object-cover">
                                 </button>
                             @endforeach
                         </div>

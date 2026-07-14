@@ -11,17 +11,40 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
+        $selectedCategory = $request->category
+            ? Category::with('parent', 'children')->where('slug', $request->category)->first()
+            : null;
+
+        return $this->renderIndex($request, $selectedCategory);
+    }
+
+    public function category(Request $request, Category $category)
+    {
+        abort_unless($category->is_active && ! $category->parent_id, 404);
+
+        return $this->renderIndex($request, $category->load('parent', 'children'));
+    }
+
+    public function subcategory(Request $request, Category $parent, Category $category)
+    {
+        abort_unless(
+            $parent->is_active
+            && ! $parent->parent_id
+            && $category->is_active
+            && $category->parent_id === $parent->id,
+            404
+        );
+
+        return $this->renderIndex($request, $category->load('parent', 'children'));
+    }
+
+    private function renderIndex(Request $request, ?Category $selectedCategoryModel = null)
+    {
         $today = today()->toDateString();
 
         $products = Product::with('category')
             ->where('is_active', true)
-            ->when($request->category, function ($query, $slug) {
-                $category = Category::with('children')->where('slug', $slug)->first();
-
-                if (! $category) {
-                    return $query->whereRaw('1 = 0');
-                }
-
+            ->when($selectedCategoryModel, function ($query, Category $category) {
                 return $query->whereIn('category_id', $category->children->pluck('id')->push($category->id));
             })
             ->when($request->search, fn ($query, $search) => $query->where('name', 'like', "%{$search}%"))
@@ -47,7 +70,9 @@ class ShopController extends Controller
                 ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('name')])
                 ->orderBy('name')
                 ->get(),
-            'selectedCategory' => $request->category,
+            'selectedCategory' => $selectedCategoryModel?->slug,
+            'selectedCategoryModel' => $selectedCategoryModel,
+            'categoryActionUrl' => $selectedCategoryModel?->public_url ?? route('shop.index'),
             'search' => $request->search,
             'minPrice' => $request->min_price,
             'maxPrice' => $request->max_price,

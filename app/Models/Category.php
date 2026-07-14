@@ -17,7 +17,10 @@ class Category extends Model
         'parent_id',
         'slug',
         'description',
+        'seo_title',
+        'seo_description',
         'image',
+        'image_alt',
         'is_active',
     ];
 
@@ -41,6 +44,18 @@ class Category extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function getPublicUrlAttribute(): string
+    {
+        if ($this->parent_id) {
+            return route('categories.subcategory', [
+                'parent' => $this->parent?->slug ?? $this->parent()->value('slug'),
+                'category' => $this->slug,
+            ]);
+        }
+
+        return route('categories.show', ['category' => $this->slug]);
     }
 
     public function getImageUrlAttribute(): string

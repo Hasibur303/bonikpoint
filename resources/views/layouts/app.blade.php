@@ -4,7 +4,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Bonik Point') }}</title>
+    @php
+        $seoTitle = trim($__env->yieldContent('title', config('app.name', 'Bonik Point')));
+        $seoDescription = trim($__env->yieldContent('meta_description', 'Shop authentic lifestyle, vape, gadget, home, and daily-use products from Bonik Point with simple ordering and customer support.'));
+        $seoCanonical = trim($__env->yieldContent('canonical', url()->current()));
+        $seoImage = trim($__env->yieldContent('meta_image', asset('assets/images/logo.jpg')));
+    @endphp
+    <title>{{ $seoTitle }}</title>
+    <meta name="description" content="{{ $seoDescription }}">
+    <link rel="canonical" href="{{ $seoCanonical }}">
+    <meta property="og:site_name" content="Bonik Point">
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ $seoDescription }}">
+    <meta property="og:url" content="{{ $seoCanonical }}">
+    <meta property="og:image" content="{{ $seoImage }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    <meta name="twitter:image" content="{{ $seoImage }}">
     <link href="{{ asset('favicon.jpg') }}" rel="shortcut icon" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -27,6 +45,30 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if(request()->routeIs('home.index'))
+        <script type="application/ld+json">
+            {!! json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'Organization',
+                'name' => 'Bonik Point',
+                'url' => route('home.index'),
+                'logo' => asset('assets/images/logo.jpg'),
+                'contactPoint' => [
+                    '@type' => 'ContactPoint',
+                    'telephone' => '01540381020',
+                    'contactType' => 'customer service',
+                    'areaServed' => 'BD',
+                    'availableLanguage' => ['Bangla', 'English'],
+                ],
+                'sameAs' => [
+                    'https://www.facebook.com/share/1EGD8CxUS9/',
+                    'https://youtube.com/@dailyvlogsbynayeem',
+                    'https://youtube.com/@nayeemrahmanvlogs',
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+        </script>
+    @endif
+    @stack('schema')
 </head>
 <body class="bg-gray-50 font-sans text-gray-700 antialiased">
     <header class="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur">
@@ -36,11 +78,15 @@
                     <img src="{{ asset('assets/images/logo.jpg') }}" alt="Bonik Point" class="h-[76px] w-auto object-contain">
                 </a>
 
+                @php
+                    $activeCategorySlug = request('category') ?: request()->route('category')?->slug;
+                @endphp
+
                 <nav class="hidden items-center gap-8 text-sm font-semibold uppercase tracking-wide text-ink md:flex">
                     <a href="{{ route('home.index') }}" class="{{ request()->routeIs('home.index') ? 'text-primary' : 'hover:text-primary' }}">Home</a>
                     <a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*') ? 'text-primary' : 'hover:text-primary' }}">Shop</a>
                     <div class="group relative">
-                        <button type="button" class="uppercase {{ request('category') ? 'text-primary' : 'hover:text-primary' }}">
+                        <button type="button" class="uppercase {{ $activeCategorySlug ? 'text-primary' : 'hover:text-primary' }}">
                             Categories
                         </button>
                         <div class="invisible absolute left-0 top-full z-50 w-64 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
@@ -48,26 +94,26 @@
                                 <a href="{{ route('shop.index') }}" class="block px-4 py-2 text-sm normal-case tracking-normal text-ink hover:bg-gray-50 hover:text-primary">All Categories</a>
                                 @foreach($headerCategories ?? [] as $category)
                                     @php
-                                        $isCategoryActive = request('category') === $category->slug;
-                                        $hasActiveChild = $category->children->contains('slug', request('category'));
+                                        $isCategoryActive = $activeCategorySlug === $category->slug;
+                                        $hasActiveChild = $category->children->contains('slug', $activeCategorySlug);
                                     @endphp
 
                                     @if($category->children->isNotEmpty())
                                         <details class="border-t border-gray-50 first:border-t-0" {{ $isCategoryActive || $hasActiveChild ? 'open' : '' }}>
                                             <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-2 text-sm normal-case tracking-normal text-ink hover:bg-gray-50 hover:text-primary">
-                                                <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="{{ $isCategoryActive ? 'text-primary' : '' }}">{{ $category->name }}</a>
+                                                <a href="{{ $category->public_url }}" class="{{ $isCategoryActive ? 'text-primary' : '' }}">{{ $category->name }}</a>
                                                 <span class="text-xs text-gray-400">&#9656;</span>
                                             </summary>
                                             <div class="pb-1">
                                                 @foreach($category->children as $child)
-                                                    <a href="{{ route('shop.index', ['category' => $child->slug]) }}" class="block px-7 py-2 text-sm normal-case tracking-normal {{ request('category') === $child->slug ? 'bg-gray-50 text-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
+                                                    <a href="{{ $child->public_url }}" class="block px-7 py-2 text-sm normal-case tracking-normal {{ $activeCategorySlug === $child->slug ? 'bg-gray-50 text-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
                                                         {{ $child->name }}
                                                     </a>
                                                 @endforeach
                                             </div>
                                         </details>
                                     @else
-                                        <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="block px-4 py-2 text-sm normal-case tracking-normal {{ $isCategoryActive ? 'bg-gray-50 text-primary' : 'text-ink hover:bg-gray-50 hover:text-primary' }}">
+                                        <a href="{{ $category->public_url }}" class="block px-4 py-2 text-sm normal-case tracking-normal {{ $isCategoryActive ? 'bg-gray-50 text-primary' : 'text-ink hover:bg-gray-50 hover:text-primary' }}">
                                             {{ $category->name }}
                                         </a>
                                     @endif
@@ -138,29 +184,29 @@
                     <div class="rounded border border-gray-100 p-2">
                         <p class="px-1 pb-2 text-xs font-bold text-gray-400">Categories</p>
                         <div class="grid gap-1 normal-case tracking-normal">
-                            <a href="{{ route('shop.index') }}" class="rounded px-3 py-2 text-sm {{ request('category') ? 'hover:bg-gray-50 hover:text-primary' : 'bg-primary text-white' }}">All Categories</a>
+                            <a href="{{ route('shop.index') }}" class="rounded px-3 py-2 text-sm {{ $activeCategorySlug ? 'hover:bg-gray-50 hover:text-primary' : 'bg-primary text-white' }}">All Categories</a>
                             @foreach($headerCategories ?? [] as $category)
                                 @php
-                                    $isCategoryActive = request('category') === $category->slug;
-                                    $hasActiveChild = $category->children->contains('slug', request('category'));
+                                    $isCategoryActive = $activeCategorySlug === $category->slug;
+                                    $hasActiveChild = $category->children->contains('slug', $activeCategorySlug);
                                 @endphp
 
                                 @if($category->children->isNotEmpty())
                                     <details class="rounded border border-gray-100" {{ $isCategoryActive || $hasActiveChild ? 'open' : '' }}>
                                         <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">
-                                            <a href="{{ route('shop.index', ['category' => $category->slug]) }}">{{ $category->name }}</a>
+                                            <a href="{{ $category->public_url }}">{{ $category->name }}</a>
                                             <span class="text-xs {{ $isCategoryActive ? 'text-white' : 'text-gray-400' }}">&#9656;</span>
                                         </summary>
                                         <div class="grid gap-1 px-2 pb-2 pt-1">
                                             @foreach($category->children as $child)
-                                                <a href="{{ route('shop.index', ['category' => $child->slug]) }}" class="rounded px-4 py-2 text-sm {{ request('category') === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
+                                                <a href="{{ $child->public_url }}" class="rounded px-4 py-2 text-sm {{ $activeCategorySlug === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
                                                     {{ $child->name }}
                                                 </a>
                                             @endforeach
                                         </div>
                                     </details>
                                 @else
-                                    <a href="{{ route('shop.index', ['category' => $category->slug]) }}" class="rounded px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">
+                                    <a href="{{ $category->public_url }}" class="rounded px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">
                                         {{ $category->name }}
                                     </a>
                                 @endif

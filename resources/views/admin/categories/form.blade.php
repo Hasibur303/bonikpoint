@@ -50,6 +50,30 @@
                 <label class="mb-1 block text-sm font-semibold">Image</label>
                 <input type="file" name="image" class="w-full rounded border border-gray-200 p-2">
             </div>
+            <div>
+                <label class="mb-1 block text-sm font-semibold">Image Alt Text</label>
+                <input name="image_alt" value="{{ old('image_alt', $category->image_alt) }}" placeholder="Example: Vape pod device category thumbnail" class="w-full rounded border-gray-200">
+                <p class="mt-1 text-xs text-gray-500">Shortly describe the category image for Google and accessibility.</p>
+                @error('image_alt')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div class="rounded-lg border border-primary/15 bg-primary/5 p-4">
+                <p class="text-sm font-black uppercase tracking-wide text-primary">SEO Settings</p>
+                <p class="mt-1 text-xs text-gray-600">Optional. Leave blank to use automatic SEO from category name and description.</p>
+                <div class="mt-4 grid gap-4">
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold">SEO Title</label>
+                        <input name="seo_title" value="{{ old('seo_title', $category->seo_title) }}" maxlength="255" placeholder="Example: Vape Pod Devices in Bangladesh | Bonik Point" class="w-full rounded border-gray-200">
+                        <p class="mt-1 text-xs text-gray-500">Best around 50-60 characters.</p>
+                        @error('seo_title')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold">Meta Description</label>
+                        <textarea name="seo_description" rows="3" maxlength="500" placeholder="Example: Browse rechargeable pod devices, vape pens, and accessories at Bonik Point with delivery across Bangladesh." class="w-full rounded border-gray-200">{{ old('seo_description', $category->seo_description) }}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">Best around 140-160 characters.</p>
+                        @error('seo_description')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
             <label class="flex items-center gap-2"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $category->exists ? $category->is_active : true))> Active</label>
         </div>
         <div class="mt-6 flex flex-wrap gap-3">

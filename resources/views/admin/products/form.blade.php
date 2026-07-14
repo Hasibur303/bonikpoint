@@ -83,11 +83,37 @@
                 @error('image')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
+                <label class="mb-1 block text-sm font-semibold">Image Alt Text</label>
+                <input name="image_alt" value="{{ old('image_alt', $product->image_alt) }}" placeholder="Example: Rincoe Manto Nano A4 rechargeable pod device" class="w-full rounded border-gray-200">
+                <p class="mt-1 text-xs text-gray-500">Shortly describe the main image for Google and screen readers.</p>
+                @error('image_alt')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div>
                 <label class="mb-1 block text-sm font-semibold">Gallery Images</label>
                 <input type="file" name="gallery_images[]" accept="image/*" multiple class="w-full rounded border border-gray-200 p-2">
                 <p class="mt-1 text-xs text-gray-500">Upload multiple extra photos for the product details page.</p>
                 @error('gallery_images')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 @error('gallery_images.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div class="md:col-span-2 rounded-lg border border-primary/15 bg-primary/5 p-4">
+                <div class="mb-4">
+                    <p class="text-sm font-black uppercase tracking-wide text-primary">SEO Settings</p>
+                    <p class="mt-1 text-xs text-gray-600">Optional. Leave blank to use automatic SEO from product name and description.</p>
+                </div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold">SEO Title</label>
+                        <input name="seo_title" value="{{ old('seo_title', $product->seo_title) }}" maxlength="255" placeholder="Example: Rincoe Manto Nano A4 Price in Bangladesh | Bonik Point" class="w-full rounded border-gray-200">
+                        <p class="mt-1 text-xs text-gray-500">Best around 50-60 characters.</p>
+                        @error('seo_title')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold">Meta Description</label>
+                        <textarea name="seo_description" rows="3" maxlength="500" placeholder="Example: Buy Rincoe Manto Nano A4 rechargeable pod system in Bangladesh with fast support from Bonik Point." class="w-full rounded border-gray-200">{{ old('seo_description', $product->seo_description) }}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">Best around 140-160 characters.</p>
+                        @error('seo_description')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
             </div>
             @if($product->exists && $product->images->isNotEmpty())
                 <div class="md:col-span-2">

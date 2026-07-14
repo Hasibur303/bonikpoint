@@ -1,3 +1,23 @@
+@php
+    $shopHeading = $selectedCategoryModel?->name ?? 'Bonik Point Products';
+    $categoryDescription = $selectedCategoryModel?->seo_description ?: $selectedCategoryModel?->description;
+    $shopDescription = $categoryDescription
+        ?: ($selectedCategoryModel
+            ? 'Browse '.$selectedCategoryModel->name.' products at Bonik Point with simple ordering, customer support, and reliable delivery options in Bangladesh.'
+            : 'Shop Bonik Point products including vape items, gadgets, kitchen essentials, toys, fashion, and daily-use collections with simple ordering in Bangladesh.');
+    $shopTitle = $selectedCategoryModel
+        ? ($selectedCategoryModel->seo_title ?: $selectedCategoryModel->name.' Products in Bangladesh | Bonik Point')
+        : (request()->routeIs('home.index') ? 'Bonik Point Store | Shop Products in Bangladesh' : 'Shop Products in Bangladesh | Bonik Point');
+    $shopCanonical = $selectedCategoryModel
+        ? $selectedCategoryModel->public_url
+        : route(request()->routeIs('home.index') ? 'home.index' : 'shop.index');
+@endphp
+
+@section('title', $shopTitle)
+@section('meta_description', Str::limit(strip_tags($shopDescription), 155, ''))
+@section('canonical', $shopCanonical)
+@section('meta_image', asset('assets/images/logo.jpg'))
+
 <x-app-layout>
     @if($festivals->isNotEmpty())
         <section class="border-b border-gray-100 bg-[#f4f7f6] py-3 md:py-4">
@@ -107,7 +127,7 @@
                                 @endif
                             </div>
 
-                            <form action="{{ route('shop.index') }}" class="mt-4 space-y-3">
+                            <form action="{{ $categoryActionUrl }}" class="mt-4 space-y-3">
                                 <label class="relative block">
                                     <span class="sr-only">Search products</span>
                                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
@@ -122,7 +142,7 @@
                                     <option value="price_low" @selected($sort === 'price_low')>Price: low to high</option>
                                     <option value="price_high" @selected($sort === 'price_high')>Price: high to low</option>
                                 </select>
-                                @if($selectedCategory)
+                                @if($selectedCategory && ! $selectedCategoryModel)
                                     <input type="hidden" name="category" value="{{ $selectedCategory }}">
                                 @endif
                                 <button class="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-black text-white hover:bg-ink">
@@ -155,7 +175,7 @@
                                         <details class="group/category rounded-md {{ $isMainActive || $hasActiveChild ? 'bg-primary/5' : '' }}" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
                                             <summary class="flex cursor-pointer list-none items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f7f9f8]">
                                                 @if($category->image)
-                                                    <img src="{{ $category->image_url }}" alt="{{ $category->name }}" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                                                    <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
                                                 @else
                                                     <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
                                                 @endif
@@ -166,16 +186,16 @@
                                                 <i class="fa-solid fa-chevron-right text-xs text-gray-400 transition group-open/category:rotate-90"></i>
                                             </summary>
                                             <div class="space-y-1 px-3 pb-2 pl-14">
-                                                <a href="{{ route('shop.index', array_filter(['category' => $category->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="block rounded px-2 py-1.5 text-xs font-bold {{ $isMainActive ? 'bg-primary text-white' : 'text-primary hover:bg-white' }}">All {{ $category->name }}</a>
+                                                <a href="{{ $category->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="block rounded px-2 py-1.5 text-xs font-bold {{ $isMainActive ? 'bg-primary text-white' : 'text-primary hover:bg-white' }}">All {{ $category->name }}</a>
                                                 @foreach($category->children->sortBy('name') as $child)
-                                                    <a href="{{ route('shop.index', array_filter(['category' => $child->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="block rounded px-2 py-1.5 text-xs font-semibold {{ $selectedCategory === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-white hover:text-primary' }}">{{ $child->name }}</a>
+                                                    <a href="{{ $child->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="block rounded px-2 py-1.5 text-xs font-semibold {{ $selectedCategory === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-white hover:text-primary' }}">{{ $child->name }}</a>
                                                 @endforeach
                                             </div>
                                         </details>
                                     @else
-                                        <a href="{{ route('shop.index', array_filter(['category' => $category->slug, 'search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f7f9f8] {{ $isMainActive ? 'bg-primary/5' : '' }}">
+                                        <a href="{{ $category->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f7f9f8] {{ $isMainActive ? 'bg-primary/5' : '' }}">
                                             @if($category->image)
-                                                <img src="{{ $category->image_url }}" alt="{{ $category->name }}" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                                                <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
                                             @else
                                                 <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
                                             @endif
@@ -193,10 +213,11 @@
                 <div class="flex items-end justify-between gap-4">
                     <div>
                         <p class="text-xs font-bold uppercase tracking-wide text-primary">Available now</p>
-                        <h2 class="mt-1 text-2xl font-black text-ink">{{ $selectedCategory ? 'Filtered products' : 'Products' }}</h2>
+                        <h1 class="mt-1 text-2xl font-black text-ink">{{ $shopHeading }}</h1>
                     </div>
                     <p class="text-sm font-semibold text-gray-500">{{ $products->total() }} results</p>
                 </div>
+                <p class="mt-3 max-w-3xl text-sm leading-6 text-gray-600">{{ $shopDescription }}</p>
 
                 <div class="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
                     @forelse($products as $product)
