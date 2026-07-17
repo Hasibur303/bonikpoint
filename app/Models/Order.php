@@ -30,6 +30,7 @@ class Order extends Model
         'delivery_payment_method',
         'delivery_payment_mobile',
         'delivery_transaction_id',
+        'delivery_payment_proof',
         'notes',
     ];
 
@@ -56,5 +57,27 @@ class Order extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(ProductReview::class);
+    }
+
+    public function paidAmount(): float
+    {
+        if ($this->status === 'delivered') {
+            return (float) $this->total;
+        }
+
+        if ($this->advance_delivery_required && $this->delivery_charge_payment_option === 'pay_now') {
+            return min((float) $this->shipping, (float) $this->total);
+        }
+
+        return 0;
+    }
+
+    public function dueAmount(): float
+    {
+        if (in_array($this->status, ['delivered', 'cancelled'], true)) {
+            return 0;
+        }
+
+        return max((float) $this->total - $this->paidAmount(), 0);
     }
 }

@@ -7,9 +7,11 @@ use App\Models\StoreSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Throwable;
 
 class CheckoutController extends Controller
 {
@@ -97,6 +99,7 @@ class CheckoutController extends Controller
                 'delivery_payment_method' => [$isGuestCheckout ? 'required' : 'required_if:delivery_charge_payment_option,pay_now', 'nullable', 'in:Bkash,Nagad,Rocket'],
                 'delivery_payment_mobile' => [$isGuestCheckout ? 'required' : 'required_if:delivery_charge_payment_option,pay_now', 'nullable', 'string', 'max:30'],
                 'delivery_transaction_id' => [$isGuestCheckout ? 'required' : 'required_if:delivery_charge_payment_option,pay_now', 'nullable', 'string', 'max:120'],
+                'delivery_payment_proof' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             ];
         }
 
@@ -106,48 +109,62 @@ class CheckoutController extends Controller
             : null;
 
         $deliveryArea = $this->deliveryAreaForCity($data['city']);
+        $paymentProofPath = null;
 
-        $order = DB::transaction(function () use ($data, $cartItems, $advanceDeliveryRequired, $deliveryArea, $isGuestCheckout) {
-            $subtotal = collect($cartItems)->sum('total');
-            $shipping = $advanceDeliveryRequired ? $this->deliveryCharge($deliveryArea) : 0;
-            $guestToken = $isGuestCheckout ? Str::random(48) : null;
-            $order = Order::create([
-                ...$data,
-                'user_id' => $isGuestCheckout ? null : auth()->id(),
-                'guest_token' => $guestToken,
-                'order_number' => 'BP-'.now()->format('YmdHis').'-'.($isGuestCheckout ? 'G'.Str::upper(Str::random(4)) : auth()->id()),
-                'status' => $advanceDeliveryRequired && $data['delivery_charge_payment_option'] === 'pay_later' ? 'waiting_delivery_charge' : 'pending',
-                'subtotal' => $subtotal,
-                'shipping' => $shipping,
-                'total' => $subtotal + $shipping,
-                'advance_delivery_required' => $advanceDeliveryRequired,
-                'delivery_area' => $advanceDeliveryRequired ? $deliveryArea : null,
-                'delivery_charge_payment_option' => $advanceDeliveryRequired ? $data['delivery_charge_payment_option'] : null,
-                'delivery_payment_method' => $advanceDeliveryRequired ? $data['delivery_payment_method'] : null,
-                'delivery_payment_mobile' => $advanceDeliveryRequired ? $data['delivery_payment_mobile'] : null,
-                'delivery_transaction_id' => $advanceDeliveryRequired ? $data['delivery_transaction_id'] : null,
-            ]);
+        if ($advanceDeliveryRequired && $data['delivery_charge_payment_option'] === 'pay_now' && $request->hasFile('delivery_payment_proof')) {
+            $paymentProofPath = $request->file('delivery_payment_proof')->store('delivery-payment-proofs', 'local');
+        }
 
-            foreach ($cartItems as $item) {
-                $product = $item['product'];
-                $quantity = $item['quantity'];
-
-                $order->items()->create([
-                    'product_id' => $product->id,
-                    'product_name' => $product->name,
-                    'selected_color_name' => $item['product_color_name'] ?? null,
-                    'selected_color_hex' => $item['product_color_hex'] ?? null,
-                    'buying_price' => $product->buying_price,
-                    'unit_price' => $item['unit_price'],
-                    'quantity' => $quantity,
-                    'total' => $item['total'],
+        try {
+            $order = DB::transaction(function () use ($data, $cartItems, $advanceDeliveryRequired, $deliveryArea, $isGuestCheckout, $paymentProofPath) {
+                $subtotal = collect($cartItems)->sum('total');
+                $shipping = $advanceDeliveryRequired ? $this->deliveryCharge($deliveryArea) : 0;
+                $guestToken = $isGuestCheckout ? Str::random(48) : null;
+                $order = Order::create([
+                    ...$data,
+                    'user_id' => $isGuestCheckout ? null : auth()->id(),
+                    'guest_token' => $guestToken,
+                    'order_number' => 'BP-'.now()->format('YmdHis').'-'.($isGuestCheckout ? 'G'.Str::upper(Str::random(4)) : auth()->id()),
+                    'status' => $advanceDeliveryRequired && $data['delivery_charge_payment_option'] === 'pay_later' ? 'waiting_delivery_charge' : 'pending',
+                    'subtotal' => $subtotal,
+                    'shipping' => $shipping,
+                    'total' => $subtotal + $shipping,
+                    'advance_delivery_required' => $advanceDeliveryRequired,
+                    'delivery_area' => $advanceDeliveryRequired ? $deliveryArea : null,
+                    'delivery_charge_payment_option' => $advanceDeliveryRequired ? $data['delivery_charge_payment_option'] : null,
+                    'delivery_payment_method' => $advanceDeliveryRequired ? $data['delivery_payment_method'] : null,
+                    'delivery_payment_mobile' => $advanceDeliveryRequired ? $data['delivery_payment_mobile'] : null,
+                    'delivery_transaction_id' => $advanceDeliveryRequired ? $data['delivery_transaction_id'] : null,
+                    'delivery_payment_proof' => $paymentProofPath,
                 ]);
 
-                $product->decrement('stock', $quantity);
+                foreach ($cartItems as $item) {
+                    $product = $item['product'];
+                    $quantity = $item['quantity'];
+
+                    $order->items()->create([
+                        'product_id' => $product->id,
+                        'product_name' => $product->name,
+                        'selected_color_name' => $item['product_color_name'] ?? null,
+                        'selected_color_hex' => $item['product_color_hex'] ?? null,
+                        'buying_price' => $product->buying_price,
+                        'unit_price' => $item['unit_price'],
+                        'quantity' => $quantity,
+                        'total' => $item['total'],
+                    ]);
+
+                    $product->decrement('stock', $quantity);
+                }
+
+                return $order;
+            });
+        } catch (Throwable $exception) {
+            if ($paymentProofPath) {
+                Storage::disk('local')->delete($paymentProofPath);
             }
 
-            return $order;
-        });
+            throw $exception;
+        }
 
         session()->forget('cart');
 
