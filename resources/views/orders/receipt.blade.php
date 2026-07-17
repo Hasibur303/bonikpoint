@@ -3,8 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
     <title>Receipt {{ $order->order_number }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-100 p-3 text-gray-800 sm:p-6">
     <main class="mx-auto max-w-3xl overflow-hidden rounded bg-white p-4 shadow sm:p-8">
@@ -90,14 +91,37 @@
             <div class="flex justify-between gap-4"><span>Subtotal</span><span class="text-right">BDT {{ number_format($order->subtotal, 2) }}</span></div>
             <div class="flex justify-between gap-4"><span>Delivery Charge</span><span class="text-right">BDT {{ number_format($order->shipping, 2) }}</span></div>
             <div class="flex justify-between gap-4 border-t pt-3 text-lg font-black text-[#103f44]"><span>Total</span><span class="text-right">BDT {{ number_format($order->total, 2) }}</span></div>
+            <div class="flex justify-between gap-4 text-green-700"><span>Paid Amount</span><span class="text-right font-bold">BDT {{ number_format($order->paidAmount(), 2) }}</span></div>
+            <div class="flex justify-between gap-4 rounded bg-red-50 px-3 py-2 text-lg font-black text-red-700"><span>Due Amount</span><span class="text-right">BDT {{ number_format($order->dueAmount(), 2) }}</span></div>
         </div>
+
+        @if($order->advance_delivery_required)
+            <div class="mt-6 rounded border border-gray-200 bg-gray-50 p-4 text-sm">
+                <h2 class="font-bold text-[#103f44]">Delivery Payment</h2>
+                <div class="mt-2 grid gap-1 sm:grid-cols-2">
+                    <p>Payment status: <strong>{{ $order->delivery_charge_payment_option === 'pay_now' ? 'Submitted' : 'Not paid' }}</strong></p>
+                    <p>Delivery charge: <strong>BDT {{ number_format($order->shipping, 2) }}</strong></p>
+                    @if($order->delivery_charge_payment_option === 'pay_now')
+                        <p>Method: <strong>{{ $order->delivery_payment_method }}</strong></p>
+                        <p>Payment mobile: <strong>{{ $order->delivery_payment_mobile }}</strong></p>
+                        <p class="break-all sm:col-span-2">Transaction ID: <strong>{{ $order->delivery_transaction_id }}</strong></p>
+                    @endif
+                </div>
+            </div>
+        @endif
 
         @if($order->advance_delivery_required && $order->delivery_charge_payment_option === 'pay_later')
             <p class="mt-6 rounded bg-red-50 p-3 text-sm font-semibold leading-6 text-red-700">ডেলিভারি চার্জ পরিশোধ না করা পর্যন্ত আপনার অর্ডার সম্পূর্ণভাবে কনফার্ম হবে না।</p>
         @endif
 
-        <div class="mt-8 flex print:hidden sm:justify-end">
-            <button onclick="window.print()" class="w-full rounded bg-[#087c7f] px-6 py-3 font-semibold text-white sm:w-auto">Print Receipt</button>
+        <div class="mt-8 flex flex-col gap-2 print:hidden sm:flex-row sm:justify-end">
+            @if(!empty($adminReceipt))
+                <a href="{{ route('admin.orders.show', $order) }}" class="inline-flex items-center justify-center rounded border border-gray-200 px-6 py-3 font-semibold text-gray-700 hover:border-[#087c7f] hover:text-[#087c7f]">Back to Order</a>
+            @endif
+            <button type="button" onclick="window.print()" class="inline-flex items-center justify-center gap-2 rounded bg-[#087c7f] px-6 py-3 font-semibold text-white hover:bg-[#103f44]">
+                <i class="fa-solid fa-print"></i>
+                Print / Save as PDF
+            </button>
         </div>
     </main>
 </body>

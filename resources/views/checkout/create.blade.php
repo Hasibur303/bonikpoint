@@ -25,7 +25,7 @@
             </div>
 
             <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_390px] lg:gap-6">
-                <form method="POST" action="{{ route($isGuestCheckout ? 'guest.checkout.store' : 'checkout.store') }}" class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                <form method="POST" action="{{ route($isGuestCheckout ? 'guest.checkout.store' : 'checkout.store') }}" enctype="multipart/form-data" class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
                     @csrf
 
                     <div class="border-b border-gray-100 px-4 py-4 sm:px-7 sm:py-5">
@@ -103,7 +103,13 @@
                                         <option value="Rocket" data-number="{{ $deliverySettings['rocket_number'] }}" @selected(old('delivery_payment_method') === 'Rocket')>Rocket - {{ $deliverySettings['rocket_number'] }}</option>
                                     </select>
                                     @error('delivery_payment_method')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                                    <p id="selected-payment-number" class="mt-2 text-xs font-semibold text-primary">Select where you sent the delivery charge.</p>
+                                    <div class="mt-2 flex min-h-9 items-center justify-between gap-3 rounded-md border border-primary/15 bg-white px-3 py-2">
+                                        <p id="selected-payment-number" class="min-w-0 text-xs font-semibold text-primary">Select where you sent the delivery charge.</p>
+                                        <button id="copy-payment-number" type="button" class="hidden shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-white hover:bg-ink">
+                                            <i class="fa-regular fa-copy"></i>
+                                            <span>Copy</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -139,6 +145,12 @@
                                     <label for="delivery-transaction-id" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Transaction ID</label>
                                     <input id="delivery-transaction-id" name="delivery_transaction_id" value="{{ old('delivery_transaction_id') }}" class="h-10 w-full rounded-md border-gray-200 bg-white text-sm shadow-sm focus:border-primary focus:ring-primary sm:h-11">
                                     @error('delivery_transaction_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label for="delivery-payment-proof" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Payment screenshot <span class="font-medium text-gray-400">(optional)</span></label>
+                                    <input id="delivery-payment-proof" name="delivery_payment_proof" type="file" accept="image/jpeg,image/png,image/webp" class="block w-full rounded-md border border-gray-200 bg-white text-xs text-gray-600 shadow-sm file:mr-3 file:border-0 file:bg-primary/10 file:px-4 file:py-2.5 file:font-bold file:text-primary hover:file:bg-primary hover:file:text-white sm:text-sm">
+                                    <p class="mt-1.5 text-[11px] text-gray-500 sm:text-xs">JPG, PNG or WebP, maximum 5 MB.</p>
+                                    @error('delivery_payment_proof')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                                 </div>
                             </div>
 
@@ -250,9 +262,27 @@
                 const paymentAccount = document.getElementById('delivery-payment-account');
                 const paymentAccountPanel = document.getElementById('delivery-payment-account-panel');
                 const selectedPaymentNumber = document.getElementById('selected-payment-number');
+                const copyPaymentNumber = document.getElementById('copy-payment-number');
                 const paymentFields = document.getElementById('delivery-payment-fields');
+                const paymentProof = document.getElementById('delivery-payment-proof');
                 const payLaterNote = document.getElementById('delivery-pay-later-note');
                 const money = (value) => `BDT ${Number(value || 0).toLocaleString()}`;
+
+                const copyText = async (value) => {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(value);
+                        return;
+                    }
+
+                    const helper = document.createElement('textarea');
+                    helper.value = value;
+                    helper.style.position = 'fixed';
+                    helper.style.opacity = '0';
+                    document.body.appendChild(helper);
+                    helper.select();
+                    document.execCommand('copy');
+                    helper.remove();
+                };
 
                 const refreshCharge = () => {
                     const city = cityInput.value.trim();
@@ -283,6 +313,11 @@
                     selectedPaymentNumber.textContent = number
                         ? `Selected ${selected.value}: ${number}`
                         : 'Select where you sent the delivery charge.';
+                    copyPaymentNumber?.classList.toggle('hidden', !number);
+                    copyPaymentNumber?.classList.toggle('inline-flex', Boolean(number));
+                    if (copyPaymentNumber) {
+                        copyPaymentNumber.dataset.number = number || '';
+                    }
                 };
 
                 const refreshPaymentMode = () => {
@@ -290,11 +325,25 @@
                     paymentFields.classList.toggle('hidden', payLater);
                     paymentAccountPanel.classList.toggle('hidden', payLater);
                     payLaterNote.classList.toggle('hidden', !payLater);
+                    if (paymentProof) {
+                        paymentProof.disabled = payLater;
+                    }
                 };
 
                 cityInput.addEventListener('input', refreshCharge);
                 cityInput.addEventListener('change', refreshCharge);
                 paymentAccount?.addEventListener('change', refreshPaymentAccount);
+                copyPaymentNumber?.addEventListener('click', async () => {
+                    const number = copyPaymentNumber.dataset.number;
+                    if (!number) {
+                        return;
+                    }
+
+                    await copyText(number);
+                    const label = copyPaymentNumber.querySelector('span');
+                    label.textContent = 'Copied';
+                    window.setTimeout(() => label.textContent = 'Copy', 1600);
+                });
                 document.querySelectorAll('input[name="delivery_charge_payment_option"]').forEach((input) => input.addEventListener('change', refreshPaymentMode));
 
                 refreshCharge();

@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrderController extends Controller
 {
@@ -41,6 +43,25 @@ class OrderController extends Controller
     public function show(Order $order): View
     {
         return view('admin.orders.show', ['order' => $order->load('items', 'user')]);
+    }
+
+    public function receipt(Order $order): View
+    {
+        return view('orders.receipt', [
+            'order' => $order->load('items'),
+            'adminReceipt' => true,
+        ]);
+    }
+
+    public function paymentProof(Order $order): StreamedResponse
+    {
+        abort_unless($order->delivery_payment_proof && Storage::disk('local')->exists($order->delivery_payment_proof), 404);
+
+        return Storage::disk('local')->response(
+            $order->delivery_payment_proof,
+            'payment-proof-'.$order->order_number.'.'.pathinfo($order->delivery_payment_proof, PATHINFO_EXTENSION),
+            ['Cache-Control' => 'private, no-store']
+        );
     }
 
     public function update(Request $request, Order $order): RedirectResponse

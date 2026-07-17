@@ -49,9 +49,16 @@
                             <p>Method: {{ $order->delivery_payment_method }}</p>
                             <p>Payment Mobile: {{ $order->delivery_payment_mobile }}</p>
                             <p>Transaction ID: {{ $order->delivery_transaction_id }}</p>
+                            @if($order->delivery_payment_proof)
+                                <p class="mt-2 inline-flex items-center gap-2 rounded bg-green-50 px-2 py-1 font-semibold text-green-700"><i class="fa-solid fa-circle-check"></i> Payment screenshot submitted</p>
+                            @endif
                         </div>
                     @endif
-                    <div class="mt-5 border-t pt-5 text-lg font-black text-ink">Total: BDT {{ number_format($order->total, 2) }}</div>
+                    <div class="mt-5 space-y-2 border-t pt-5 text-sm">
+                        <div class="flex justify-between gap-4"><span>Order total</span><span class="font-bold">BDT {{ number_format($order->total, 2) }}</span></div>
+                        <div class="flex justify-between gap-4 text-green-700"><span>Paid amount</span><span class="font-bold">BDT {{ number_format($order->paidAmount(), 2) }}</span></div>
+                        <div class="flex justify-between gap-4 text-lg font-black text-ink"><span>Due amount</span><span>BDT {{ number_format($order->dueAmount(), 2) }}</span></div>
+                    </div>
                 </aside>
             </div>
         </div>
