@@ -79,7 +79,7 @@
 
 <x-app-layout>
     @if($festivals->isNotEmpty())
-        <section class="border-b border-gray-100 bg-[#f4f7f6] py-3 md:py-4">
+        <section class="border-b border-[#d6e0dd] bg-[#e8eeec] py-3 md:py-4">
             <div class="container">
                 <div id="festival-mosaic-viewport" class="festival-mosaic-viewport" aria-label="Festival offers">
                     <div id="festival-mosaic-track" class="festival-mosaic-track">
@@ -128,7 +128,8 @@
                     overflow: hidden;
                     border-radius: 0.45rem;
                     background: #071b1f;
-                    box-shadow: 0 10px 28px rgba(8, 28, 31, 0.10);
+                    border: 1px solid rgba(255, 255, 255, 0.65);
+                    box-shadow: 0 12px 30px rgba(12, 42, 44, 0.13);
                     transition: transform 180ms ease, box-shadow 180ms ease;
                 }
 
@@ -168,19 +169,19 @@
         </section>
     @endif
 
-    <section class="bg-[#f4f7f6] py-6 md:py-8">
+    <section class="min-h-[60vh] bg-[#f3f5f4] py-5 md:py-8">
         <div class="container grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
             <aside class="lg:sticky lg:top-24">
-                <details id="shop-sidebar" class="group overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                    <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-4 font-black text-ink lg:hidden">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-sliders text-primary"></i> Filters and categories</span>
-                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition group-open:rotate-180"></i>
+                <details id="shop-sidebar" class="group overflow-hidden rounded-lg border border-[#d4ddda] bg-white shadow-[0_12px_32px_rgba(20,49,51,0.08)]">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-3 bg-ink p-4 font-black text-white lg:hidden">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-sliders text-[#c8dc62]"></i> Filters and categories</span>
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-300 transition group-open:rotate-180"></i>
                     </summary>
 
                     <div class="hidden group-open:block lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
-                        <div class="p-4">
+                        <div class="border-b border-[#dce4e1] bg-[#edf3f1] p-4">
                             <div class="flex items-center justify-between gap-3">
-                                <h2 class="font-black text-ink">Filter products</h2>
+                                <h2 class="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-ink"><span class="grid h-8 w-8 place-items-center rounded-md bg-ink text-xs text-white"><i class="fa-solid fa-sliders"></i></span> Filter products</h2>
                                 @if($search || $minPrice || $maxPrice || $sort || $selectedCategory)
                                     <a href="{{ route('shop.index') }}" class="text-xs font-bold text-primary hover:text-ink">Clear all</a>
                                 @endif
@@ -190,21 +191,21 @@
                                 <label class="relative block">
                                     <span class="sr-only">Search products</span>
                                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
-                                    <input name="search" value="{{ $search }}" placeholder="Search products" aria-label="Search products" class="h-11 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 text-sm focus:border-primary focus:ring-primary">
+                                    <input name="search" value="{{ $search }}" placeholder="Search products" aria-label="Search products" class="h-11 w-full rounded-md border-[#ccd8d4] bg-white pl-10 text-sm font-medium shadow-sm placeholder:font-medium placeholder:text-gray-500 focus:border-primary focus:ring-primary">
                                 </label>
                                 <div class="grid grid-cols-2 gap-2">
                                     <label>
                                         <span class="sr-only">Minimum price</span>
-                                        <input name="min_price" type="number" min="0" value="{{ $minPrice }}" placeholder="Min price" class="h-10 w-full min-w-0 rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
+                                        <input name="min_price" type="number" min="0" value="{{ $minPrice }}" placeholder="Min price" class="h-10 w-full min-w-0 rounded-md border-[#ccd8d4] bg-white text-sm shadow-sm focus:border-primary focus:ring-primary">
                                     </label>
                                     <label>
                                         <span class="sr-only">Maximum price</span>
-                                        <input name="max_price" type="number" min="0" value="{{ $maxPrice }}" placeholder="Max price" class="h-10 w-full min-w-0 rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
+                                        <input name="max_price" type="number" min="0" value="{{ $maxPrice }}" placeholder="Max price" class="h-10 w-full min-w-0 rounded-md border-[#ccd8d4] bg-white text-sm shadow-sm focus:border-primary focus:ring-primary">
                                     </label>
                                 </div>
                                 <label>
                                     <span class="sr-only">Sort products</span>
-                                    <select name="sort" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] py-0 text-sm focus:border-primary focus:ring-primary">
+                                    <select name="sort" class="h-10 w-full rounded-md border-[#ccd8d4] bg-white py-0 text-sm shadow-sm focus:border-primary focus:ring-primary">
                                         <option value="">Newest arrivals</option>
                                         <option value="price_low" @selected($sort === 'price_low')>Price: low to high</option>
                                         <option value="price_high" @selected($sort === 'price_high')>Price: high to low</option>
@@ -213,14 +214,14 @@
                                 @if($selectedCategory && ! $selectedCategoryModel)
                                     <input type="hidden" name="category" value="{{ $selectedCategory }}">
                                 @endif
-                                <button type="submit" class="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-black text-white hover:bg-ink">
+                                <button type="submit" class="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-ink text-xs font-black uppercase tracking-wide text-white shadow-[0_6px_16px_rgba(16,63,68,0.16)] hover:bg-primary">
                                     <i class="fa-solid fa-sliders"></i>
                                     Apply filters
                                 </button>
                             </form>
                         </div>
 
-                        <div class="border-t border-gray-100 p-4">
+                        <div class="bg-white p-4">
                             <div class="flex items-center justify-between gap-3">
                                 <h2 class="font-black text-ink">Categories</h2>
                                 <a href="{{ route('shop.index', array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="text-xs font-bold {{ $selectedCategory ? 'text-primary hover:text-ink' : 'text-gray-400' }}">All products</a>
@@ -240,8 +241,8 @@
                                     @endphp
 
                                     @if($category->children->isNotEmpty())
-                                        <details class="group/category rounded-md {{ $isMainActive || $hasActiveChild ? 'bg-primary/5' : '' }}" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
-                                            <summary class="flex cursor-pointer list-none items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f7f9f8]">
+                                        <details class="group/category rounded-md {{ $isMainActive || $hasActiveChild ? 'bg-[#edf5f3]' : '' }}" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
+                                            <summary class="flex cursor-pointer list-none items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f2f5f4]">
                                                 @if($category->image)
                                                     <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
                                                 @else
@@ -261,7 +262,7 @@
                                             </div>
                                         </details>
                                     @else
-                                        <a href="{{ $category->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f7f9f8] {{ $isMainActive ? 'bg-primary/5' : '' }}">
+                                        <a href="{{ $category->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f2f5f4] {{ $isMainActive ? 'bg-[#edf5f3]' : '' }}">
                                             @if($category->image)
                                                 <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
                                             @else
@@ -278,14 +279,21 @@
             </aside>
 
             <div>
-                <div class="flex items-end justify-between gap-4">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-wide text-primary">Available now</p>
-                        <h1 class="mt-1 text-2xl font-black text-ink">{{ $shopHeading }}</h1>
+                @if($selectedCategoryModel || $selectedBrand)
+                    <div class="flex items-end justify-between gap-4 border-b border-[#d8e0dd] pb-4">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wide text-primary">Available now</p>
+                            <h1 class="mt-1 text-2xl font-black text-ink">{{ $shopHeading }}</h1>
+                        </div>
+                        <p class="rounded-md border border-[#d6dfdc] bg-white px-3 py-1.5 text-sm font-bold text-gray-500 shadow-sm">{{ $products->total() }} results</p>
                     </div>
-                    <p class="text-sm font-semibold text-gray-500">{{ $products->total() }} results</p>
-                </div>
-                <p class="mt-3 max-w-3xl text-sm leading-6 text-gray-600">{{ $shopDescription }}</p>
+                    <p class="mt-3 max-w-3xl text-sm leading-6 text-gray-600">{{ $shopDescription }}</p>
+                @else
+                    <h1 class="sr-only">{{ $shopHeading }}</h1>
+                    <div class="flex justify-end border-b border-[#d8e0dd] pb-3">
+                        <p class="rounded-md border border-[#d6dfdc] bg-white px-3 py-1.5 text-sm font-bold text-gray-500 shadow-sm">{{ $products->total() }} results</p>
+                    </div>
+                @endif
 
                 <div class="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
                     @forelse($products as $product)

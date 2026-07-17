@@ -54,23 +54,27 @@
     @endif
     @stack('schema')
 </head>
-<body class="bg-gray-50 font-sans text-gray-700 antialiased">
-    <header class="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur">
+<body class="bg-[#f3f5f4] font-sans text-gray-700 antialiased">
+    <header class="sticky top-0 z-50 border-b border-[#31575a] bg-[#123b3e] text-white shadow-[0_8px_24px_rgba(9,34,36,0.14)]">
         <div class="container">
             <div class="flex h-20 items-center justify-between gap-6">
-                <a href="{{ route('home.index') }}" class="flex items-center gap-3">
-                    <img src="{{ asset('assets/images/logo.webp') }}" alt="Bonik Point" width="160" height="80" decoding="async" class="h-[76px] w-auto object-contain">
+                <a href="{{ route('home.index') }}" class="flex shrink-0 items-center gap-2.5" aria-label="Bonik Point home">
+                    <span class="grid h-10 w-10 place-items-center rounded-md bg-white text-xl font-black text-ink shadow-sm">B</span>
+                    <span class="block">
+                        <span class="block text-xs font-black uppercase leading-tight text-white sm:text-base">Bonik Point</span>
+                        <span class="hidden text-[9px] font-bold uppercase tracking-wide text-[#c8dc62] sm:block">Shop with confidence</span>
+                    </span>
                 </a>
 
                 @php
                     $activeCategorySlug = request('category') ?: request()->route('category')?->slug;
                 @endphp
 
-                <nav class="hidden items-center gap-8 text-sm font-semibold uppercase tracking-wide text-ink md:flex">
-                    <a href="{{ route('home.index') }}" class="{{ request()->routeIs('home.index') ? 'text-primary' : 'hover:text-primary' }}">Home</a>
-                    <a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*') ? 'text-primary' : 'hover:text-primary' }}">Shop</a>
+                <nav class="hidden items-center gap-8 text-sm font-semibold uppercase tracking-wide text-gray-200 md:flex">
+                    <a href="{{ route('home.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('home.index') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Home</a>
+                    <a href="{{ route('shop.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('shop.*') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Shop</a>
                     <div class="group relative">
-                        <button type="button" aria-haspopup="true" class="uppercase {{ $activeCategorySlug ? 'text-primary' : 'hover:text-primary' }}">
+                        <button type="button" aria-haspopup="true" class="border-b-2 py-2 uppercase transition {{ $activeCategorySlug ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">
                             Categories
                         </button>
                         <div class="invisible absolute left-0 top-full z-50 w-64 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
@@ -105,33 +109,37 @@
                             </div>
                         </div>
                     </div>
-                    <a href="{{ route('cart.index') }}" class="{{ request()->routeIs('cart.*') ? 'text-primary' : 'hover:text-primary' }}">Cart</a>
+                    <a href="{{ route('cart.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('cart.*') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Cart</a>
                     @auth
-                        <a href="{{ route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'text-primary' : 'hover:text-primary' }}">Orders</a>
+                        <a href="{{ route('orders.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('orders.*') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Orders</a>
                         @if(auth()->user()->isAdmin())
-                            <a href="{{ route('admin.index') }}" class="hover:text-primary">Admin</a>
+                            <a href="{{ route('admin.index') }}" class="border-b-2 border-transparent py-2 transition hover:border-white/30 hover:text-white">Admin</a>
                         @endif
                     @endauth
                 </nav>
 
                 <div class="flex items-center gap-2 sm:gap-4">
                     <form action="{{ route('shop.index') }}" class="hidden xl:block">
-                        <input name="search" value="{{ request('search') }}" placeholder="Search products" aria-label="Search products" class="w-56 rounded-full border-gray-200 text-sm focus:border-primary focus:ring-primary">
+                        <label class="relative block">
+                            <span class="sr-only">Search products</span>
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
+                            <input name="search" value="{{ request('search') }}" placeholder="Search products" aria-label="Search products" class="h-10 w-56 rounded-md border-white/10 bg-white pl-10 text-sm text-ink shadow-sm placeholder:text-gray-400 focus:border-[#c8dc62] focus:ring-[#c8dc62]">
+                        </label>
                     </form>
 
-                    <button id="open-cart-drawer" type="button" aria-label="Open shopping cart" class="relative grid h-10 w-10 place-items-center rounded-full border border-gray-200 text-ink hover:border-primary hover:text-primary" title="Cart">
+                    <button id="open-cart-drawer" type="button" aria-label="Open shopping cart" class="relative grid h-10 w-10 place-items-center rounded-md border border-white/20 text-white transition hover:border-white/50 hover:bg-white/10" title="Cart">
                         <i class="fa-solid fa-bag-shopping"></i>
-                        <span id="cart-count-badge" class="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-xs font-bold text-white">{{ $drawerCart['count'] ?? 0 }}</span>
+                        <span id="cart-count-badge" class="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded bg-[#c8dc62] px-1 text-xs font-black text-ink">{{ $drawerCart['count'] ?? 0 }}</span>
                     </button>
 
-                    <a href="tel:01540381020" aria-label="Call Bonik Point customer service" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary transition hover:border-primary hover:bg-primary hover:text-white lg:w-auto lg:px-4" title="Call customer service">
+                    <a href="tel:01540381020" aria-label="Call Bonik Point customer service" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/20 bg-white/10 text-white transition hover:bg-white hover:text-ink lg:w-auto lg:px-4" title="Call customer service">
                         <i class="fa-solid fa-phone"></i>
                         <span class="ml-2 hidden text-sm font-bold lg:inline">Call</span>
                     </a>
 
                     @auth
                         <div class="group relative">
-                            <button type="button" aria-label="Open customer account menu" aria-haspopup="true" class="grid h-10 w-10 place-items-center rounded-full bg-primary text-white" title="Account">
+                            <button type="button" aria-label="Open customer account menu" aria-haspopup="true" class="grid h-10 w-10 place-items-center rounded-md bg-[#c8dc62] text-ink transition hover:bg-white" title="Account">
                                 <i class="fa-regular fa-user"></i>
                             </button>
                             <div class="invisible absolute right-0 top-full z-50 w-48 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
@@ -147,28 +155,28 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="rounded-full bg-ink px-5 py-2 text-sm font-semibold text-white hover:bg-primary">Sign In</a>
+                        <a href="{{ route('login') }}" class="rounded-md bg-[#c8dc62] px-5 py-2.5 text-sm font-black text-ink hover:bg-white">Sign In</a>
                     @endauth
 
-                    <button id="mobile-menu-button" type="button" class="grid h-10 w-10 place-items-center rounded border border-gray-200 text-ink hover:border-primary hover:text-primary md:hidden" aria-controls="mobile-menu" aria-expanded="false">
+                    <button id="mobile-menu-button" type="button" class="grid h-10 w-10 place-items-center rounded-md border border-white/20 text-white hover:border-white/50 hover:bg-white/10 md:hidden" aria-controls="mobile-menu" aria-expanded="false">
                         <span class="sr-only">Open menu</span>
                         <span class="text-2xl leading-none">&#9776;</span>
                     </button>
                 </div>
             </div>
 
-            <div id="mobile-menu" class="hidden border-t border-gray-100 py-4 md:hidden">
+            <div id="mobile-menu" class="hidden border-t border-white/10 py-4 md:hidden">
                 <form action="{{ route('shop.index') }}" class="mb-4">
-                    <input name="search" value="{{ request('search') }}" placeholder="Search products" aria-label="Search products" class="w-full rounded-lg border-gray-200 text-sm focus:border-primary focus:ring-primary">
+                    <input name="search" value="{{ request('search') }}" placeholder="Search products" aria-label="Search products" class="w-full rounded-md border-white/10 bg-white text-sm text-ink focus:border-[#c8dc62] focus:ring-[#c8dc62]">
                 </form>
 
-                <nav class="grid gap-2 text-sm font-semibold uppercase tracking-wide text-ink">
-                    <a href="{{ route('home.index') }}" class="rounded px-3 py-2 {{ request()->routeIs('home.index') ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">Home</a>
-                    <a href="{{ route('shop.index') }}" class="rounded px-3 py-2 {{ request()->routeIs('shop.*') ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">Shop</a>
-                    <div class="rounded border border-gray-100 p-2">
-                        <p class="px-1 pb-2 text-xs font-bold text-gray-400">Categories</p>
+                <nav class="grid gap-2 text-sm font-semibold uppercase tracking-wide text-white">
+                    <a href="{{ route('home.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('home.index') ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">Home</a>
+                    <a href="{{ route('shop.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('shop.*') ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">Shop</a>
+                    <div class="rounded-md border border-white/10 p-2">
+                        <p class="px-1 pb-2 text-xs font-bold text-gray-300">Categories</p>
                         <div class="grid gap-1 normal-case tracking-normal">
-                            <a href="{{ route('shop.index') }}" class="rounded px-3 py-2 text-sm {{ $activeCategorySlug ? 'hover:bg-gray-50 hover:text-primary' : 'bg-primary text-white' }}">All Categories</a>
+                            <a href="{{ route('shop.index') }}" class="rounded-md px-3 py-2 text-sm {{ $activeCategorySlug ? 'hover:bg-white/10' : 'bg-[#c8dc62] text-ink' }}">All Categories</a>
                             @foreach($headerCategories ?? [] as $category)
                                 @php
                                     $isCategoryActive = $activeCategorySlug === $category->slug;
@@ -176,41 +184,41 @@
                                 @endphp
 
                                 @if($category->children->isNotEmpty())
-                                    <details class="rounded border border-gray-100" {{ $isCategoryActive || $hasActiveChild ? 'open' : '' }}>
-                                        <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">
+                                    <details class="rounded-md border border-white/10" {{ $isCategoryActive || $hasActiveChild ? 'open' : '' }}>
+                                        <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded-md px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">
                                             <a href="{{ $category->public_url }}">{{ $category->name }}</a>
                                             <span class="text-xs {{ $isCategoryActive ? 'text-white' : 'text-gray-400' }}">&#9656;</span>
                                         </summary>
                                         <div class="grid gap-1 px-2 pb-2 pt-1">
                                             @foreach($category->children as $child)
-                                                <a href="{{ $child->public_url }}" class="rounded px-4 py-2 text-sm {{ $activeCategorySlug === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-primary' }}">
+                                                <a href="{{ $child->public_url }}" class="rounded-md px-4 py-2 text-sm {{ $activeCategorySlug === $child->slug ? 'bg-[#c8dc62] text-ink' : 'text-gray-200 hover:bg-white/10 hover:text-white' }}">
                                                     {{ $child->name }}
                                                 </a>
                                             @endforeach
                                         </div>
                                     </details>
                                 @else
-                                    <a href="{{ $category->public_url }}" class="rounded px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">
+                                    <a href="{{ $category->public_url }}" class="rounded-md px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">
                                         {{ $category->name }}
                                     </a>
                                 @endif
                             @endforeach
                         </div>
                     </div>
-                    <a href="{{ route('cart.index') }}" class="rounded px-3 py-2 {{ request()->routeIs('cart.*') ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">Cart</a>
+                    <a href="{{ route('cart.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('cart.*') ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">Cart</a>
                     @auth
-                        <a href="{{ route('dashboard') }}" class="rounded px-3 py-2 {{ request()->routeIs('dashboard') ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">Dashboard</a>
-                        <a href="{{ route('orders.index') }}" class="rounded px-3 py-2 {{ request()->routeIs('orders.*') ? 'bg-primary text-white' : 'hover:bg-gray-50 hover:text-primary' }}">Orders</a>
+                        <a href="{{ route('dashboard') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('dashboard') ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">Dashboard</a>
+                        <a href="{{ route('orders.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('orders.*') ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">Orders</a>
                         @if(auth()->user()->isAdmin())
-                            <a href="{{ route('admin.index') }}" class="rounded px-3 py-2 hover:bg-gray-50 hover:text-primary">Admin</a>
+                            <a href="{{ route('admin.index') }}" class="rounded-md px-3 py-2 hover:bg-white/10">Admin</a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="w-full rounded px-3 py-2 text-left hover:bg-gray-50 hover:text-primary">Sign Out</button>
+                            <button type="submit" class="w-full rounded-md px-3 py-2 text-left hover:bg-white/10">Sign Out</button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="rounded px-3 py-2 hover:bg-gray-50 hover:text-primary">Sign In</a>
-                        <a href="{{ route('register') }}" class="rounded px-3 py-2 hover:bg-gray-50 hover:text-primary">Register</a>
+                        <a href="{{ route('login') }}" class="rounded-md px-3 py-2 hover:bg-white/10">Sign In</a>
+                        <a href="{{ route('register') }}" class="rounded-md px-3 py-2 hover:bg-white/10">Register</a>
                     @endauth
                 </nav>
             </div>
