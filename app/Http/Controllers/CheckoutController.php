@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Product;
+use App\Models\ProductColor;
 use App\Models\StoreSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Throwable;
 
@@ -48,6 +51,10 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
+        if ($this->ageConfirmationRequired($cartItems)) {
+            return redirect()->route('cart.index')->with('error', 'Please confirm your age before checkout.');
+        }
+
         $city = $this->canonicalCity(old('city'));
 
         return view('checkout.create', [
@@ -77,6 +84,10 @@ class CheckoutController extends Controller
 
         if (count($cartItems) === 0) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
+
+        if ($this->ageConfirmationRequired($cartItems)) {
+            return redirect()->route('cart.index')->with('error', 'Please confirm your age before checkout.');
         }
 
         $advanceDeliveryRequired = $this->advanceDeliveryRequired($cartItems);
@@ -117,7 +128,8 @@ class CheckoutController extends Controller
 
         try {
             $order = DB::transaction(function () use ($data, $cartItems, $advanceDeliveryRequired, $deliveryArea, $isGuestCheckout, $paymentProofPath) {
-                $subtotal = collect($cartItems)->sum('total');
+                $verifiedItems = $this->verifiedCartItems($cartItems);
+                $subtotal = collect($verifiedItems)->sum('total');
                 $shipping = $advanceDeliveryRequired ? $this->deliveryCharge($deliveryArea) : 0;
                 $guestToken = $isGuestCheckout ? Str::random(48) : null;
                 $order = Order::create([
@@ -138,7 +150,7 @@ class CheckoutController extends Controller
                     'delivery_payment_proof' => $paymentProofPath,
                 ]);
 
-                foreach ($cartItems as $item) {
+                foreach ($verifiedItems as $item) {
                     $product = $item['product'];
                     $quantity = $item['quantity'];
 
@@ -178,6 +190,73 @@ class CheckoutController extends Controller
     private function advanceDeliveryRequired(array $cartItems): bool
     {
         return collect($cartItems)->contains(fn ($item) => (bool) $item['product']->advance_delivery_charge);
+    }
+
+    private function ageConfirmationRequired(array $cartItems): bool
+    {
+        return collect($cartItems)->contains(fn ($item) => $item['product']->isAgeRestricted())
+            && ! request()->session()->boolean('age_restricted_confirmed');
+    }
+
+    private function verifiedCartItems(array $cartItems): array
+    {
+        return collect($cartItems)->map(function (array $item) {
+            $cartProduct = $item['product'];
+            $quantity = max(1, (int) $item['quantity']);
+
+            $product = Product::whereKey($cartProduct->id)
+                ->where('is_active', true)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $product) {
+                throw ValidationException::withMessages([
+                    'cart' => "{$cartProduct->name} is no longer available.",
+                ]);
+            }
+
+            if ($product->stock < $quantity) {
+                throw ValidationException::withMessages([
+                    'cart' => "{$product->name} only has {$product->stock} item(s) in stock.",
+                ]);
+            }
+
+            $selectedColor = null;
+
+            if (! empty($item['product_color_id'])) {
+                $selectedColor = ProductColor::where('product_id', $product->id)
+                    ->whereKey($item['product_color_id'])
+                    ->first();
+
+                if (! $selectedColor) {
+                    throw ValidationException::withMessages([
+                        'cart' => "Please select a valid color for {$product->name}.",
+                    ]);
+                }
+            }
+
+            $unitPrice = (float) $product->price;
+            $festivalTitle = null;
+
+            if (! empty($item['festival_id'])) {
+                $festival = \App\Models\Festival::find($item['festival_id']);
+
+                if ($festival && $festival->isRunning() && $festival->includesProduct($product)) {
+                    $unitPrice = (float) $festival->discountedPrice($product);
+                    $festivalTitle = $festival->title;
+                }
+            }
+
+            return [
+                'product' => $product,
+                'quantity' => $quantity,
+                'unit_price' => $unitPrice,
+                'festival_title' => $festivalTitle,
+                'product_color_name' => $selectedColor?->name,
+                'product_color_hex' => $selectedColor?->hex_code,
+                'total' => $unitPrice * $quantity,
+            ];
+        })->values()->all();
     }
 
     private function deliveryCharge(?string $area): int

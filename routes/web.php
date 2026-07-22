@@ -11,12 +11,14 @@ use App\Http\Controllers\FestivalController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\VideoController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\FestivalController as AdminFestivalController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProfitController as AdminProfitController;
 use App\Http\Controllers\Admin\ProductFaqController as AdminProductFaqController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ProductReviewController as AdminProductReviewController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Models\Category;
@@ -44,6 +46,7 @@ Route::get('/sitemap.xml', function () {
     $urls = collect([
         ['loc' => route('home.index'), 'priority' => '1.0'],
         ['loc' => route('shop.index'), 'priority' => '0.9'],
+        ['loc' => route('videos.index'), 'priority' => '0.6'],
         ['loc' => route('order-instructions'), 'priority' => '0.5'],
         ['loc' => route('return-policy'), 'priority' => '0.5'],
     ]);
@@ -100,10 +103,12 @@ Route::get('/sitemap.xml', function () {
 })->name('sitemap');
 Route::view('/return-refund-policy', 'pages.return-policy')->name('return-policy');
 Route::view('/order-instructions', 'pages.order-instructions')->name('order-instructions');
+Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
 Route::get('/festivals/{festival:slug}', [FestivalController::class, 'show'])->name('festivals.show');
 Route::get('/products/{product}', [ShopController::class, 'show'])->name('shop.show');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::get('/cart/snapshot', [CartController::class, 'snapshotResponse'])->name('cart.snapshot');
+Route::post('/cart/confirm-age', [CartController::class, 'confirmAge'])->name('cart.confirm-age');
 Route::post('/cart/{product}', [CartController::class, 'store'])->name('cart.store');
 Route::patch('/cart/{product}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{product}', [CartController::class, 'destroy'])->name('cart.destroy');
@@ -141,6 +146,9 @@ Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(fu
     Route::get('products/{product}/faqs', [AdminProductFaqController::class, 'edit'])->name('products.faqs.edit');
     Route::patch('products/{product}/faqs', [AdminProductFaqController::class, 'update'])->name('products.faqs.update');
     Route::resource('products', AdminProductController::class)->except('show');
+    Route::get('reviews', [AdminProductReviewController::class, 'index'])->name('reviews.index');
+    Route::patch('reviews/{review}', [AdminProductReviewController::class, 'update'])->name('reviews.update');
+    Route::delete('reviews/{review}', [AdminProductReviewController::class, 'destroy'])->name('reviews.destroy');
     Route::resource('festivals', AdminFestivalController::class)->except('show');
     Route::get('profit', [AdminProfitController::class, 'index'])->name('profit.index');
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
@@ -149,6 +157,9 @@ Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(fu
     Route::get('orders/{order}/payment-proof', [AdminOrderController::class, 'paymentProof'])->name('orders.payment-proof');
     Route::patch('orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
     Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('administrators', [AdminUserController::class, 'admins'])->name('users.admins');
+    Route::get('administrators/create', [AdminUserController::class, 'createAdmin'])->name('users.admins.create');
+    Route::post('administrators', [AdminUserController::class, 'storeAdmin'])->name('users.admins.store');
     Route::patch('users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::get('settings', [AdminSettingController::class, 'edit'])->name('settings.edit');
     Route::patch('settings', [AdminSettingController::class, 'update'])->name('settings.update');

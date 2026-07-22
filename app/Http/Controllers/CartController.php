@@ -21,6 +21,18 @@ class CartController extends Controller
     {
         abort_unless($product->is_active, 404);
 
+        if ($product->isAgeRestricted() && ! $request->session()->boolean('age_restricted_confirmed')) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Please confirm your age before adding this product to cart.',
+                    'requires_age_verification' => true,
+                    'cart' => $this->snapshot(),
+                ], 428);
+            }
+
+            return redirect()->route('shop.show', $product)->with('error', 'Please confirm your age before adding this product to cart.');
+        }
+
         $quantity = max(1, min((int) $request->input('quantity', 1), $product->stock));
         $cart = session('cart', []);
         $festival = $this->festivalFor($request, $product);
@@ -77,7 +89,14 @@ class CartController extends Controller
 
         if (isset($cart[$cartKey])) {
             $otherQuantity = $this->quantityForProduct($cart, $product->id, $cartKey);
-            $cart[$cartKey]['quantity'] = min((int) $request->quantity, max(1, $product->stock - $otherQuantity));
+            $allowedQuantity = max(0, $product->stock - $otherQuantity);
+
+            if ($product->stock < 1 || $allowedQuantity < 1) {
+                unset($cart[$cartKey]);
+            } else {
+                $cart[$cartKey]['quantity'] = min((int) $request->quantity, $allowedQuantity);
+            }
+
             session(['cart' => $cart]);
         }
 
@@ -113,6 +132,13 @@ class CartController extends Controller
         return response()->json(['cart' => $this->snapshot()]);
     }
 
+    public function confirmAge(Request $request): JsonResponse
+    {
+        $request->session()->put('age_restricted_confirmed', true);
+
+        return response()->json(['confirmed' => true]);
+    }
+
     public static function count(): int
     {
         return collect(session('cart', []))->sum('quantity');
@@ -133,11 +159,11 @@ class CartController extends Controller
             $productId = (int) str($cartKey)->before(':')->toString();
             $product = $products->get((int) $productId);
 
-            if (! $product) {
+            if (! $product || ! $product->is_active || $product->stock < 1) {
                 return null;
             }
 
-            $quantity = min((int) $item['quantity'], max(1, $product->stock));
+            $quantity = min((int) $item['quantity'], $product->stock);
             $unitPrice = isset($item['unit_price']) ? (float) $item['unit_price'] : (float) $product->price;
 
             return [

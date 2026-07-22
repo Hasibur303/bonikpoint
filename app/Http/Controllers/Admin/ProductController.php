@@ -16,10 +16,33 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = trim((string) $request->input('search'));
+        $categoryId = $request->integer('category');
+        $status = in_array($request->input('status'), ['active', 'hidden', 'low_stock'], true)
+            ? $request->input('status')
+            : null;
+
         return view('admin.products.index', [
-            'products' => Product::with('category')->withCount('faqs')->latest()->paginate(10),
+            'products' => Product::with('category')
+                ->withCount('faqs')
+                ->when($search, fn ($query) => $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('sku', 'like', '%'.$search.'%')
+                        ->orWhere('brand', 'like', '%'.$search.'%');
+                }))
+                ->when($categoryId, fn ($query) => $query->where('category_id', $categoryId))
+                ->when($status === 'active', fn ($query) => $query->where('is_active', true))
+                ->when($status === 'hidden', fn ($query) => $query->where('is_active', false))
+                ->when($status === 'low_stock', fn ($query) => $query->where('stock', '<=', 5))
+                ->latest()
+                ->paginate(12)
+                ->withQueryString(),
+            'categories' => Category::with('parent')->orderBy('parent_id')->orderBy('name')->get(),
+            'search' => $search,
+            'selectedCategory' => $categoryId,
+            'selectedStatus' => $status,
         ]);
     }
 

@@ -1,7 +1,8 @@
 <x-admin-layout>
-    <div class="mb-6">
-        <p class="text-sm font-bold uppercase tracking-wide text-primary">Catalog</p>
-        <h1 class="text-4xl font-black text-ink">
+    <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+        <p class="text-xs font-black uppercase tracking-wide text-primary">Catalog</p>
+        <h1 class="mt-1 text-3xl font-black text-ink sm:text-4xl">
             @if($category->exists)
                 Edit {{ $category->parent_id ? 'Subcategory' : 'Main Category' }}
             @elseif($parentCategory)
@@ -12,9 +13,13 @@
         </h1>
         @if($parentCategory)
             <p class="mt-2 text-sm font-semibold text-primary">Under: {{ $parentCategory->name }}</p>
+        @else
+            <p class="mt-2 text-sm text-gray-500">Control storefront organization, imagery, and category SEO.</p>
         @endif
+        </div>
+        <a href="{{ $parentCategory ? route('admin.categories.show', $parentCategory) : route('admin.categories.index') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#d7e1df] bg-white px-4 text-xs font-black text-ink shadow-sm hover:border-primary hover:text-primary"><i class="fa-solid fa-arrow-left"></i>Back</a>
     </div>
-    <form method="POST" action="{{ $category->exists ? route('admin.categories.update', $category) : route('admin.categories.store') }}" enctype="multipart/form-data" class="max-w-3xl rounded-lg bg-white p-6 shadow-sm">
+    <form method="POST" action="{{ $category->exists ? route('admin.categories.update', $category) : route('admin.categories.store') }}" enctype="multipart/form-data" class="max-w-4xl rounded-lg border border-[#dfe7e5] bg-white p-5 shadow-sm sm:p-6">
         @csrf
         @if($category->exists) @method('PUT') @endif
         <div class="space-y-5">
@@ -77,7 +82,7 @@
             <label class="flex items-center gap-2"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $category->exists ? $category->is_active : true))> Active</label>
         </div>
         <div class="mt-6 flex flex-wrap gap-3">
-            <button class="rounded bg-primary px-6 py-3 font-semibold text-white">Save Category</button>
+            <button class="inline-flex h-11 items-center gap-2 rounded-md bg-primary px-5 text-sm font-black text-white hover:bg-ink"><i class="fa-solid fa-floppy-disk"></i>Save Category</button>
             @if($parentCategory)
                 <a href="{{ route('admin.categories.show', $parentCategory) }}" class="rounded border border-gray-200 px-6 py-3 font-semibold text-ink hover:border-primary hover:text-primary">Cancel</a>
             @else

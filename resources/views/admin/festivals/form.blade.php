@@ -4,12 +4,16 @@
         $selectedProductValues = collect(old('products', $selectedProducts))->map(fn ($id) => (int) $id)->all();
     @endphp
 
-    <div class="mb-6">
-        <p class="text-sm font-bold uppercase tracking-wide text-primary">Marketing</p>
-        <h1 class="text-4xl font-black text-ink">{{ $festival->exists ? 'Edit Festival Offer' : 'Add Festival Offer' }}</h1>
+    <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+            <p class="text-xs font-black uppercase tracking-wide text-primary">Growth</p>
+            <h1 class="mt-1 text-3xl font-black text-ink sm:text-4xl">{{ $festival->exists ? 'Edit Festival Offer' : 'Add Festival Offer' }}</h1>
+            <p class="mt-2 text-sm text-gray-500">Build a scheduled promotion using categories or selected products.</p>
+        </div>
+        <a href="{{ route('admin.festivals.index') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#d7e1df] bg-white px-4 text-xs font-black text-ink shadow-sm hover:border-primary hover:text-primary"><i class="fa-solid fa-arrow-left"></i>Back to Offers</a>
     </div>
 
-    <form method="POST" action="{{ $festival->exists ? route('admin.festivals.update', $festival) : route('admin.festivals.store') }}" enctype="multipart/form-data" class="rounded-lg bg-white p-6 shadow-sm">
+    <form method="POST" action="{{ $festival->exists ? route('admin.festivals.update', $festival) : route('admin.festivals.store') }}" enctype="multipart/form-data" class="rounded-lg border border-[#dfe7e5] bg-white p-5 shadow-sm sm:p-6">
         @csrf
         @if($festival->exists) @method('PUT') @endif
 
@@ -100,6 +104,6 @@
             </label>
         </div>
 
-        <button class="mt-6 rounded bg-primary px-6 py-3 font-semibold text-white">Save Festival</button>
+        <div class="sticky bottom-4 z-10 mt-6 flex items-center justify-between gap-4 rounded-lg border border-[#d7e1df] bg-white/95 p-3 shadow-[0_12px_35px_rgba(16,63,68,0.13)] backdrop-blur"><p class="hidden pl-2 text-xs font-semibold text-gray-500 sm:block">Confirm the discount and schedule before publishing.</p><button class="ml-auto inline-flex h-11 items-center gap-2 rounded-md bg-primary px-5 text-sm font-black text-white hover:bg-ink"><i class="fa-solid fa-floppy-disk"></i>Save Festival</button></div>
     </form>
 </x-admin-layout>

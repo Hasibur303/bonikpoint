@@ -1,3 +1,85 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .admin-content input:not([type='checkbox']):not([type='radio']):not([type='color']),
+    .admin-content select,
+    .admin-content textarea {
+        border-color: #d7e1df;
+        border-radius: 0.5rem;
+        background-color: #fbfcfc;
+        color: #183f43;
+        box-shadow: 0 1px 2px rgba(16, 63, 68, 0.03);
+        transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+    }
+
+    .admin-content input:not([type='checkbox']):not([type='radio']):not([type='color']):focus,
+    .admin-content select:focus,
+    .admin-content textarea:focus {
+        border-color: #087c7f;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(8, 124, 127, 0.1);
+        outline: none;
+    }
+
+    .admin-content input[type='file'] {
+        padding: 0.55rem;
+    }
+
+    .admin-content input[type='checkbox'],
+    .admin-content input[type='radio'] {
+        border-color: #c9d5d3;
+        color: #087c7f;
+    }
+
+    .admin-content input[type='checkbox']:focus,
+    .admin-content input[type='radio']:focus {
+        --tw-ring-color: rgba(8, 124, 127, 0.2);
+    }
+
+    .admin-content label {
+        color: #294c50;
+    }
+
+    .admin-content table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .admin-content table thead {
+        background-color: #f5f8f7;
+    }
+
+    .admin-content table thead th {
+        border-bottom: 1px solid #e1e9e7;
+        color: #6b7d7f;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0;
+        white-space: nowrap;
+    }
+
+    .admin-content table tbody tr {
+        transition: background-color 160ms ease;
+    }
+
+    .admin-content table tbody tr:hover {
+        background-color: #f8fbfa;
+    }
+
+    .admin-content table tbody td {
+        border-bottom-color: #edf1f0;
+        vertical-align: middle;
+    }
+
+    .admin-content .shadow-sm {
+        box-shadow: 0 8px 28px rgba(24, 63, 67, 0.06);
+    }
+}
+
+#admin-sidebar,
+#admin-sidebar nav {
+    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+    scrollbar-width: thin;
+}

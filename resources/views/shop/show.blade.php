@@ -1,6 +1,5 @@
 @php
-    $isVapeProduct = in_array($product->category?->slug, ['vape-accessories'], true)
-        || in_array($product->category?->parent?->slug, ['vape-accessories'], true);
+    $isVapeProduct = $product->isAgeRestricted();
 
     $averageRating = round((float) ($product->reviews_avg_rating ?? 0), 1);
     $primaryImageAlt = $product->image_alt ?: $product->name.' main product image';
@@ -20,6 +19,12 @@
         : 'Buy '.$product->name.' from Bonik Point with simple ordering and customer support in Bangladesh.');
     $productTitle = $product->seo_title ?: $product->name.' | Bonik Point';
     $productCategoryTrail = collect([$product->category?->parent, $product->category])->filter();
+    $safeSchemaOptions = JSON_UNESCAPED_SLASHES
+        | JSON_UNESCAPED_UNICODE
+        | JSON_HEX_TAG
+        | JSON_HEX_APOS
+        | JSON_HEX_AMP
+        | JSON_HEX_QUOT;
     $productSchema = [
         '@context' => 'https://schema.org',
         '@type' => 'Product',
@@ -125,18 +130,18 @@
 
 @push('schema')
     <script type="application/ld+json">
-        {!! json_encode($productSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+        {!! json_encode($productSchema, $safeSchemaOptions) !!}
     </script>
     <script type="application/ld+json">
         {!! json_encode([
             '@context' => 'https://schema.org',
             '@type' => 'BreadcrumbList',
             'itemListElement' => $breadcrumbItems,
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+        ], $safeSchemaOptions) !!}
     </script>
     @if($faqSchema)
         <script type="application/ld+json">
-            {!! json_encode($faqSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+            {!! json_encode($faqSchema, $safeSchemaOptions) !!}
         </script>
     @endif
 @endpush
@@ -511,7 +516,15 @@
                     document.body.classList.add('overflow-hidden');
                 }
 
-                confirmButton.addEventListener('click', function () {
+                confirmButton.addEventListener('click', async function () {
+                    await fetch('{{ route('cart.confirm-age') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                        },
+                    });
+
                     sessionStorage.setItem(storageKey, 'yes');
                     warning.classList.add('hidden');
                     document.body.classList.remove('overflow-hidden');

@@ -88,6 +88,18 @@ class CategoryController extends Controller
 
     public function destroy(Category $category): RedirectResponse
     {
+        if ($category->children()->exists()) {
+            return back()->withErrors([
+                'category' => 'Delete or move this category subcategories before deleting the main category.',
+            ]);
+        }
+
+        if ($category->products()->exists()) {
+            return back()->withErrors([
+                'category' => 'Move or delete this category products before deleting the category.',
+            ]);
+        }
+
         $parentId = $category->parent_id;
         $category->delete();
 

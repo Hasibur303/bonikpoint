@@ -1,9 +1,13 @@
 <x-admin-layout>
-    <div class="mb-6">
-        <p class="text-sm font-bold uppercase tracking-wide text-primary">Catalog</p>
-        <h1 class="text-4xl font-black text-ink">{{ $product->exists ? 'Edit Product' : 'Add Product' }}</h1>
+    <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+            <p class="text-xs font-black uppercase tracking-wide text-primary">Catalog</p>
+            <h1 class="mt-1 text-3xl font-black text-ink sm:text-4xl">{{ $product->exists ? 'Edit Product' : 'Add Product' }}</h1>
+            <p class="mt-2 text-sm text-gray-500">Manage product information, media, pricing, fulfillment, and SEO.</p>
+        </div>
+        <a href="{{ route('admin.products.index') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#d7e1df] bg-white px-4 text-xs font-black text-ink shadow-sm hover:border-primary hover:text-primary"><i class="fa-solid fa-arrow-left"></i>Back to Products</a>
     </div>
-    <form method="POST" action="{{ $product->exists ? route('admin.products.update', $product) : route('admin.products.store') }}" enctype="multipart/form-data" class="rounded-lg bg-white p-6 shadow-sm">
+    <form id="product-editor-form" method="POST" action="{{ $product->exists ? route('admin.products.update', $product) : route('admin.products.store') }}" enctype="multipart/form-data" class="rounded-lg border border-[#dfe7e5] bg-white p-5 shadow-sm sm:p-6">
         @csrf
         @if($product->exists) @method('PUT') @endif
         <div class="grid gap-5 md:grid-cols-2">
@@ -192,13 +196,16 @@
                 @error('colors.*.name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 @error('colors.*.hex_code')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
-            <div class="flex items-center gap-6">
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6">
                 <label class="flex items-center gap-2"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $product->exists ? $product->is_active : true))> Active</label>
                 <label class="flex items-center gap-2"><input type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $product->is_featured))> Featured</label>
                 <label class="flex items-center gap-2"><input type="checkbox" name="advance_delivery_charge" value="1" @checked(old('advance_delivery_charge', $product->exists ? $product->advance_delivery_charge : true))> Advance Delivery Charge</label>
             </div>
         </div>
-        <button class="mt-6 rounded bg-primary px-6 py-3 font-semibold text-white">Save Product</button>
+        <div class="sticky bottom-4 z-10 mt-6 flex items-center justify-between gap-4 rounded-lg border border-[#d7e1df] bg-white/95 p-3 shadow-[0_12px_35px_rgba(16,63,68,0.13)] backdrop-blur">
+            <p class="hidden pl-2 text-xs font-semibold text-gray-500 sm:block">Review pricing and stock before saving.</p>
+            <button class="ml-auto inline-flex h-11 items-center gap-2 rounded-md bg-primary px-5 text-sm font-black text-white hover:bg-ink"><i class="fa-solid fa-floppy-disk"></i>Save Product</button>
+        </div>
     </form>
 
     <script>

@@ -48,6 +48,12 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        if ($user->isAdmin()) {
+            return Redirect::route('profile.edit')->withErrors([
+                'account' => 'Administrator accounts cannot be deleted from this page. Create another admin and transfer access before removing an admin account.',
+            ]);
+        }
+
         Auth::logout();
 
         $user->delete();

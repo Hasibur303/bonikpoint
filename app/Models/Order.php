@@ -15,6 +15,7 @@ class Order extends Model
         'user_id',
         'guest_token',
         'order_number',
+        'parcel_id',
         'customer_name',
         'email',
         'mobile',

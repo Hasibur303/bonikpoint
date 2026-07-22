@@ -18,6 +18,9 @@
             <div class="min-w-0 text-left sm:text-right">
                 <p class="text-sm font-bold uppercase text-gray-400">Receipt</p>
                 <p class="break-words font-bold">{{ $order->order_number }}</p>
+                @if($order->parcel_id)
+                    <p class="mt-1 break-all text-sm font-bold text-[#087c7f]">Parcel ID: {{ $order->parcel_id }}</p>
+                @endif
                 <p class="text-sm text-gray-500">{{ $order->created_at->format('d M Y') }}</p>
                 <p class="mt-2 inline-flex max-w-full rounded bg-gray-100 px-3 py-1 text-sm font-semibold capitalize">{{ str($order->status)->replace('_', ' ') }}</p>
             </div>

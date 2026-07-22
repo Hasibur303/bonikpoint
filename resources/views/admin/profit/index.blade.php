@@ -1,93 +1,47 @@
 <x-admin-layout>
-    <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-            <p class="text-sm font-bold uppercase tracking-wide text-primary">Accounts</p>
-            <h1 class="text-4xl font-black text-ink">Profit Report</h1>
-            <p class="mt-2 text-sm text-gray-500">Showing non-cancelled orders for {{ $periodLabel }}.</p>
+            <p class="text-xs font-black uppercase tracking-wide text-primary">Finance</p>
+            <h1 class="mt-1 text-3xl font-black text-ink sm:text-4xl">Profit Report</h1>
+            <p class="mt-2 text-sm text-gray-500">Delivered sales for <span class="font-bold text-ink">{{ $periodLabel }}</span>.</p>
         </div>
-        <a href="{{ route('admin.products.index') }}" class="rounded bg-ink px-5 py-2 font-semibold text-white">Update Buying Prices</a>
+        <a href="{{ route('admin.products.index') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#d7e1df] bg-white px-4 text-xs font-black text-ink shadow-sm hover:border-primary hover:text-primary"><i class="fa-solid fa-pen"></i>Update Buying Prices</a>
     </div>
 
-    <form method="GET" action="{{ route('admin.profit.index') }}" class="mb-6 rounded-lg bg-white p-5 shadow-sm">
-        <div class="grid gap-4 lg:grid-cols-[180px_1fr_1fr_1fr_auto]">
-            <div>
-                <label class="mb-1 block text-sm font-semibold">Report Type</label>
-                <select name="filter" class="w-full rounded border-gray-200">
-                    <option value="day" @selected($filter === 'day')>Selected Date</option>
-                    <option value="month" @selected($filter === 'month')>Full Month</option>
-                    <option value="year" @selected($filter === 'year')>Full Year</option>
-                    <option value="all" @selected($filter === 'all')>All Time</option>
-                </select>
-            </div>
-            <div>
-                <label class="mb-1 block text-sm font-semibold">Date</label>
-                <input type="date" name="date" value="{{ $date }}" class="w-full rounded border-gray-200">
-            </div>
-            <div>
-                <label class="mb-1 block text-sm font-semibold">Month</label>
-                <input type="month" name="month" value="{{ $month }}" class="w-full rounded border-gray-200">
-            </div>
-            <div>
-                <label class="mb-1 block text-sm font-semibold">Year</label>
-                <input type="number" name="year" value="{{ $year }}" min="2000" max="2100" class="w-full rounded border-gray-200">
-            </div>
-            <div class="flex items-end">
-                <button class="w-full rounded bg-primary px-6 py-2.5 font-semibold text-white">Show Profit</button>
-            </div>
+    <form method="GET" action="{{ route('admin.profit.index') }}" class="mb-5 rounded-lg border border-[#dfe7e5] bg-white p-4 shadow-sm">
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-[180px_1fr_1fr_1fr_auto]">
+            <div><label class="mb-1.5 block text-xs font-black">Report Type</label><select name="filter" class="h-11 w-full text-sm"><option value="day" @selected($filter === 'day')>Selected Date</option><option value="month" @selected($filter === 'month')>Full Month</option><option value="year" @selected($filter === 'year')>Full Year</option><option value="all" @selected($filter === 'all')>All Time</option></select></div>
+            <div><label class="mb-1.5 block text-xs font-black">Date</label><input type="date" name="date" value="{{ $date }}" class="h-11 w-full text-sm"></div>
+            <div><label class="mb-1.5 block text-xs font-black">Month</label><input type="month" name="month" value="{{ $month }}" class="h-11 w-full text-sm"></div>
+            <div><label class="mb-1.5 block text-xs font-black">Year</label><input type="number" name="year" value="{{ $year }}" min="2000" max="2100" class="h-11 w-full text-sm"></div>
+            <div class="flex items-end"><button class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-ink px-5 text-xs font-black text-white hover:bg-primary"><i class="fa-solid fa-chart-simple"></i>Generate</button></div>
         </div>
     </form>
 
-    <div class="grid gap-5 md:grid-cols-5">
-        <div class="rounded-lg bg-white p-5 shadow-sm">
-            <p class="text-sm text-gray-500">Revenue</p>
-            <p class="mt-2 text-2xl font-black text-ink">BDT {{ number_format((float) $summary->revenue, 2) }}</p>
-        </div>
-        <div class="rounded-lg bg-white p-5 shadow-sm">
-            <p class="text-sm text-gray-500">Buying Cost</p>
-            <p class="mt-2 text-2xl font-black text-ink">BDT {{ number_format((float) $summary->cost, 2) }}</p>
-        </div>
-        <div class="rounded-lg bg-white p-5 shadow-sm">
-            <p class="text-sm text-gray-500">Profit</p>
-            <p class="mt-2 text-2xl font-black text-primary">BDT {{ number_format((float) $summary->profit, 2) }}</p>
-        </div>
-        <div class="rounded-lg bg-white p-5 shadow-sm">
-            <p class="text-sm text-gray-500">Orders</p>
-            <p class="mt-2 text-2xl font-black text-ink">{{ $summary->orders_count }}</p>
-        </div>
-        <div class="rounded-lg bg-white p-5 shadow-sm">
-            <p class="text-sm text-gray-500">Units Sold</p>
-            <p class="mt-2 text-2xl font-black text-ink">{{ $summary->units }}</p>
-        </div>
+    @php
+        $profitMetrics = [
+            ['label' => 'Revenue', 'value' => 'BDT '.number_format((float) $summary->revenue, 2), 'icon' => 'fa-arrow-trend-up', 'class' => 'bg-blue-50 text-blue-700'],
+            ['label' => 'Buying Cost', 'value' => 'BDT '.number_format((float) $summary->cost, 2), 'icon' => 'fa-boxes-stacked', 'class' => 'bg-amber-50 text-amber-700'],
+            ['label' => 'Gross Profit', 'value' => 'BDT '.number_format((float) $summary->profit, 2), 'icon' => 'fa-sack-dollar', 'class' => 'bg-emerald-50 text-emerald-700'],
+            ['label' => 'Orders', 'value' => number_format($summary->orders_count), 'icon' => 'fa-receipt', 'class' => 'bg-[#e5f4f2] text-primary'],
+            ['label' => 'Units Sold', 'value' => number_format($summary->units), 'icon' => 'fa-cubes', 'class' => 'bg-[#f0f5d7] text-[#617311]'],
+        ];
+    @endphp
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        @foreach($profitMetrics as $metric)
+            <article class="rounded-lg border border-[#dfe7e5] bg-white p-4 shadow-sm"><div class="flex items-start justify-between gap-3"><div><p class="text-xs font-bold text-gray-500">{{ $metric['label'] }}</p><p class="mt-2 text-xl font-black text-ink">{{ $metric['value'] }}</p></div><span class="grid h-9 w-9 shrink-0 place-items-center rounded-md {{ $metric['class'] }}"><i class="fa-solid {{ $metric['icon'] }} text-xs"></i></span></div></article>
+        @endforeach
     </div>
 
-    <div class="mt-8 overflow-hidden rounded-lg bg-white shadow-sm">
-        <table class="w-full text-left text-sm">
-            <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-                <tr>
-                    <th class="p-4">Product</th>
-                    <th class="p-4">Qty</th>
-                    <th class="p-4">Revenue</th>
-                    <th class="p-4">Buying Cost</th>
-                    <th class="p-4">Profit</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y">
-                @forelse($products as $product)
-                    <tr>
-                        <td class="p-4 font-semibold text-ink">{{ $product->product_name }}</td>
-                        <td class="p-4">{{ $product->quantity_sold }}</td>
-                        <td class="p-4">BDT {{ number_format((float) $product->revenue, 2) }}</td>
-                        <td class="p-4">BDT {{ number_format((float) $product->cost, 2) }}</td>
-                        <td class="p-4 font-bold text-primary">BDT {{ number_format((float) $product->profit, 2) }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="p-8 text-center text-gray-500">No sales found for this period.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <p class="mt-4 text-sm text-gray-500">Set each product's buying price for accurate profit. Existing orders use the saved order cost when available, otherwise the current product buying price is used.</p>
+    <section class="mt-6 overflow-hidden rounded-lg border border-[#dfe7e5] bg-white shadow-sm">
+        <div class="border-b border-[#e7edeb] px-5 py-4"><h2 class="text-base font-black text-ink">Product Performance</h2><p class="mt-0.5 text-xs text-gray-500">Revenue, cost, and gross profit by product.</p></div>
+        <div class="overflow-x-auto"><table class="min-w-[720px] w-full text-left text-sm"><thead><tr><th class="px-5 py-3">Product</th><th class="px-4 py-3">Quantity</th><th class="px-4 py-3">Revenue</th><th class="px-4 py-3">Buying Cost</th><th class="px-5 py-3 text-right">Profit</th></tr></thead><tbody>
+            @forelse($products as $product)
+                <tr><td class="px-5 py-4 font-black text-ink">{{ $product->product_name }}</td><td class="px-4 py-4 font-bold text-gray-600">{{ $product->quantity_sold }}</td><td class="px-4 py-4 font-bold text-ink">BDT {{ number_format((float) $product->revenue, 2) }}</td><td class="px-4 py-4 text-gray-600">BDT {{ number_format((float) $product->cost, 2) }}</td><td class="px-5 py-4 text-right font-black text-emerald-700">BDT {{ number_format((float) $product->profit, 2) }}</td></tr>
+            @empty
+                <tr><td colspan="5" class="px-5 py-14 text-center"><span class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-gray-100 text-gray-400"><i class="fa-solid fa-chart-column"></i></span><p class="mt-3 font-bold text-ink">No sales for this period</p><p class="mt-1 text-xs text-gray-500">Choose another date range to review performance.</p></td></tr>
+            @endforelse
+        </tbody></table></div>
+    </section>
+    <p class="mt-4 flex items-start gap-2 text-xs text-gray-500"><i class="fa-solid fa-circle-info mt-0.5 text-primary"></i><span>Profit accuracy depends on each product's buying price. Existing order costs are used when available.</span></p>
 </x-admin-layout>

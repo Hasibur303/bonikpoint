@@ -74,6 +74,14 @@ class Product extends Model
         return $this->warranty_type && $this->warranty_type !== 'none';
     }
 
+    public function isAgeRestricted(): bool
+    {
+        $category = $this->relationLoaded('category') ? $this->category : $this->category()->with('parent')->first();
+        $slugs = collect([$category?->slug, $category?->parent?->slug])->filter();
+
+        return $slugs->contains(fn (string $slug) => str_contains($slug, 'vape'));
+    }
+
     public function getWarrantyLabelAttribute(): string
     {
         return match ($this->warranty_type) {

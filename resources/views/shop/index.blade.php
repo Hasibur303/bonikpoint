@@ -123,6 +123,7 @@
 
                 .festival-mosaic-card {
                     flex: 0 0 clamp(6.25rem, calc((100vw - 2.7rem) / 3), 8rem);
+                    position: relative;
                     display: block;
                     aspect-ratio: 1 / 1;
                     overflow: hidden;
@@ -130,7 +131,48 @@
                     background: #071b1f;
                     border: 1px solid rgba(255, 255, 255, 0.65);
                     box-shadow: 0 12px 30px rgba(12, 42, 44, 0.13);
-                    transition: transform 180ms ease, box-shadow 180ms ease;
+                    transform: translateZ(0) scale(1);
+                    transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1), filter 620ms ease, box-shadow 620ms ease;
+                }
+
+                .festival-mosaic-card::after {
+                    content: '';
+                    position: absolute;
+                    inset: -45%;
+                    pointer-events: none;
+                    background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.2) 50%, transparent 62%);
+                    opacity: 0;
+                    transform: translate3d(-55%, 0, 0) rotate(8deg);
+                }
+
+                .festival-mosaic-viewport.is-animating .festival-mosaic-card {
+                    transform: translateZ(0) scale(0.982);
+                    filter: saturate(0.94) brightness(0.98);
+                    box-shadow: 0 7px 18px rgba(12, 42, 44, 0.1);
+                }
+
+                .festival-mosaic-viewport.is-animating .festival-mosaic-card::after {
+                    animation: festival-card-sheen 680ms cubic-bezier(0.22, 1, 0.36, 1);
+                }
+
+                .festival-mosaic-viewport.is-dragging .festival-mosaic-card {
+                    transform: translateZ(0) scale(0.975);
+                    filter: saturate(0.92) brightness(0.97);
+                    transition-duration: 160ms;
+                }
+
+                @keyframes festival-card-sheen {
+                    0% {
+                        opacity: 0;
+                        transform: translate3d(-55%, 0, 0) rotate(8deg);
+                    }
+                    35% {
+                        opacity: 0.65;
+                    }
+                    100% {
+                        opacity: 0;
+                        transform: translate3d(55%, 0, 0) rotate(8deg);
+                    }
                 }
 
                 @media (min-width: 768px) {
@@ -163,6 +205,17 @@
                 @media (min-width: 1024px) {
                     .festival-mosaic-card:hover {
                         transform: translateY(-2px);
+                    }
+                }
+
+                @media (prefers-reduced-motion: reduce) {
+                    .festival-mosaic-track,
+                    .festival-mosaic-card {
+                        transition: none !important;
+                    }
+
+                    .festival-mosaic-card::after {
+                        animation: none !important;
                     }
                 }
             </style>
@@ -338,7 +391,9 @@
             let didDrag = false;
             let slideTimer = null;
             let resetTimer = null;
-            const slideDelay = 2600;
+            let motionTimer = null;
+            const motionDuration = 680;
+            const slideDelay = 3200;
 
             const panelWidth = () => Math.max(1, festivalTrack.scrollWidth / 2);
 
@@ -367,23 +422,34 @@
             };
 
             const renderFestivalTrack = (animate = false) => {
-                festivalTrack.style.transition = animate ? 'transform 520ms cubic-bezier(0.22, 1, 0.36, 1)' : 'none';
+                window.clearTimeout(motionTimer);
+                festivalViewport.classList.toggle('is-animating', animate);
+                festivalTrack.style.transition = animate ? `transform ${motionDuration}ms cubic-bezier(0.22, 1, 0.36, 1)` : 'none';
                 festivalTrack.style.transform = `translate3d(${offset}px, 0, 0)`;
+
+                if (animate) {
+                    motionTimer = window.setTimeout(() => {
+                        festivalViewport.classList.remove('is-animating');
+                    }, motionDuration);
+                }
+            };
+
+            const scheduleFestivalLoopReset = () => {
+                window.clearTimeout(resetTimer);
+                resetTimer = window.setTimeout(() => {
+                    if (isDragging) return;
+
+                    offset = normalizeOffset(offset);
+                    renderFestivalTrack();
+                }, motionDuration + 40);
             };
 
             const moveFestivalStep = () => {
                 if (isDragging) return;
 
-                window.clearTimeout(resetTimer);
                 offset -= stepWidth();
                 renderFestivalTrack(true);
-
-                resetTimer = window.setTimeout(() => {
-                    if (isDragging || offset > -panelWidth()) return;
-
-                    offset += panelWidth();
-                    renderFestivalTrack();
-                }, 560);
+                scheduleFestivalLoopReset();
             };
 
             const restartFestivalTimer = () => {
@@ -394,6 +460,8 @@
             festivalViewport.addEventListener('pointerdown', (event) => {
                 window.clearInterval(slideTimer);
                 window.clearTimeout(resetTimer);
+                window.clearTimeout(motionTimer);
+                festivalViewport.classList.remove('is-animating');
                 isDragging = true;
                 didDrag = false;
                 startX = event.clientX;
@@ -424,6 +492,9 @@
                 isDragging = false;
                 festivalViewport.classList.remove('is-dragging');
                 festivalViewport.releasePointerCapture?.(event.pointerId);
+                offset = Math.round(offset / stepWidth()) * stepWidth();
+                renderFestivalTrack(true);
+                scheduleFestivalLoopReset();
                 restartFestivalTimer();
             };
 

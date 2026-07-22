@@ -31,10 +31,10 @@ class ProductReviewController extends Controller
             [
                 'rating' => $data['rating'],
                 'comment' => $data['comment'],
-                'is_approved' => true,
+                'is_approved' => false,
             ]
         );
 
-        return back()->with('success', 'Thank you. Your product review has been saved.');
+        return back()->with('success', 'Thank you. Your product review has been submitted for approval.');
     }
 }

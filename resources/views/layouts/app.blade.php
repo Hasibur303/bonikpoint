@@ -48,6 +48,7 @@
                     'https://www.facebook.com/share/1EGD8CxUS9/',
                     'https://youtube.com/@dailyvlogsbynayeem',
                     'https://youtube.com/@nayeemrahmanvlogs',
+                    'https://youtube.com/@budgetkoto',
                 ],
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
         </script>
@@ -55,14 +56,19 @@
     @stack('schema')
 </head>
 <body class="bg-[#f3f5f4] font-sans text-gray-700 antialiased">
-    <header class="sticky top-0 z-50 border-b border-[#31575a] bg-[#123b3e] text-white shadow-[0_8px_24px_rgba(9,34,36,0.14)]">
-        <div class="container">
-            <div class="flex h-20 items-center justify-between gap-6">
+    <header class="sticky top-0 z-50 bg-[#f3f5f4]/95 py-3 backdrop-blur">
+        <div class="container relative">
+            <div class="flex h-16 items-center gap-2 rounded-lg bg-[#0f5555] px-3 text-white shadow-[0_12px_30px_rgba(9,50,51,0.16)] sm:gap-3 sm:px-4">
+                <button id="mobile-menu-button" type="button" class="grid h-10 w-10 shrink-0 place-items-center rounded-md text-white transition hover:bg-white/10 lg:hidden" aria-controls="mobile-menu" aria-expanded="false">
+                    <span class="sr-only">Open menu</span>
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+
                 <a href="{{ route('home.index') }}" class="flex shrink-0 items-center gap-2.5" aria-label="Bonik Point home">
-                    <span class="grid h-10 w-10 place-items-center rounded-md bg-white text-xl font-black text-ink shadow-sm">B</span>
+                    <span class="grid h-9 w-9 place-items-center rounded-md bg-white text-lg font-black text-ink shadow-sm sm:h-10 sm:w-10 sm:text-xl">B</span>
                     <span class="block">
                         <span class="block text-xs font-black uppercase leading-tight text-white sm:text-base">Bonik Point</span>
-                        <span class="hidden text-[9px] font-bold uppercase tracking-wide text-[#c8dc62] sm:block">Shop with confidence</span>
+                        <span class="hidden text-[9px] font-bold uppercase tracking-wide text-[#d5e77a] lg:block">Shop with confidence</span>
                     </span>
                 </a>
 
@@ -70,9 +76,8 @@
                     $activeCategorySlug = request('category') ?: request()->route('category')?->slug;
                 @endphp
 
-                <nav class="hidden items-center gap-8 text-sm font-semibold uppercase tracking-wide text-gray-200 md:flex">
-                    <a href="{{ route('home.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('home.index') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Home</a>
-                    <a href="{{ route('shop.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('shop.*') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Shop</a>
+                <nav class="hidden shrink-0 items-center gap-4 text-xs font-semibold uppercase tracking-wide text-gray-200 lg:flex xl:gap-5 xl:text-sm">
+                    <a href="{{ route('shop.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('shop.*', 'home.index') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Shop</a>
                     <div class="group relative">
                         <button type="button" aria-haspopup="true" class="border-b-2 py-2 uppercase transition {{ $activeCategorySlug ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">
                             Categories
@@ -109,6 +114,7 @@
                             </div>
                         </div>
                     </div>
+                    <a href="{{ route('videos.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('videos.*') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Videos</a>
                     <a href="{{ route('cart.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('cart.*') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Cart</a>
                     @auth
                         <a href="{{ route('orders.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('orders.*') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Orders</a>
@@ -118,28 +124,27 @@
                     @endauth
                 </nav>
 
-                <div class="flex items-center gap-2 sm:gap-4">
-                    <form action="{{ route('shop.index') }}" class="hidden xl:block">
+                <div class="ml-auto flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3">
+                    <form action="{{ route('shop.index') }}" class="hidden min-w-0 flex-1 md:block md:max-w-md">
                         <label class="relative block">
                             <span class="sr-only">Search products</span>
                             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
-                            <input name="search" value="{{ request('search') }}" placeholder="Search products" aria-label="Search products" class="h-10 w-56 rounded-md border-white/10 bg-white pl-10 text-sm text-ink shadow-sm placeholder:text-gray-400 focus:border-[#c8dc62] focus:ring-[#c8dc62]">
+                            <input name="search" value="{{ request('search') }}" placeholder="Search products, categories or brands" aria-label="Search products" class="h-10 w-full rounded-full border-white/10 bg-white pl-10 pr-4 text-sm text-ink shadow-sm placeholder:text-gray-400 focus:border-[#d5e77a] focus:ring-[#d5e77a]">
                         </label>
                     </form>
 
-                    <button id="open-cart-drawer" type="button" aria-label="Open shopping cart" class="relative grid h-10 w-10 place-items-center rounded-md border border-white/20 text-white transition hover:border-white/50 hover:bg-white/10" title="Cart">
+                    <button id="open-cart-drawer" type="button" aria-label="Open shopping cart" class="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-ink shadow-sm transition hover:bg-[#edf3f1]" title="Cart">
                         <i class="fa-solid fa-bag-shopping"></i>
-                        <span id="cart-count-badge" class="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded bg-[#c8dc62] px-1 text-xs font-black text-ink">{{ $drawerCart['count'] ?? 0 }}</span>
+                        <span id="cart-count-badge" class="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#d5e77a] px-1 text-[10px] font-black text-ink ring-2 ring-[#0f5555]">{{ $drawerCart['count'] ?? 0 }}</span>
                     </button>
 
-                    <a href="tel:01540381020" aria-label="Call Bonik Point customer service" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/20 bg-white/10 text-white transition hover:bg-white hover:text-ink lg:w-auto lg:px-4" title="Call customer service">
+                    <a href="tel:01540381020" aria-label="Call Bonik Point customer service" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white hover:text-ink" title="Call customer service">
                         <i class="fa-solid fa-phone"></i>
-                        <span class="ml-2 hidden text-sm font-bold lg:inline">Call</span>
                     </a>
 
                     @auth
                         <div class="group relative">
-                            <button type="button" aria-label="Open customer account menu" aria-haspopup="true" class="grid h-10 w-10 place-items-center rounded-md bg-[#c8dc62] text-ink transition hover:bg-white" title="Account">
+                            <button type="button" aria-label="Open customer account menu" aria-haspopup="true" class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#d5e77a] text-ink transition hover:bg-white" title="Account">
                                 <i class="fa-regular fa-user"></i>
                             </button>
                             <div class="invisible absolute right-0 top-full z-50 w-48 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
@@ -155,28 +160,22 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="rounded-md bg-[#c8dc62] px-5 py-2.5 text-sm font-black text-ink hover:bg-white">Sign In</a>
+                        <a href="{{ route('login') }}" class="rounded-full bg-[#d5e77a] px-4 py-2.5 text-xs font-black text-ink hover:bg-white sm:px-5 sm:text-sm">Sign In</a>
                     @endauth
-
-                    <button id="mobile-menu-button" type="button" class="grid h-10 w-10 place-items-center rounded-md border border-white/20 text-white hover:border-white/50 hover:bg-white/10 md:hidden" aria-controls="mobile-menu" aria-expanded="false">
-                        <span class="sr-only">Open menu</span>
-                        <span class="text-2xl leading-none">&#9776;</span>
-                    </button>
                 </div>
             </div>
 
-            <div id="mobile-menu" class="hidden border-t border-white/10 py-4 md:hidden">
-                <form action="{{ route('shop.index') }}" class="mb-4">
-                    <input name="search" value="{{ request('search') }}" placeholder="Search products" aria-label="Search products" class="w-full rounded-md border-white/10 bg-white text-sm text-ink focus:border-[#c8dc62] focus:ring-[#c8dc62]">
+            <div id="mobile-menu" class="absolute left-4 right-4 top-full mt-2 hidden max-h-[calc(100vh-7rem)] overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 text-ink shadow-[0_20px_45px_rgba(15,45,47,0.18)]">
+                <form action="{{ route('shop.index') }}" class="mb-4 md:hidden">
+                    <input name="search" value="{{ request('search') }}" placeholder="Search products, categories or brands" aria-label="Search products" class="w-full rounded-full border-gray-200 bg-[#f7f9f8] text-sm text-ink focus:border-primary focus:ring-primary">
                 </form>
 
-                <nav class="grid gap-2 text-sm font-semibold uppercase tracking-wide text-white">
-                    <a href="{{ route('home.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('home.index') ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">Home</a>
-                    <a href="{{ route('shop.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('shop.*') ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">Shop</a>
-                    <div class="rounded-md border border-white/10 p-2">
-                        <p class="px-1 pb-2 text-xs font-bold text-gray-300">Categories</p>
+                <nav class="grid gap-2 text-sm font-semibold uppercase tracking-wide text-ink sm:grid-cols-2 lg:grid-cols-4">
+                    <a href="{{ route('shop.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('shop.*', 'home.index') ? 'bg-ink text-white' : 'hover:bg-[#edf3f1] hover:text-primary' }}">Shop</a>
+                    <div class="rounded-md border border-gray-200 p-2 sm:col-span-2 lg:col-span-4">
+                        <p class="px-1 pb-2 text-xs font-bold text-gray-400">Categories</p>
                         <div class="grid gap-1 normal-case tracking-normal">
-                            <a href="{{ route('shop.index') }}" class="rounded-md px-3 py-2 text-sm {{ $activeCategorySlug ? 'hover:bg-white/10' : 'bg-[#c8dc62] text-ink' }}">All Categories</a>
+                            <a href="{{ route('shop.index') }}" class="rounded-md px-3 py-2 text-sm {{ $activeCategorySlug ? 'hover:bg-[#edf3f1] hover:text-primary' : 'bg-primary text-white' }}">All Categories</a>
                             @foreach($headerCategories ?? [] as $category)
                                 @php
                                     $isCategoryActive = $activeCategorySlug === $category->slug;
@@ -184,41 +183,42 @@
                                 @endphp
 
                                 @if($category->children->isNotEmpty())
-                                    <details class="rounded-md border border-white/10" {{ $isCategoryActive || $hasActiveChild ? 'open' : '' }}>
-                                        <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded-md px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">
+                                    <details class="rounded-md border border-gray-100" {{ $isCategoryActive || $hasActiveChild ? 'open' : '' }}>
+                                        <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded-md px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-primary text-white' : 'hover:bg-[#edf3f1] hover:text-primary' }}">
                                             <a href="{{ $category->public_url }}">{{ $category->name }}</a>
                                             <span class="text-xs {{ $isCategoryActive ? 'text-white' : 'text-gray-400' }}">&#9656;</span>
                                         </summary>
                                         <div class="grid gap-1 px-2 pb-2 pt-1">
                                             @foreach($category->children as $child)
-                                                <a href="{{ $child->public_url }}" class="rounded-md px-4 py-2 text-sm {{ $activeCategorySlug === $child->slug ? 'bg-[#c8dc62] text-ink' : 'text-gray-200 hover:bg-white/10 hover:text-white' }}">
+                                                <a href="{{ $child->public_url }}" class="rounded-md px-4 py-2 text-sm {{ $activeCategorySlug === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-[#edf3f1] hover:text-primary' }}">
                                                     {{ $child->name }}
                                                 </a>
                                             @endforeach
                                         </div>
                                     </details>
                                 @else
-                                    <a href="{{ $category->public_url }}" class="rounded-md px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">
+                                    <a href="{{ $category->public_url }}" class="rounded-md px-3 py-2 text-sm {{ $isCategoryActive ? 'bg-primary text-white' : 'hover:bg-[#edf3f1] hover:text-primary' }}">
                                         {{ $category->name }}
                                     </a>
                                 @endif
                             @endforeach
                         </div>
                     </div>
-                    <a href="{{ route('cart.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('cart.*') ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">Cart</a>
+                    <a href="{{ route('videos.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('videos.*') ? 'bg-ink text-white' : 'hover:bg-[#edf3f1] hover:text-primary' }}">Videos</a>
+                    <a href="{{ route('cart.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('cart.*') ? 'bg-ink text-white' : 'hover:bg-[#edf3f1] hover:text-primary' }}">Cart</a>
                     @auth
-                        <a href="{{ route('dashboard') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('dashboard') ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">Dashboard</a>
-                        <a href="{{ route('orders.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('orders.*') ? 'bg-[#c8dc62] text-ink' : 'hover:bg-white/10' }}">Orders</a>
+                        <a href="{{ route('dashboard') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('dashboard') ? 'bg-ink text-white' : 'hover:bg-[#edf3f1] hover:text-primary' }}">Dashboard</a>
+                        <a href="{{ route('orders.index') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('orders.*') ? 'bg-ink text-white' : 'hover:bg-[#edf3f1] hover:text-primary' }}">Orders</a>
                         @if(auth()->user()->isAdmin())
-                            <a href="{{ route('admin.index') }}" class="rounded-md px-3 py-2 hover:bg-white/10">Admin</a>
+                            <a href="{{ route('admin.index') }}" class="rounded-md px-3 py-2 hover:bg-[#edf3f1] hover:text-primary">Admin</a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="w-full rounded-md px-3 py-2 text-left hover:bg-white/10">Sign Out</button>
+                            <button type="submit" class="w-full rounded-md px-3 py-2 text-left hover:bg-red-50 hover:text-red-700">Sign Out</button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="rounded-md px-3 py-2 hover:bg-white/10">Sign In</a>
-                        <a href="{{ route('register') }}" class="rounded-md px-3 py-2 hover:bg-white/10">Register</a>
+                        <a href="{{ route('login') }}" class="rounded-md px-3 py-2 hover:bg-[#edf3f1] hover:text-primary">Sign In</a>
+                        <a href="{{ route('register') }}" class="rounded-md px-3 py-2 hover:bg-[#edf3f1] hover:text-primary">Register</a>
                     @endauth
                 </nav>
             </div>
@@ -274,6 +274,7 @@
                 <div class="space-y-1 text-[11px] md:space-y-2 md:text-sm">
                     <a href="{{ route('shop.index') }}" class="block hover:text-accent">All Products</a>
                     <a href="{{ route('cart.index') }}" class="block hover:text-accent">Cart</a>
+                    <a href="{{ route('videos.index') }}" class="block hover:text-accent">Videos</a>
                     <a href="{{ route('orders.index') }}" class="block hover:text-accent">Orders</a>
                     <a href="{{ route('order-instructions') }}" class="block hover:text-accent">Order Instructions</a>
                     <a href="{{ route('return-policy') }}" class="block hover:text-accent">Return & Refund Policy</a>
@@ -300,6 +301,10 @@
                         <i class="fa-brands fa-youtube w-4 text-sm md:text-base"></i>
                         <span class="truncate">Nayeem Vlogs</span>
                     </a>
+                    <a href="https://youtube.com/@budgetkoto?si=cO3IVqaCdoG3aNJa" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 text-gray-300 hover:text-accent" title="Budget Koto on YouTube">
+                        <i class="fa-brands fa-youtube w-4 text-sm md:text-base"></i>
+                        <span class="truncate">Budget Koto</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -307,6 +312,19 @@
             &copy; {{ now()->year }} Bonik Point. All rights reserved.
         </div>
     </footer>
+    <div id="global-age-warning" class="fixed inset-0 z-[130] hidden bg-ink/90 px-4 py-6 backdrop-blur">
+        <div class="flex min-h-full items-center justify-center">
+            <div class="w-full max-w-lg rounded-lg bg-white p-6 text-center shadow-2xl">
+                <p class="text-sm font-bold uppercase tracking-wide text-primary">Age Restricted Product</p>
+                <h2 class="mt-2 text-3xl font-black text-ink">Are you 18 or older?</h2>
+                <p class="mt-4 leading-7 text-gray-600">This product is intended for adult users only. Please confirm your age before adding vape products to cart.</p>
+                <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                    <button id="global-confirm-age" type="button" class="rounded bg-primary px-5 py-3 font-semibold text-white hover:bg-ink">Yes, I am 18+</button>
+                    <button id="global-cancel-age" type="button" class="rounded border border-gray-200 px-5 py-3 font-semibold text-ink hover:border-primary hover:text-primary">No, cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const button = document.getElementById('mobile-menu-button');
@@ -316,10 +334,24 @@
                 return;
             }
 
-            button.addEventListener('click', function () {
+            const closeMenu = () => {
+                menu.classList.add('hidden');
+                button.setAttribute('aria-expanded', 'false');
+            };
+
+            button.addEventListener('click', function (event) {
+                event.stopPropagation();
                 const isOpen = !menu.classList.contains('hidden');
                 menu.classList.toggle('hidden', isOpen);
                 button.setAttribute('aria-expanded', String(!isOpen));
+            });
+
+            menu.addEventListener('click', (event) => event.stopPropagation());
+            document.addEventListener('click', closeMenu);
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeMenu();
+                }
             });
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -331,6 +363,10 @@
             const cartSubtotal = document.getElementById('cart-drawer-subtotal');
             const cartBadge = document.getElementById('cart-count-badge');
             const checkoutButton = document.getElementById('cart-drawer-checkout');
+            const ageWarning = document.getElementById('global-age-warning');
+            const confirmAgeButton = document.getElementById('global-confirm-age');
+            const cancelAgeButton = document.getElementById('global-cancel-age');
+            let pendingAgeForm = null;
             let cartState = @json($drawerCart ?? ['items' => [], 'count' => 0, 'subtotal' => 0]);
 
             const money = (value) => `BDT ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -350,6 +386,18 @@
             const closeDrawer = () => {
                 drawer.classList.add('translate-x-full');
                 overlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            };
+
+            const openAgeWarning = (form) => {
+                pendingAgeForm = form;
+                ageWarning?.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            };
+
+            const closeAgeWarning = () => {
+                pendingAgeForm = null;
+                ageWarning?.classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
             };
 
@@ -408,11 +456,18 @@
                     ...options,
                 });
 
-                if (!response.ok) {
-                    throw new Error('Cart request failed');
+                const data = await response.json();
+
+                if (response.status === 428 && data.requires_age_verification) {
+                    openAgeWarning(options.form || null);
+                    return;
                 }
 
-                const data = await response.json();
+                if (!response.ok) {
+                    alert(data.message || 'Cart request failed');
+                    return;
+                }
+
                 cartState = data.cart;
                 renderCart();
                 openDrawer();
@@ -424,9 +479,33 @@
                     requestCart(form.action, {
                         method: 'POST',
                         body: new FormData(form),
+                        form,
                     });
                 });
             });
+
+            confirmAgeButton?.addEventListener('click', async function () {
+                const form = pendingAgeForm;
+
+                await fetch('{{ route('cart.confirm-age') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                });
+
+                closeAgeWarning();
+
+                if (form) {
+                    requestCart(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                    });
+                }
+            });
+
+            cancelAgeButton?.addEventListener('click', closeAgeWarning);
 
             cartItems.addEventListener('click', function (event) {
                 const button = event.target.closest('button[data-product-id]');
