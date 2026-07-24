@@ -147,14 +147,14 @@
                             <button type="button" aria-label="Open customer account menu" aria-haspopup="true" class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#d5e77a] text-ink transition hover:bg-white" title="Account">
                                 <i class="fa-regular fa-user"></i>
                             </button>
-                            <div class="invisible absolute right-0 top-full z-50 w-48 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-                                <div class="rounded bg-white py-2 shadow-xl ring-1 ring-gray-100">
+                            <div class="invisible absolute right-0 top-full z-50 w-48 pt-2 text-ink opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                                <div class="rounded bg-white py-2 text-ink shadow-xl ring-1 ring-gray-100">
                                     <div class="px-4 py-2 text-xs font-semibold uppercase text-gray-400">{{ auth()->user()->name }}</div>
-                                    <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Profile</a>
-                                    <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">My Orders</a>
+                                    <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm font-semibold text-ink hover:bg-[#edf3f1] hover:text-primary">Profile</a>
+                                    <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm font-semibold text-ink hover:bg-[#edf3f1] hover:text-primary">My Orders</a>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-                                        <button type="submit" class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50">Sign Out</button>
+                                        <button type="submit" class="block w-full px-4 py-2 text-left text-sm font-semibold text-ink hover:bg-red-50 hover:text-red-700">Sign Out</button>
                                     </form>
                                 </div>
                             </div>
