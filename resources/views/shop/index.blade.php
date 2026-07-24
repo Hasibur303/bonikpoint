@@ -177,28 +177,19 @@
 
                 @media (min-width: 768px) {
                     .festival-mosaic-track {
-                        width: 200%;
+                        width: max-content;
                     }
 
                     .festival-mosaic {
-                        flex: 0 0 50%;
-                        display: grid;
-                        grid-template-columns: repeat(4, minmax(0, 1fr));
+                        flex: 0 0 auto;
+                        display: flex;
                         gap: 0.5rem;
                         padding-right: 0.5rem;
                     }
 
                     .festival-mosaic-card {
-                        flex: initial;
+                        flex: 0 0 calc((min(100vw, 1440px) - 1.5rem) / 4);
                         border-radius: 0.5rem;
-                    }
-
-                    .festival-mosaic-card.is-wide,
-                    .festival-mosaic-card:nth-child(5n) {
-                        grid-column: 1 / -1;
-                        justify-self: center;
-                        width: 74%;
-                        aspect-ratio: 4 / 0.68;
                     }
                 }
 
