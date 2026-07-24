@@ -17,19 +17,6 @@
                 <p class="mx-auto mt-3 hidden max-w-2xl text-sm leading-6 text-gray-600 sm:block sm:text-base">আপনার কার্টে রাখা পণ্যগুলো নিরাপদে সংরক্ষিত আছে। আপনার জন্য সহজ অপশনটি বেছে নিন।</p>
             </div>
 
-            <div class="mx-auto mt-4 max-w-3xl rounded-lg border-2 border-primary bg-white px-3 py-3 text-left shadow-[0_14px_35px_rgba(8,124,127,0.14)] sm:mt-8 sm:px-6 sm:py-5">
-                <div class="flex gap-3 sm:gap-4">
-                    <span class="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary text-base text-white shadow-sm sm:h-11 sm:w-11 sm:text-lg"><i class="fa-solid fa-bag-shopping"></i></span>
-                    <div>
-                        <span class="hidden rounded-full bg-[#f0f5d7] px-2.5 py-1 text-[10px] font-black tracking-wide text-[#526510] sm:inline-flex">অ্যাকাউন্ট লাগবে না</span>
-                        <h2 class="text-base font-black leading-6 text-ink sm:hidden">অ্যাকাউন্ট ছাড়া অর্ডার করুন</h2>
-                        <p class="mt-0.5 text-xs font-semibold leading-5 text-primary sm:hidden">নিচের “অর্ডার করুন” বাটনে চাপ দিন।</p>
-                        <h2 class="mt-2 hidden text-lg font-black leading-7 text-ink sm:block sm:text-xl">অ্যাকাউন্ট ছাড়া অর্ডার করতে নিচের <span class="text-primary">“অর্ডার করুন”</span> বাটনে ক্লিক করুন</h2>
-                        <p class="mt-1.5 hidden text-sm leading-6 text-[#405248] sm:block">অ্যাকাউন্ট না থাকলেও কোনো সমস্যা নেই। আপনার নাম, মোবাইল নম্বর ও ঠিকানা দিয়ে খুব সহজে অর্ডার করতে পারবেন।</p>
-                    </div>
-                </div>
-            </div>
-
             <div class="mt-4 grid grid-cols-2 gap-3 md:mt-5 md:grid-cols-[1.25fr_1fr_1fr] md:gap-4 md:items-stretch">
                 <section class="col-span-2 flex flex-col rounded-lg border-2 border-primary bg-white p-4 shadow-[0_14px_35px_rgba(8,124,127,0.13)] sm:p-6 md:col-span-1">
                     <span class="grid h-10 w-10 place-items-center rounded-md bg-primary text-base text-white shadow-sm sm:h-12 sm:w-12 sm:text-lg"><i class="fa-solid fa-bag-shopping"></i></span>
