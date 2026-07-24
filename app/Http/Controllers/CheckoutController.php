@@ -195,7 +195,7 @@ class CheckoutController extends Controller
     private function ageConfirmationRequired(array $cartItems): bool
     {
         return collect($cartItems)->contains(fn ($item) => $item['product']->isAgeRestricted())
-            && ! request()->session()->boolean('age_restricted_confirmed');
+            && ! (bool) request()->session()->get('age_restricted_confirmed', false);
     }
 
     private function verifiedCartItems(array $cartItems): array

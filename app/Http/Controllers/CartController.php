@@ -21,7 +21,7 @@ class CartController extends Controller
     {
         abort_unless($product->is_active, 404);
 
-        if ($product->isAgeRestricted() && ! $request->session()->boolean('age_restricted_confirmed')) {
+        if ($product->isAgeRestricted() && ! (bool) $request->session()->get('age_restricted_confirmed', false)) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => 'Please confirm your age before adding this product to cart.',
