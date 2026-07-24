@@ -1,6 +1,6 @@
 /.phpunit.cache
 /node_modules
-/public/build
+# The production build is tracked because the shared hosting server has no Node.js.
 /public/hot
 /public/storage
 /storage/*.key
