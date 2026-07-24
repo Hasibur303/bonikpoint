@@ -43,6 +43,30 @@
         @endforeach
     </div>
 
+    <section class="mt-5 overflow-hidden rounded-lg border border-[#dfe7e5] bg-white shadow-[0_10px_30px_rgba(20,60,64,0.05)]">
+        <div class="flex flex-col gap-1 border-b border-[#e7edeb] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="text-base font-black text-ink">Visitor Activity</h2>
+                <p class="mt-0.5 text-xs text-gray-500">Anonymous unique visitors. Tracking starts after this update is deployed.</p>
+            </div>
+            <i class="fa-solid fa-chart-simple text-primary"></i>
+        </div>
+        <div class="grid grid-cols-2 divide-x divide-y divide-[#e7edeb] sm:grid-cols-4 sm:divide-y-0">
+            @foreach([
+                ['label' => 'Today', 'value' => $visitorStats['today']],
+                ['label' => 'This Week', 'value' => $visitorStats['week']],
+                ['label' => 'This Month', 'value' => $visitorStats['month']],
+                ['label' => 'All Time', 'value' => $visitorStats['total']],
+            ] as $visitorMetric)
+                <div class="p-4 sm:p-5">
+                    <p class="text-xs font-bold text-gray-500">{{ $visitorMetric['label'] }}</p>
+                    <p class="mt-2 text-2xl font-black text-ink sm:text-3xl">{{ number_format($visitorMetric['value']) }}</p>
+                    <p class="mt-1 text-[10px] font-semibold uppercase tracking-wide text-primary">Unique visitors</p>
+                </div>
+            @endforeach
+        </div>
+    </section>
+
     <section class="mt-5 grid overflow-hidden rounded-lg border border-[#dfe7e5] bg-white shadow-[0_10px_30px_rgba(20,60,64,0.05)] sm:grid-cols-3">
         <a href="{{ route('admin.orders.index', ['status' => 'pending']) }}" class="flex items-center gap-4 border-b border-[#e7edeb] p-5 transition hover:bg-blue-50/50 sm:border-b-0 sm:border-r">
             <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-blue-50 text-blue-700"><i class="fa-solid fa-clock"></i></span>
