@@ -58,7 +58,7 @@
                         <div class="flex justify-between"><span>Shipping</span><span>BDT 0.00</span></div>
                         <div class="border-t pt-3 flex justify-between text-lg font-black text-ink"><span>Total</span><span>BDT {{ number_format(\App\Http\Controllers\CartController::subtotal(), 2) }}</span></div>
                     </div>
-                    <a href="{{ route('checkout.create') }}" class="mt-6 block rounded-lg bg-primary px-5 py-3 text-center text-sm font-black text-white shadow-lg shadow-primary/20 hover:bg-ink md:px-6 md:text-base">Proceed to Checkout</a>
+                    <a href="{{ route('checkout.start') }}" class="mt-6 block rounded-lg bg-primary px-5 py-3 text-center text-sm font-black text-white shadow-lg shadow-primary/20 hover:bg-ink md:px-6 md:text-base">Proceed to Checkout</a>
                 </aside>
             </div>
         @else

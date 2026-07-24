@@ -38,6 +38,37 @@ class CheckoutController extends Controller
         return $this->renderCheckout(false);
     }
 
+    public function start(): View|RedirectResponse
+    {
+        if (auth()->check()) {
+            return redirect()->route('checkout.create');
+        }
+
+        $cartItems = app(CartController::class)->items();
+
+        if (count($cartItems) === 0) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
+
+        if ($this->ageConfirmationRequired($cartItems)) {
+            return redirect()->route('cart.index')->with('error', 'Please confirm your age before checkout.');
+        }
+
+        return view('checkout.start', [
+            'cartItems' => $cartItems,
+            'subtotal' => CartController::subtotal(),
+        ]);
+    }
+
+    public function accountRedirect(string $screen): RedirectResponse
+    {
+        abort_unless(in_array($screen, ['login', 'register'], true), 404);
+
+        session(['url.intended' => route('checkout.create')]);
+
+        return redirect()->route($screen);
+    }
+
     public function guestCreate(): View|RedirectResponse
     {
         return $this->renderCheckout(true);

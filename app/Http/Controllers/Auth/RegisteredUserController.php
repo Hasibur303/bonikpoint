@@ -48,6 +48,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('shop.index', absolute: false));
+        return redirect()->intended(route('shop.index', absolute: false));
     }
 }

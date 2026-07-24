@@ -257,7 +257,7 @@
                 <span id="cart-drawer-subtotal">BDT 0.00</span>
             </div>
             <div class="grid gap-3">
-                <a href="{{ route('checkout.create') }}" id="cart-drawer-checkout" class="rounded-lg bg-primary px-5 py-3 text-center font-semibold text-white hover:bg-ink">Place Order</a>
+                <a href="{{ route('checkout.start') }}" id="cart-drawer-checkout" class="rounded-lg bg-primary px-5 py-3 text-center font-semibold text-white hover:bg-ink">Place Order</a>
                 <a href="{{ route('shop.index') }}" class="rounded-lg border border-gray-200 px-5 py-3 text-center font-semibold text-ink hover:border-primary hover:text-primary">Continue Shopping</a>
             </div>
         </div>

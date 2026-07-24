@@ -112,6 +112,10 @@ Route::post('/cart/confirm-age', [CartController::class, 'confirmAge'])->name('c
 Route::post('/cart/{product}', [CartController::class, 'store'])->name('cart.store');
 Route::patch('/cart/{product}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{product}', [CartController::class, 'destroy'])->name('cart.destroy');
+Route::get('/checkout/start', [CheckoutController::class, 'start'])->name('checkout.start');
+Route::get('/checkout/account/{screen}', [CheckoutController::class, 'accountRedirect'])
+    ->whereIn('screen', ['login', 'register'])
+    ->name('checkout.account');
 Route::get('/guest-checkout', [CheckoutController::class, 'guestCreate'])->name('guest.checkout.create');
 Route::post('/guest-checkout', [CheckoutController::class, 'guestStore'])->name('guest.checkout.store');
 Route::get('/guest-orders/{order:order_number}/{token}', [OrderController::class, 'guestShow'])->name('guest.orders.show');
