@@ -184,7 +184,7 @@
                 <div>
                     <div class="overflow-hidden rounded-lg bg-white p-2 shadow-[0_18px_45px_rgba(8,28,31,0.10)] ring-1 ring-gray-100 md:p-3">
                         <div class="overflow-hidden rounded-md bg-gray-100">
-                            <img id="product-gallery-main" src="{{ $galleryImages->first()['url'] }}" alt="{{ $galleryImages->first()['label'] }}" width="1000" height="1000" fetchpriority="high" class="aspect-square w-full object-cover">
+                            <img id="product-gallery-main" src="{{ $galleryImages->first()['url'] }}" alt="{{ $galleryImages->first()['label'] }}" width="1000" height="1000" fetchpriority="high" class="aspect-square w-full object-contain">
                         </div>
                     </div>
 
@@ -192,7 +192,7 @@
                         <div class="mt-3 grid grid-cols-5 gap-2 md:mt-4 md:gap-3">
                             @foreach($galleryImages as $index => $galleryImage)
                                 <button type="button" aria-label="View product image {{ $index + 1 }}" data-gallery-src="{{ $galleryImage['url'] }}" data-gallery-alt="{{ $galleryImage['label'] }}" class="product-gallery-thumb overflow-hidden rounded-md border bg-white p-1 shadow-sm transition hover:border-primary md:p-1.5 {{ $index === 0 ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200' }}">
-                                    <img src="{{ $galleryImage['url'] }}" alt="{{ $galleryImage['label'] }}" width="200" height="200" loading="lazy" decoding="async" class="aspect-square w-full rounded object-cover">
+                                    <img src="{{ $galleryImage['url'] }}" alt="{{ $galleryImage['label'] }}" width="200" height="200" loading="lazy" decoding="async" class="aspect-square w-full rounded object-contain">
                                 </button>
                             @endforeach
                         </div>
