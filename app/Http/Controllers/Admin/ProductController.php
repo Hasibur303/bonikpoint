@@ -149,7 +149,7 @@ class ProductController extends Controller
         $category = Category::with('parent')->find($data['category_id']);
         $isVapeCategory = str_contains((string) $category?->slug, 'vape')
             || str_contains((string) $category?->parent?->slug, 'vape');
-        $data['vape_device_type'] = $isVapeCategory ? ($data['vape_device_type'] ?: null) : null;
+        $data['vape_device_type'] = $isVapeCategory ? ($data['vape_device_type'] ?? null) : null;
         $data['advance_delivery_charge'] = $request->boolean('advance_delivery_charge');
         $data['warranty_duration'] = $data['warranty_type'] === 'none' ? null : $data['warranty_duration'];
         $data['warranty_details'] = $data['warranty_type'] === 'none' ? null : $data['warranty_details'];
