@@ -115,7 +115,7 @@ class ShopController extends Controller
         }
 
         return view('shop.show', [
-            'product' => $product->load('category.parent', 'images', 'faqs', 'colors')
+            'product' => $product->load('category.parent', 'images', 'faqs', 'colors', 'flavors')
                 ->loadCount(['reviews' => fn ($query) => $query->where('is_approved', true)])
                 ->loadAvg(['reviews' => fn ($query) => $query->where('is_approved', true)], 'rating'),
             'reviews' => $product->reviews()

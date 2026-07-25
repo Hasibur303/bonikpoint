@@ -13,6 +13,7 @@
         'label' => $product->name.' product image '.($index + 2),
     ]));
     $firstColor = $product->colors->first();
+    $firstFlavor = $product->flavors->first();
     $productDescription = $product->seo_description
         ?: ($product->description
         ? Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags($product->description))), 155, '')
@@ -183,8 +184,11 @@
             <div class="grid gap-5 md:gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.72fr)]">
                 <div>
                     <div class="overflow-hidden rounded-lg bg-white p-2 shadow-[0_18px_45px_rgba(8,28,31,0.10)] ring-1 ring-gray-100 md:p-3">
-                        <div class="overflow-hidden rounded-md bg-gray-100">
-                            <img id="product-gallery-main" src="{{ $galleryImages->first()['url'] }}" alt="{{ $galleryImages->first()['label'] }}" width="1000" height="1000" fetchpriority="high" class="aspect-square w-full object-contain">
+                        <div class="group relative overflow-hidden rounded-md bg-gray-100">
+                            <img id="product-gallery-main" src="{{ $galleryImages->first()['url'] }}" alt="{{ $galleryImages->first()['label'] }}" width="1000" height="1000" fetchpriority="high" class="aspect-square w-full cursor-zoom-in object-contain">
+                            <button id="open-product-zoom" type="button" class="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-md bg-white/95 text-primary shadow-lg transition hover:bg-primary hover:text-white" aria-label="Zoom product image" title="Zoom image">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -245,6 +249,12 @@
                                     <span class="font-bold text-ink">Advance required</span>
                                 </div>
                             @endif
+                            @if($isVapeProduct && $product->vape_device_type)
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="font-semibold text-gray-500">Device Type</span>
+                                    <span class="font-bold text-ink">{{ match($product->vape_device_type) { 'full_device' => 'Full Device', 'cartridge_only' => 'Cartridge Only', 'battery_only' => 'Battery Only' } }}</span>
+                                </div>
+                            @endif
                         </div>
 
                         @if($product->stock > 0)
@@ -265,6 +275,20 @@
                                 </div>
                             @endif
 
+                            @if($product->flavors->isNotEmpty())
+                                <div class="mt-5 md:mt-6">
+                                    <div class="mb-2 flex items-center justify-between gap-3">
+                                        <label class="block text-xs font-bold text-ink md:text-sm">Flavor</label>
+                                        <span id="selected-flavor-label" class="text-xs font-bold uppercase tracking-wide text-primary">{{ $firstFlavor?->name }}</span>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1.5 md:gap-2">
+                                        @foreach($product->flavors as $flavor)
+                                            <button type="button" data-flavor-id="{{ $flavor->id }}" data-flavor-name="{{ $flavor->name }}" class="product-flavor-option rounded-full border px-2.5 py-1.5 text-xs font-bold transition md:px-3 md:py-2 md:text-sm {{ $loop->first ? 'border-primary bg-primary/5 text-primary ring-2 ring-primary/20' : 'border-gray-200 bg-white text-gray-600 hover:border-primary hover:text-primary' }}">{{ $flavor->name }}</button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
                             <div class="mt-5 md:mt-6">
                                 <label for="product-quantity" class="mb-2 block text-xs font-bold text-ink md:text-sm">Quantity</label>
                                 <input id="product-quantity" type="number" value="1" min="1" max="{{ $product->stock }}" class="h-10 w-24 rounded-lg border-gray-200 bg-[#f8faf9] text-center text-sm font-bold focus:border-primary focus:ring-primary md:h-12 md:w-28 md:text-base">
@@ -277,6 +301,9 @@
                                     @if($product->colors->isNotEmpty())
                                         <input type="hidden" name="product_color_id" value="{{ $firstColor?->id }}" class="product-action-color">
                                     @endif
+                                    @if($product->flavors->isNotEmpty())
+                                        <input type="hidden" name="product_flavor_id" value="{{ $firstFlavor?->id }}" class="product-action-flavor">
+                                    @endif
                                     <button type="submit" class="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-primary bg-white px-4 text-sm font-black text-primary shadow-sm hover:bg-primary hover:text-white md:h-12 md:px-5 md:text-base">
                                         <i class="fa-solid fa-cart-shopping"></i>
                                         Add to Cart
@@ -288,6 +315,9 @@
                                     <input type="hidden" name="quantity" value="1" class="product-action-quantity">
                                     @if($product->colors->isNotEmpty())
                                         <input type="hidden" name="product_color_id" value="{{ $firstColor?->id }}" class="product-action-color">
+                                    @endif
+                                    @if($product->flavors->isNotEmpty())
+                                        <input type="hidden" name="product_flavor_id" value="{{ $firstFlavor?->id }}" class="product-action-flavor">
                                     @endif
                                     <input type="hidden" name="buy_now" value="1">
                                     <button type="submit" class="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-black text-white shadow-lg shadow-primary/20 hover:bg-ink md:h-12 md:px-5 md:text-base">
@@ -410,6 +440,20 @@
         </div>
     </section>
 
+    <div id="product-zoom-dialog" class="fixed inset-0 z-[130] hidden bg-ink/90 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Product image zoom">
+        <div class="mx-auto flex h-full max-w-6xl flex-col">
+            <div class="flex items-center justify-end gap-2 py-3">
+                <button type="button" data-zoom-action="out" class="grid h-10 w-10 place-items-center rounded-md bg-white text-ink hover:bg-primary hover:text-white" aria-label="Zoom out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                <button type="button" data-zoom-action="in" class="grid h-10 w-10 place-items-center rounded-md bg-white text-ink hover:bg-primary hover:text-white" aria-label="Zoom in"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                <button type="button" data-zoom-action="reset" class="h-10 rounded-md bg-white px-3 text-xs font-bold text-ink hover:bg-primary hover:text-white">Reset</button>
+                <button id="close-product-zoom" type="button" class="grid h-10 w-10 place-items-center rounded-md bg-white text-ink hover:bg-red-600 hover:text-white" aria-label="Close image zoom"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="product-zoom-stage" class="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-lg bg-white">
+                <img id="product-zoom-image" src="" alt="" class="max-h-full max-w-full origin-center select-none object-contain transition-transform duration-150">
+            </div>
+        </div>
+    </div>
+
     <section class="bg-white py-12">
         <div class="container">
             <h2 class="mb-6 text-2xl font-black text-ink">Related Products</h2>
@@ -434,6 +478,13 @@
             const colorButtons = document.querySelectorAll('.product-color-option');
             const colorInputs = document.querySelectorAll('.product-action-color');
             const selectedColorLabel = document.getElementById('selected-color-label');
+            const flavorButtons = document.querySelectorAll('.product-flavor-option');
+            const flavorInputs = document.querySelectorAll('.product-action-flavor');
+            const selectedFlavorLabel = document.getElementById('selected-flavor-label');
+            const zoomDialog = document.getElementById('product-zoom-dialog');
+            const zoomImage = document.getElementById('product-zoom-image');
+            const zoomStage = document.getElementById('product-zoom-stage');
+            let zoomLevel = 1;
 
             colorButtons.forEach(function (button) {
                 button.addEventListener('click', function () {
@@ -450,6 +501,25 @@
 
                     if (selectedColorLabel) {
                         selectedColorLabel.textContent = button.dataset.colorName;
+                    }
+                });
+            });
+
+            flavorButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    flavorButtons.forEach(function (item) {
+                        item.classList.remove('border-primary', 'bg-primary/5', 'text-primary', 'ring-2', 'ring-primary/20');
+                        item.classList.add('border-gray-200', 'bg-white', 'text-gray-600');
+                    });
+
+                    button.classList.add('border-primary', 'bg-primary/5', 'text-primary', 'ring-2', 'ring-primary/20');
+                    button.classList.remove('border-gray-200', 'bg-white', 'text-gray-600');
+                    flavorInputs.forEach(function (input) {
+                        input.value = button.dataset.flavorId;
+                    });
+
+                    if (selectedFlavorLabel) {
+                        selectedFlavorLabel.textContent = button.dataset.flavorName;
                     }
                 });
             });
@@ -496,6 +566,56 @@
                     thumb.classList.add('border-primary', 'ring-2', 'ring-primary/20');
                     thumb.classList.remove('border-gray-200');
                 });
+            });
+
+            const renderZoom = () => {
+                if (zoomImage) {
+                    zoomImage.style.transform = `scale(${zoomLevel})`;
+                }
+            };
+
+            const openZoom = () => {
+                if (!zoomDialog || !zoomImage || !mainImage) {
+                    return;
+                }
+
+                zoomLevel = 1;
+                zoomImage.src = mainImage.src;
+                zoomImage.alt = mainImage.alt;
+                renderZoom();
+                zoomDialog.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            };
+
+            const closeZoom = () => {
+                zoomDialog?.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            };
+
+            document.getElementById('open-product-zoom')?.addEventListener('click', openZoom);
+            mainImage?.addEventListener('click', openZoom);
+            document.getElementById('close-product-zoom')?.addEventListener('click', closeZoom);
+            document.querySelectorAll('[data-zoom-action]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const action = button.dataset.zoomAction;
+                    zoomLevel = action === 'in' ? Math.min(3, zoomLevel + 0.25) : action === 'out' ? Math.max(1, zoomLevel - 0.25) : 1;
+                    renderZoom();
+                });
+            });
+            zoomDialog?.addEventListener('click', function (event) {
+                if (event.target === zoomDialog) {
+                    closeZoom();
+                }
+            });
+            zoomStage?.addEventListener('wheel', function (event) {
+                event.preventDefault();
+                zoomLevel = event.deltaY < 0 ? Math.min(3, zoomLevel + 0.2) : Math.max(1, zoomLevel - 0.2);
+                renderZoom();
+            }, { passive: false });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeZoom();
+                }
             });
         });
     </script>

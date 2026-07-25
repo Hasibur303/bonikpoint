@@ -27,6 +27,9 @@
                                             Color: {{ $item->selected_color_name }}
                                         </p>
                                     @endif
+                                    @if($item->selected_flavor_name)
+                                        <span class="mt-1 block text-xs font-semibold text-gray-500">Flavor: {{ $item->selected_flavor_name }}</span>
+                                    @endif
                                     <p class="mt-1 text-sm text-gray-500">BDT {{ number_format($item->unit_price, 2) }} x {{ $item->quantity }}</p>
                                 </div>
                                 <p class="shrink-0 font-semibold text-ink sm:text-right">BDT {{ number_format($item->total, 2) }}</p>

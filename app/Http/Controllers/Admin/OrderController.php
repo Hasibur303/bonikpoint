@@ -104,16 +104,6 @@ class OrderController extends Controller
                 ]);
             }
 
-            if (
-                $order->advance_delivery_required
-                && $order->delivery_charge_payment_option === 'pay_later'
-                && ! in_array($nextStatus, ['waiting_delivery_charge', 'cancelled'], true)
-            ) {
-                throw ValidationException::withMessages([
-                    'status' => 'This order still needs advance delivery charge payment before confirmation.',
-                ]);
-            }
-
             if ($previousStatus !== 'cancelled' && $nextStatus === 'cancelled') {
                 foreach ($order->items as $item) {
                     if ($item->product_id) {

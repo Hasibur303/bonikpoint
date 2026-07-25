@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Festival;
 use App\Models\Product;
 use App\Models\ProductColor;
+use App\Models\ProductFlavor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,7 +38,8 @@ class CartController extends Controller
         $cart = session('cart', []);
         $festival = $this->festivalFor($request, $product);
         $selectedColor = $this->selectedColorFor($request, $product);
-        $cartKey = $this->cartKey($product->id, $festival?->id, $selectedColor?->id);
+        $selectedFlavor = $this->selectedFlavorFor($request, $product);
+        $cartKey = $this->cartKey($product->id, $festival?->id, $selectedColor?->id, $selectedFlavor?->id);
         $currentQuantity = $cart[$cartKey]['quantity'] ?? 0;
         $otherQuantity = $this->quantityForProduct($cart, $product->id, $cartKey);
         $allowedQuantity = max(0, $product->stock - $otherQuantity);
@@ -61,6 +63,8 @@ class CartController extends Controller
             'product_color_id' => $selectedColor?->id,
             'product_color_name' => $selectedColor?->name,
             'product_color_hex' => $selectedColor?->hex_code,
+            'product_flavor_id' => $selectedFlavor?->id,
+            'product_flavor_name' => $selectedFlavor?->name,
         ];
 
         session(['cart' => $cart]);
@@ -146,7 +150,7 @@ class CartController extends Controller
 
     public static function subtotal(): float
     {
-        return collect((new self())->items())->sum(fn ($item) => $item['total']);
+        return collect((new self)->items())->sum(fn ($item) => $item['total']);
     }
 
     public function items(): array
@@ -176,6 +180,8 @@ class CartController extends Controller
                 'product_color_id' => $item['product_color_id'] ?? null,
                 'product_color_name' => $item['product_color_name'] ?? null,
                 'product_color_hex' => $item['product_color_hex'] ?? null,
+                'product_flavor_id' => $item['product_flavor_id'] ?? null,
+                'product_flavor_name' => $item['product_flavor_name'] ?? null,
                 'total' => $unitPrice * $quantity,
             ];
         })->filter()->values()->all();
@@ -193,6 +199,7 @@ class CartController extends Controller
             'festival_title' => $item['festival_title'],
             'product_color_name' => $item['product_color_name'],
             'product_color_hex' => $item['product_color_hex'],
+            'product_flavor_name' => $item['product_flavor_name'],
             'quantity' => $item['quantity'],
             'stock' => $item['product']->stock,
             'total' => $item['total'],
@@ -241,9 +248,30 @@ class CartController extends Controller
         return $selectedColor;
     }
 
-    private function cartKey(int $productId, ?int $festivalId = null, ?int $colorId = null): string
+    private function selectedFlavorFor(Request $request, Product $product): ?ProductFlavor
     {
-        return collect([$productId, $festivalId ? 'festival-'.$festivalId : null, $colorId ? 'color-'.$colorId : null])
+        $flavors = $product->flavors()->get();
+
+        if ($flavors->isEmpty()) {
+            return null;
+        }
+
+        if (! $request->filled('product_flavor_id')) {
+            return $flavors->first();
+        }
+
+        $selectedFlavor = $flavors->firstWhere('id', $request->integer('product_flavor_id'));
+
+        if (! $selectedFlavor) {
+            abort(422, 'Please select a valid flavor.');
+        }
+
+        return $selectedFlavor;
+    }
+
+    private function cartKey(int $productId, ?int $festivalId = null, ?int $colorId = null, ?int $flavorId = null): string
+    {
+        return collect([$productId, $festivalId ? 'festival-'.$festivalId : null, $colorId ? 'color-'.$colorId : null, $flavorId ? 'flavor-'.$flavorId : null])
             ->filter()
             ->join(':');
     }

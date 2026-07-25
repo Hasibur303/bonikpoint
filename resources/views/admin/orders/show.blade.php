@@ -47,6 +47,9 @@
                                         Color: {{ $item->selected_color_name }}
                                     </span>
                                 @endif
+                                @if($item->selected_flavor_name)
+                                    <span class="mt-1 block text-xs font-semibold text-gray-500">Flavor: {{ $item->selected_flavor_name }}</span>
+                                @endif
                             </td>
                             <td class="p-3">{{ $item->quantity }}</td>
                             <td class="p-3">৳{{ number_format($item->unit_price, 2) }}</td>

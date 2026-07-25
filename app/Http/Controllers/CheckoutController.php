@@ -6,6 +6,7 @@ use App\Models\Festival;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductColor;
+use App\Models\ProductFlavor;
 use App\Models\StoreSetting;
 use App\Support\BotProtection;
 use Illuminate\Http\RedirectResponse;
@@ -194,6 +195,7 @@ class CheckoutController extends Controller
                         'product_name' => $product->name,
                         'selected_color_name' => $item['product_color_name'] ?? null,
                         'selected_color_hex' => $item['product_color_hex'] ?? null,
+                        'selected_flavor_name' => $item['product_flavor_name'] ?? null,
                         'buying_price' => $product->buying_price,
                         'unit_price' => $item['unit_price'],
                         'quantity' => $quantity,
@@ -257,6 +259,7 @@ class CheckoutController extends Controller
             }
 
             $selectedColor = null;
+            $selectedFlavor = null;
 
             if (! empty($item['product_color_id'])) {
                 $selectedColor = ProductColor::where('product_id', $product->id)
@@ -266,6 +269,18 @@ class CheckoutController extends Controller
                 if (! $selectedColor) {
                     throw ValidationException::withMessages([
                         'cart' => "Please select a valid color for {$product->name}.",
+                    ]);
+                }
+            }
+
+            if (! empty($item['product_flavor_id'])) {
+                $selectedFlavor = ProductFlavor::where('product_id', $product->id)
+                    ->whereKey($item['product_flavor_id'])
+                    ->first();
+
+                if (! $selectedFlavor) {
+                    throw ValidationException::withMessages([
+                        'cart' => "Please select a valid flavor for {$product->name}.",
                     ]);
                 }
             }
@@ -289,6 +304,7 @@ class CheckoutController extends Controller
                 'festival_title' => $festivalTitle,
                 'product_color_name' => $selectedColor?->name,
                 'product_color_hex' => $selectedColor?->hex_code,
+                'product_flavor_name' => $selectedFlavor?->name,
                 'total' => $unitPrice * $quantity,
             ];
         })->values()->all();

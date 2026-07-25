@@ -17,6 +17,7 @@ class Product extends Model
         'category_id',
         'name',
         'brand',
+        'vape_device_type',
         'slug',
         'description',
         'seo_title',
@@ -126,6 +127,11 @@ class Product extends Model
     public function colors(): HasMany
     {
         return $this->hasMany(ProductColor::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function flavors(): HasMany
+    {
+        return $this->hasMany(ProductFlavor::class)->orderBy('sort_order')->orderBy('id');
     }
 
     public function getImageUrlAttribute(): string

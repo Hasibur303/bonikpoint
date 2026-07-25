@@ -40,6 +40,9 @@
                                         Color: {{ $item->selected_color_name }}
                                     </p>
                                 @endif
+                                @if($item->selected_flavor_name)
+                                    <span class="mt-1 block text-xs font-semibold text-gray-500">Flavor: {{ $item->selected_flavor_name }}</span>
+                                @endif
                                 <p class="text-sm text-gray-500">BDT {{ number_format($item->unit_price, 2) }} x {{ $item->quantity }}</p>
                                 @if($order->status === 'delivered' && $item->product_id)
                                     @php($review = $order->reviews->firstWhere('product_id', $item->product_id))

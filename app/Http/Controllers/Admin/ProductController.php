@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Support\ImageUploadOptimizer;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductColor;
+use App\Models\ProductFlavor;
 use App\Models\ProductImage;
+use App\Support\ImageUploadOptimizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -49,7 +50,7 @@ class ProductController extends Controller
     public function create(): View
     {
         return view('admin.products.form', [
-            'product' => new Product(),
+            'product' => new Product,
             'categories' => Category::with('parent')->orderBy('parent_id')->orderBy('name')->get(),
         ]);
     }
@@ -59,6 +60,9 @@ class ProductController extends Controller
         $product = Product::create($this->validated($request));
         $this->storeGalleryImages($request, $product);
         $this->storeNewColors($request, $product);
+        if ($product->isAgeRestricted()) {
+            $this->storeNewFlavors($request, $product);
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Product created.');
     }
@@ -66,7 +70,7 @@ class ProductController extends Controller
     public function edit(Product $product): View
     {
         return view('admin.products.form', [
-            'product' => $product->load('images', 'colors'),
+            'product' => $product->load('images', 'colors', 'flavors'),
             'categories' => Category::with('parent')->orderBy('parent_id')->orderBy('name')->get(),
         ]);
     }
@@ -79,6 +83,13 @@ class ProductController extends Controller
         $this->deleteSelectedColors($request, $product);
         $this->updateExistingColors($request, $product);
         $this->storeNewColors($request, $product);
+        if ($product->isAgeRestricted()) {
+            $this->deleteSelectedFlavors($request, $product);
+            $this->updateExistingFlavors($request, $product);
+            $this->storeNewFlavors($request, $product);
+        } else {
+            $product->flavors()->delete();
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated.');
     }
@@ -96,6 +107,7 @@ class ProductController extends Controller
             'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
             'brand' => ['nullable', 'string', 'max:120'],
+            'vape_device_type' => ['nullable', 'in:full_device,cartridge_only,battery_only'],
             'description' => ['nullable', 'string'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string', 'max:500'],
@@ -118,6 +130,12 @@ class ProductController extends Controller
             'colors.*.hex_code' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'delete_colors' => ['nullable', 'array'],
             'delete_colors.*' => ['integer', 'exists:product_colors,id'],
+            'existing_flavors' => ['nullable', 'array'],
+            'existing_flavors.*.name' => ['nullable', 'string', 'max:100'],
+            'flavors' => ['nullable', 'array'],
+            'flavors.*.name' => ['nullable', 'string', 'max:100'],
+            'delete_flavors' => ['nullable', 'array'],
+            'delete_flavors.*' => ['integer', 'exists:product_flavors,id'],
             'advance_delivery_charge' => ['nullable', 'boolean'],
             'warranty_type' => ['required', 'in:none,guarantee,service_warranty,replacement_warranty,brand_warranty'],
             'warranty_duration' => ['nullable', 'string', 'max:120'],
@@ -128,6 +146,10 @@ class ProductController extends Controller
 
         $data['slug'] = Str::slug($data['name']).($product?->exists ? '' : '-'.Str::lower(Str::random(5)));
         $data['buying_price'] = $data['buying_price'] ?? 0;
+        $category = Category::with('parent')->find($data['category_id']);
+        $isVapeCategory = str_contains((string) $category?->slug, 'vape')
+            || str_contains((string) $category?->parent?->slug, 'vape');
+        $data['vape_device_type'] = $isVapeCategory ? ($data['vape_device_type'] ?: null) : null;
         $data['advance_delivery_charge'] = $request->boolean('advance_delivery_charge');
         $data['warranty_duration'] = $data['warranty_type'] === 'none' ? null : $data['warranty_duration'];
         $data['warranty_details'] = $data['warranty_type'] === 'none' ? null : $data['warranty_details'];
@@ -138,7 +160,7 @@ class ProductController extends Controller
             $data['image'] = ImageUploadOptimizer::store($request->file('image'), 'products');
         }
 
-        unset($data['gallery_images'], $data['delete_gallery_images'], $data['existing_colors'], $data['colors'], $data['delete_colors']);
+        unset($data['gallery_images'], $data['delete_gallery_images'], $data['existing_colors'], $data['colors'], $data['delete_colors'], $data['existing_flavors'], $data['flavors'], $data['delete_flavors']);
 
         return $data;
     }
@@ -217,6 +239,7 @@ class ProductController extends Controller
 
                 if ($name === '') {
                     $productColor->delete();
+
                     return;
                 }
 
@@ -248,5 +271,56 @@ class ProductController extends Controller
         $hexCode = trim((string) $hexCode);
 
         return $hexCode === '' ? null : strtoupper($hexCode);
+    }
+
+    private function storeNewFlavors(Request $request, Product $product): void
+    {
+        $flavors = collect($request->input('flavors', []))
+            ->map(fn ($flavor) => trim((string) ($flavor['name'] ?? '')))
+            ->filter()
+            ->unique(fn (string $flavor) => str($flavor)->lower()->toString())
+            ->values();
+
+        if ($flavors->isEmpty()) {
+            return;
+        }
+
+        $nextSortOrder = ((int) $product->flavors()->max('sort_order')) + 1;
+
+        $flavors->each(function (string $flavor) use ($product, &$nextSortOrder): void {
+            $product->flavors()->create([
+                'name' => $flavor,
+                'sort_order' => $nextSortOrder++,
+            ]);
+        });
+    }
+
+    private function updateExistingFlavors(Request $request, Product $product): void
+    {
+        collect($request->input('existing_flavors', []))->each(function (array $flavor, int|string $id) use ($product): void {
+            $name = trim((string) ($flavor['name'] ?? ''));
+            $productFlavor = ProductFlavor::where('product_id', $product->id)->whereKey($id)->first();
+
+            if (! $productFlavor) {
+                return;
+            }
+
+            if ($name === '') {
+                $productFlavor->delete();
+
+                return;
+            }
+
+            $productFlavor->update(['name' => $name]);
+        });
+    }
+
+    private function deleteSelectedFlavors(Request $request, Product $product): void
+    {
+        $flavorIds = collect($request->input('delete_flavors', []))->map(fn ($id) => (int) $id)->filter()->all();
+
+        if ($flavorIds !== []) {
+            ProductFlavor::where('product_id', $product->id)->whereIn('id', $flavorIds)->delete();
+        }
     }
 }

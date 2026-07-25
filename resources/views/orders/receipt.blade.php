@@ -46,6 +46,9 @@
                     @if($item->selected_color_name)
                         <span class="mt-1 block text-xs text-gray-500">Color: {{ $item->selected_color_name }}</span>
                     @endif
+                    @if($item->selected_flavor_name)
+                        <span class="mt-1 block text-xs text-gray-500">Flavor: {{ $item->selected_flavor_name }}</span>
+                    @endif
                     <div class="mt-3 grid grid-cols-3 gap-2 text-xs text-gray-500">
                         <div>
                             <span class="block uppercase">Qty</span>
@@ -80,6 +83,9 @@
                             {{ $item->product_name }}
                             @if($item->selected_color_name)
                                 <span class="mt-1 block text-xs text-gray-500">Color: {{ $item->selected_color_name }}</span>
+                            @endif
+                            @if($item->selected_flavor_name)
+                                <span class="mt-1 block text-xs text-gray-500">Flavor: {{ $item->selected_flavor_name }}</span>
                             @endif
                         </td>
                         <td class="p-3">{{ $item->quantity }}</td>

@@ -426,6 +426,7 @@
                                     <p class="line-clamp-2 text-sm font-black leading-5 text-ink sm:truncate sm:text-base sm:font-semibold">${escapeHtml(item.name)}</p>
                                     ${item.festival_title ? `<p class="text-xs font-bold uppercase tracking-wide text-accent">${escapeHtml(item.festival_title)}</p>` : ''}
                                     ${item.product_color_name ? `<p class="mt-1 flex items-center gap-1.5 text-xs font-semibold text-gray-500"><span class="h-3 w-3 rounded-full border border-black/10" style="background-color: ${escapeHtml(item.product_color_hex || '#E5E7EB')}"></span>Color: ${escapeHtml(item.product_color_name)}</p>` : ''}
+                                    ${item.product_flavor_name ? `<p class="mt-1 text-xs font-semibold text-gray-500">Flavor: ${escapeHtml(item.product_flavor_name)}</p>` : ''}
                                     <p class="text-xs font-semibold text-gray-500 sm:text-sm">${money(item.price)}</p>
                                 </div>
                                 <button type="button" class="js-cart-remove grid h-8 w-8 shrink-0 place-items-center rounded-md bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 sm:w-auto sm:bg-transparent sm:text-sm sm:font-semibold" data-product-id="${item.id}" data-cart-key="${escapeHtml(item.key)}" title="Remove" aria-label="Remove ${escapeHtml(item.name)}">

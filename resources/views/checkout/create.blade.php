@@ -206,6 +206,9 @@
                                                 {{ $item['product_color_name'] }}
                                             </p>
                                         @endif
+                                        @if($item['product_flavor_name'])
+                                            <p class="mt-1 text-xs font-semibold text-gray-500">Flavor: {{ $item['product_flavor_name'] }}</p>
+                                        @endif
                                         <p class="mt-1 text-xs text-gray-500">Qty {{ $item['quantity'] }}</p>
                                     </div>
                                     <span class="text-right text-sm font-black text-ink">BDT {{ number_format($item['total']) }}</span>

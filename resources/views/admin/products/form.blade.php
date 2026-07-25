@@ -20,7 +20,7 @@
                 <label class="mb-1 block text-sm font-semibold">Category</label>
                 <select name="category_id" class="w-full rounded border-gray-200" required>
                     @foreach($categories as $category)
-                        <option value="{{ $category->id }}" @selected(old('category_id', $product->category_id) == $category->id)>
+                        <option value="{{ $category->id }}" data-vape="{{ str_contains(strtolower(($category->parent?->name ?? '').' '.$category->name), 'vape') ? '1' : '0' }}" @selected(old('category_id', $product->category_id) == $category->id)>
                             {{ $category->parent ? $category->parent->name.' / '.$category->name : $category->name }}
                         </option>
                     @endforeach
@@ -31,6 +31,56 @@
                 <input id="product-brand" name="brand" value="{{ old('brand', $product->brand) }}" placeholder="Example: SMOK, Rincoe, Samsung" class="w-full rounded border-gray-200">
                 <p class="mt-1 text-xs text-gray-500">Optional. Adds correct brand information and a searchable brand page.</p>
                 @error('brand')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div id="vape-options" class="hidden rounded-lg border border-primary/20 bg-primary/5 p-4 md:col-span-2">
+                <div class="mb-4">
+                    <p class="text-sm font-black text-primary">Vape Product Options</p>
+                    <p class="mt-1 text-xs text-gray-600">Only shown for products in a Vape category. Add flavors only when customers need to choose one.</p>
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">Device Type</label>
+                    <select name="vape_device_type" class="w-full rounded border-gray-200 md:max-w-md">
+                        <option value="">Not applicable / no device type</option>
+                        <option value="full_device" @selected(old('vape_device_type', $product->vape_device_type) === 'full_device')>Full Device</option>
+                        <option value="cartridge_only" @selected(old('vape_device_type', $product->vape_device_type) === 'cartridge_only')>Cartridge Only</option>
+                        <option value="battery_only" @selected(old('vape_device_type', $product->vape_device_type) === 'battery_only')>Battery Only</option>
+                    </select>
+                    @error('vape_device_type')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="mt-5 border-t border-primary/15 pt-5">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <label class="block text-sm font-semibold">Flavors</label>
+                            <p class="mt-1 text-xs text-gray-600">Examples: Mango Ice, Red Bull, Blueberry Raspberry. Customers choose a flavor before buying.</p>
+                        </div>
+                        <button type="button" id="add-flavor-row" class="rounded bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-primary">Add Flavor</button>
+                    </div>
+
+                    @if($product->exists && $product->flavors->isNotEmpty())
+                        <div class="mt-4 grid gap-3 md:grid-cols-2">
+                            @foreach($product->flavors as $flavor)
+                                <div class="rounded-md border border-primary/15 bg-white p-3">
+                                    <label class="mb-1 block text-xs font-bold uppercase text-gray-500">Flavor Name</label>
+                                    <input name="existing_flavors[{{ $flavor->id }}][name]" value="{{ old('existing_flavors.'.$flavor->id.'.name', $flavor->name) }}" class="w-full rounded border-gray-200">
+                                    <label class="mt-2 flex items-center gap-2 text-xs font-semibold text-red-600"><input type="checkbox" name="delete_flavors[]" value="{{ $flavor->id }}" class="rounded border-gray-300 text-red-600 focus:ring-red-500">Delete this flavor</label>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @php($newFlavorRows = old('flavors', [['name' => '']]))
+                    <div id="flavor-rows" class="mt-4 grid gap-3 md:grid-cols-2">
+                        @foreach($newFlavorRows as $index => $flavor)
+                            <div class="flavor-row rounded-md border border-dashed border-primary/30 bg-white p-3">
+                                <label class="mb-1 block text-xs font-bold uppercase text-gray-500">New Flavor</label>
+                                <input name="flavors[{{ $index }}][name]" value="{{ $flavor['name'] ?? '' }}" placeholder="Example: Mango Ice" class="w-full rounded border-gray-200">
+                            </div>
+                        @endforeach
+                    </div>
+                    @error('existing_flavors.*.name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    @error('flavors.*.name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
             </div>
             <div>
                 <label class="mb-1 block text-sm font-semibold">Price</label>
@@ -212,6 +262,10 @@
         document.addEventListener('DOMContentLoaded', function () {
             const addButton = document.getElementById('add-color-row');
             const rows = document.getElementById('color-rows');
+            const category = document.querySelector('select[name="category_id"]');
+            const vapeOptions = document.getElementById('vape-options');
+            const addFlavorButton = document.getElementById('add-flavor-row');
+            const flavorRows = document.getElementById('flavor-rows');
 
             if (!addButton || !rows) {
                 return;
@@ -234,6 +288,22 @@
                     </div>
                 `;
                 rows.appendChild(wrapper);
+            });
+
+            const refreshVapeOptions = () => {
+                const selected = category?.options[category.selectedIndex];
+                vapeOptions?.classList.toggle('hidden', selected?.dataset.vape !== '1');
+            };
+
+            category?.addEventListener('change', refreshVapeOptions);
+            refreshVapeOptions();
+
+            addFlavorButton?.addEventListener('click', function () {
+                const index = flavorRows.querySelectorAll('.flavor-row').length;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flavor-row rounded-md border border-dashed border-primary/30 bg-white p-3';
+                wrapper.innerHTML = `<label class="mb-1 block text-xs font-bold uppercase text-gray-500">New Flavor</label><input name="flavors[${index}][name]" placeholder="Example: Mango Ice" class="w-full rounded border-gray-200">`;
+                flavorRows.appendChild(wrapper);
             });
         });
     </script>

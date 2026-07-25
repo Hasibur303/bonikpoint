@@ -16,6 +16,7 @@ class OrderItem extends Model
         'product_name',
         'selected_color_name',
         'selected_color_hex',
+        'selected_flavor_name',
         'buying_price',
         'unit_price',
         'quantity',

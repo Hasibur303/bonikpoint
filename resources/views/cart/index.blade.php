@@ -23,6 +23,9 @@
                                         Color: {{ $item['product_color_name'] }}
                                     </p>
                                 @endif
+                                @if($item['product_flavor_name'])
+                                    <p class="mt-1 text-xs font-semibold text-gray-500">Flavor: {{ $item['product_flavor_name'] }}</p>
+                                @endif
                                 <p class="mt-1 text-xs font-semibold text-gray-500 md:text-sm">BDT {{ number_format($item['unit_price'], 2) }} each</p>
                             </div>
                             <div class="col-span-2 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-3 md:col-span-1 md:flex-nowrap md:justify-end md:border-t-0 md:pt-0">
