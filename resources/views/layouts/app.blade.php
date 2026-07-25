@@ -448,30 +448,42 @@
             };
 
             const requestCart = async (url, options = {}) => {
-                const response = await fetch(url, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        ...(options.headers || {}),
-                    },
-                    ...options,
-                });
+                try {
+                    const response = await fetch(url, {
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken,
+                            ...(options.headers || {}),
+                        },
+                        ...options,
+                    });
+                    const contentType = response.headers.get('content-type') || '';
+                    const data = contentType.includes('application/json') ? await response.json() : {};
 
-                const data = await response.json();
+                    if (response.status === 419) {
+                        alert('Your session expired. The page will refresh, then please add the product again.');
+                        window.location.reload();
+                        return;
+                    }
 
-                if (response.status === 428 && data.requires_age_verification) {
-                    openAgeWarning(options.form || null);
-                    return;
+                    if (response.status === 428 && data.requires_age_verification) {
+                        openAgeWarning(options.form || null);
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        alert(data.message || 'Could not add this product. Please refresh the page and try again.');
+                        return;
+                    }
+
+                    cartState = data.cart;
+                    renderCart();
+                    openDrawer();
+                } catch (error) {
+                    alert('Could not connect to the cart. Please refresh the page and try again.');
                 }
-
-                if (!response.ok) {
-                    alert(data.message || 'Cart request failed');
-                    return;
-                }
-
-                cartState = data.cart;
-                renderCart();
-                openDrawer();
             };
 
             document.querySelectorAll('.js-add-to-cart').forEach((form) => {
