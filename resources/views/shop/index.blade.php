@@ -460,8 +460,6 @@
                 offset = normalizeOffset(offset);
                 startOffset = offset;
                 renderFestivalTrack();
-                festivalViewport.classList.add('is-dragging');
-                festivalViewport.setPointerCapture?.(event.pointerId);
             });
 
             festivalViewport.addEventListener('pointermove', (event) => {
@@ -474,6 +472,8 @@
                 }
 
                 didDrag = true;
+                festivalViewport.classList.add('is-dragging');
+                festivalViewport.setPointerCapture?.(event.pointerId);
                 offset = normalizeOffset(startOffset + delta);
                 renderFestivalTrack();
                 event.preventDefault();
@@ -483,9 +483,12 @@
                 if (!isDragging) return;
 
                 const wasDragged = didDrag;
+                const posterLink = wasDragged ? null : event.target.closest('.festival-mosaic-card');
                 isDragging = false;
                 festivalViewport.classList.remove('is-dragging');
-                festivalViewport.releasePointerCapture?.(event.pointerId);
+                if (festivalViewport.hasPointerCapture?.(event.pointerId)) {
+                    festivalViewport.releasePointerCapture(event.pointerId);
+                }
 
                 if (wasDragged) {
                     suppressClick = true;
@@ -496,6 +499,11 @@
                 }
 
                 restartFestivalTimer();
+
+                if (posterLink) {
+                    event.preventDefault();
+                    window.location.assign(posterLink.href);
+                }
             };
 
             festivalViewport.addEventListener('pointerup', stopFestivalDrag);
