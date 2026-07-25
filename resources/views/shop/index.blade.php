@@ -380,6 +380,7 @@
             let startX = 0;
             let startOffset = 0;
             let didDrag = false;
+            let suppressClick = false;
             let slideTimer = null;
             let resetTimer = null;
             let motionTimer = null;
@@ -468,10 +469,11 @@
 
                 const delta = event.clientX - startX;
 
-                if (Math.abs(delta) > 6) {
-                    didDrag = true;
+                if (!didDrag && Math.abs(delta) <= 12) {
+                    return;
                 }
 
+                didDrag = true;
                 offset = normalizeOffset(startOffset + delta);
                 renderFestivalTrack();
                 event.preventDefault();
@@ -480,12 +482,19 @@
             const stopFestivalDrag = (event) => {
                 if (!isDragging) return;
 
+                const wasDragged = didDrag;
                 isDragging = false;
                 festivalViewport.classList.remove('is-dragging');
                 festivalViewport.releasePointerCapture?.(event.pointerId);
-                offset = Math.round(offset / stepWidth()) * stepWidth();
-                renderFestivalTrack(true);
-                scheduleFestivalLoopReset();
+
+                if (wasDragged) {
+                    suppressClick = true;
+                    window.setTimeout(() => suppressClick = false, 250);
+                    offset = Math.round(offset / stepWidth()) * stepWidth();
+                    renderFestivalTrack(true);
+                    scheduleFestivalLoopReset();
+                }
+
                 restartFestivalTimer();
             };
 
@@ -493,11 +502,11 @@
             festivalViewport.addEventListener('pointercancel', stopFestivalDrag);
             festivalViewport.addEventListener('pointerleave', stopFestivalDrag);
             festivalViewport.addEventListener('click', (event) => {
-                if (!didDrag) return;
+                if (!suppressClick) return;
 
                 event.preventDefault();
                 event.stopPropagation();
-                didDrag = false;
+                suppressClick = false;
             }, true);
 
             window.addEventListener('resize', () => {
