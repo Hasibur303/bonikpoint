@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Festival;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductColor;
 use App\Models\StoreSetting;
+use App\Support\BotProtection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -106,6 +108,8 @@ class CheckoutController extends Controller
 
     public function guestStore(Request $request): RedirectResponse
     {
+        BotProtection::ensureHuman($request);
+
         return $this->placeOrder($request, true);
     }
 
@@ -270,7 +274,7 @@ class CheckoutController extends Controller
             $festivalTitle = null;
 
             if (! empty($item['festival_id'])) {
-                $festival = \App\Models\Festival::find($item['festival_id']);
+                $festival = Festival::find($item['festival_id']);
 
                 if ($festival && $festival->isRunning() && $festival->includesProduct($product)) {
                     $unitPrice = (float) $festival->discountedPrice($product);

@@ -161,6 +161,9 @@
                     @endif
 
                     <div class="sticky bottom-0 z-20 border-t border-gray-100 bg-white/95 p-4 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur sm:static sm:px-7 sm:py-5 sm:shadow-none">
+                        @if($isGuestCheckout)
+                            <x-bot-protection />
+                        @endif
                         <div class="mb-3 flex items-center justify-between gap-2 rounded-md bg-[#f4f7f6] p-2 sm:hidden">
                             <span class="text-xs font-black text-ink">Need help?</span>
                             <div class="flex items-center gap-1.5">
