@@ -102,6 +102,8 @@
                     cursor: grab;
                     touch-action: pan-y;
                     user-select: none;
+                    perspective: 1400px;
+                    padding: 0.45rem 0.2rem 0.85rem;
                 }
 
                 .festival-mosaic-viewport.is-dragging {
@@ -130,9 +132,28 @@
                     border-radius: 0.45rem;
                     background: #071b1f;
                     border: 1px solid rgba(255, 255, 255, 0.65);
-                    box-shadow: 0 12px 30px rgba(12, 42, 44, 0.13);
-                    transform: translateZ(0) scale(1);
+                    box-shadow: 0 16px 25px rgba(7, 27, 31, 0.18), 0 5px 10px rgba(7, 27, 31, 0.08);
+                    transform: translate3d(0, 0, 0) scale(1);
+                    transform-style: preserve-3d;
                     transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1), filter 620ms ease, box-shadow 620ms ease;
+                }
+
+                .festival-mosaic-card::before {
+                    content: '';
+                    position: absolute;
+                    inset: 0.4rem;
+                    z-index: 1;
+                    border: 1px solid rgba(255, 255, 255, 0.58);
+                    border-radius: calc(0.45rem - 0.16rem);
+                    box-shadow: inset 0 0 0 1px rgba(6, 46, 49, 0.12);
+                    opacity: 0.72;
+                    pointer-events: none;
+                    transform: translateZ(18px);
+                }
+
+                .festival-mosaic-card img {
+                    transform: translateZ(14px) scale(1.04);
+                    transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
                 }
 
                 .festival-mosaic-card::after {
@@ -146,9 +167,13 @@
                 }
 
                 .festival-mosaic-viewport.is-animating .festival-mosaic-card {
-                    transform: translateZ(0) scale(0.982);
+                    transform: translate3d(0, 0, 0) scale(0.982);
                     filter: saturate(0.94) brightness(0.98);
                     box-shadow: 0 7px 18px rgba(12, 42, 44, 0.1);
+                }
+
+                .festival-mosaic-viewport.is-animating .festival-mosaic-card img {
+                    transform: translateZ(10px) scale(1.025);
                 }
 
                 .festival-mosaic-viewport.is-animating .festival-mosaic-card::after {
@@ -156,7 +181,7 @@
                 }
 
                 .festival-mosaic-viewport.is-dragging .festival-mosaic-card {
-                    transform: translateZ(0) scale(0.975);
+                    transform: translate3d(0, 0, 0) scale(0.975);
                     filter: saturate(0.92) brightness(0.97);
                     transition-duration: 160ms;
                 }
@@ -194,8 +219,27 @@
                 }
 
                 @media (min-width: 1024px) {
+                    .festival-mosaic-card {
+                        transform: rotateX(1.5deg) rotateY(-2.5deg) translateZ(0);
+                    }
+
+                    .festival-mosaic-card:nth-child(even) {
+                        transform: rotateX(1.5deg) rotateY(2.5deg) translateZ(0);
+                    }
+
                     .festival-mosaic-card:hover {
-                        transform: translateY(-2px);
+                        transform: translateY(-9px) rotateX(-2deg) rotateY(5deg) translateZ(28px) scale(1.025);
+                        box-shadow: 0 25px 34px rgba(7, 27, 31, 0.26), 0 8px 14px rgba(7, 27, 31, 0.11);
+                        filter: saturate(1.05) brightness(1.02);
+                        z-index: 2;
+                    }
+
+                    .festival-mosaic-card:nth-child(even):hover {
+                        transform: translateY(-9px) rotateX(-2deg) rotateY(-5deg) translateZ(28px) scale(1.025);
+                    }
+
+                    .festival-mosaic-card:hover img {
+                        transform: translateZ(32px) scale(1.095);
                     }
                 }
 
