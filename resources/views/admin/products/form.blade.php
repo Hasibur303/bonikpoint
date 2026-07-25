@@ -10,6 +10,16 @@
     <form id="product-editor-form" method="POST" action="{{ $product->exists ? route('admin.products.update', $product) : route('admin.products.store') }}" enctype="multipart/form-data" class="rounded-lg border border-[#dfe7e5] bg-white p-5 shadow-sm sm:p-6">
         @csrf
         @if($product->exists) @method('PUT') @endif
+        @if($errors->any())
+            <div role="alert" class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                <p class="font-black">The product was not saved. Please correct the highlighted information.</p>
+                <ul class="mt-2 list-disc space-y-1 pl-5">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <div class="grid gap-5 md:grid-cols-2">
             <div>
                 <label class="mb-1 block text-sm font-semibold">Name</label>
@@ -25,6 +35,7 @@
                         </option>
                     @endforeach
                 </select>
+                @error('category_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label for="product-brand" class="mb-1 block text-sm font-semibold">Brand</label>
@@ -85,23 +96,28 @@
             <div>
                 <label class="mb-1 block text-sm font-semibold">Price</label>
                 <input name="price" type="number" step="0.01" value="{{ old('price', $product->price) }}" class="w-full rounded border-gray-200" required>
+                @error('price')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label class="mb-1 block text-sm font-semibold">Buying Price</label>
                 <input name="buying_price" type="number" step="0.01" value="{{ old('buying_price', $product->buying_price ?? 0) }}" class="w-full rounded border-gray-200">
                 <p class="mt-1 text-xs text-gray-500">Admin only. Used for profit calculation and hidden from shop pages.</p>
+                @error('buying_price')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label class="mb-1 block text-sm font-semibold">Compare Price</label>
                 <input name="compare_price" type="number" step="0.01" value="{{ old('compare_price', $product->compare_price) }}" class="w-full rounded border-gray-200">
+                @error('compare_price')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label class="mb-1 block text-sm font-semibold">Stock</label>
                 <input name="stock" type="number" value="{{ old('stock', $product->stock ?? 0) }}" class="w-full rounded border-gray-200" required>
+                @error('stock')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label class="mb-1 block text-sm font-semibold">SKU</label>
                 <input name="sku" value="{{ old('sku', $product->sku) }}" class="w-full rounded border-gray-200">
+                @error('sku')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
             <div class="md:col-span-2">
                 <label class="mb-1 block text-sm font-semibold">Description</label>
