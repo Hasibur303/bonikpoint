@@ -5,14 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\SteadfastCourier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class OrderController extends Controller
 {
@@ -43,6 +46,8 @@ class OrderController extends Controller
                 ->when($status, fn ($query) => $query->where('status', $status))
                 ->when($search, fn ($query) => $query->where(function ($query) use ($search) {
                     $query->where('parcel_id', 'like', '%'.$search.'%')
+                        ->orWhere('steadfast_consignment_id', 'like', '%'.$search.'%')
+                        ->orWhere('steadfast_tracking_code', 'like', '%'.$search.'%')
                         ->orWhere('order_number', 'like', '%'.$search.'%')
                         ->orWhere('customer_name', 'like', '%'.$search.'%')
                         ->orWhere('mobile', 'like', '%'.$search.'%');
@@ -58,9 +63,12 @@ class OrderController extends Controller
         ]);
     }
 
-    public function show(Order $order): View
+    public function show(Order $order, SteadfastCourier $steadfast): View
     {
-        return view('admin.orders.show', ['order' => $order->load('items', 'user')]);
+        return view('admin.orders.show', [
+            'order' => $order->load('items', 'user'),
+            'steadfastConfigured' => $steadfast->configured(),
+        ]);
     }
 
     public function receipt(Order $order): View
@@ -97,6 +105,10 @@ class OrderController extends Controller
         $validated['cancellation_note'] = filled($validated['cancellation_note'] ?? null)
             ? trim($validated['cancellation_note'])
             : null;
+
+        if ($order->hasSteadfastShipment()) {
+            $validated['parcel_id'] = $order->parcel_id;
+        }
 
         $adminRecordedDeliveryPayment = $request->hasFile('delivery_payment_proof')
             && $order->advance_delivery_required
@@ -145,5 +157,89 @@ class OrderController extends Controller
         return back()->with('success', $adminRecordedDeliveryPayment
             ? 'Payment screenshot saved. Delivery charge marked paid and the order is ready for review.'
             : 'Order fulfillment details updated.');
+    }
+
+    public function sendToSteadfast(Order $order, SteadfastCourier $steadfast): RedirectResponse
+    {
+        $lock = Cache::lock('steadfast-order-'.$order->getKey(), 30);
+
+        if (! $lock->get()) {
+            return back()->withErrors(['steadfast' => 'This order is already being submitted. Please wait a moment and refresh the page.']);
+        }
+
+        try {
+            $order->refresh()->loadMissing('items');
+
+            if ($order->is_offline_sale) {
+                return back()->withErrors(['steadfast' => 'Offline sales cannot be submitted to Steadfast.']);
+            }
+
+            if ($order->hasSteadfastShipment()) {
+                return back()->withErrors(['steadfast' => 'This order has already been submitted to Steadfast.']);
+            }
+
+            if ($order->status !== 'confirmed') {
+                return back()->withErrors(['steadfast' => 'Confirm the order before sending it to Steadfast.']);
+            }
+
+            try {
+                $shipment = $steadfast->createOrder($order);
+
+                $order->update([
+                    'parcel_id' => $shipment['consignment_id'],
+                    'steadfast_consignment_id' => $shipment['consignment_id'],
+                    'steadfast_tracking_code' => $shipment['tracking_code'],
+                    'steadfast_status' => $shipment['status'],
+                    'steadfast_cod_amount' => $order->dueAmount(),
+                    'steadfast_submitted_at' => now(),
+                    'steadfast_last_synced_at' => now(),
+                    'steadfast_last_error' => null,
+                    'status' => 'processing',
+                ]);
+            } catch (Throwable $exception) {
+                report($exception);
+
+                $order->update([
+                    'steadfast_last_error' => $exception->getMessage(),
+                ]);
+
+                return back()->withErrors([
+                    'steadfast' => 'Steadfast submission failed: '.$exception->getMessage(),
+                ]);
+            }
+
+            return back()->with('success', 'Parcel submitted to Steadfast successfully. Consignment ID: '.$shipment['consignment_id']);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    public function refreshSteadfastStatus(Order $order, SteadfastCourier $steadfast): RedirectResponse
+    {
+        if (! $order->hasSteadfastShipment()) {
+            return back()->withErrors(['steadfast' => 'This order has not been submitted to Steadfast yet.']);
+        }
+
+        try {
+            $status = $steadfast->status($order->steadfast_consignment_id);
+
+            $order->update([
+                'steadfast_status' => $status,
+                'steadfast_last_synced_at' => now(),
+                'steadfast_last_error' => null,
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            $order->update([
+                'steadfast_last_error' => $exception->getMessage(),
+            ]);
+
+            return back()->withErrors([
+                'steadfast' => 'Could not refresh Steadfast status: '.$exception->getMessage(),
+            ]);
+        }
+
+        return back()->with('success', 'Steadfast parcel status updated: '.str($status)->replace('_', ' ')->title());
     }
 }

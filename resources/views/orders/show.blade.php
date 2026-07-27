@@ -23,6 +23,28 @@
             </div>
         </div>
 
+        @if($order->hasSteadfastShipment())
+            <div class="mb-5 flex flex-col gap-3 rounded-lg border border-[#cbded9] bg-[#edf6f3] p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                <div class="flex min-w-0 items-center gap-3">
+                    <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-primary text-white"><i class="fa-solid fa-truck-fast"></i></span>
+                    <div class="min-w-0">
+                        <p class="text-xs font-black uppercase tracking-wide text-primary">Courier Tracking</p>
+                        <p class="mt-1 text-sm font-bold text-ink">Your parcel has been submitted to Steadfast Courier.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs sm:text-right">
+                    <div class="rounded-md bg-white px-3 py-2 ring-1 ring-black/5">
+                        <span class="block text-[10px] font-black uppercase text-gray-400">Tracking Code</span>
+                        <span class="mt-0.5 block break-all font-mono font-black text-primary">{{ $order->steadfast_tracking_code ?: $order->steadfast_consignment_id }}</span>
+                    </div>
+                    <div class="rounded-md bg-white px-3 py-2 ring-1 ring-black/5">
+                        <span class="block text-[10px] font-black uppercase text-gray-400">Courier Status</span>
+                        <span class="mt-0.5 block font-black capitalize text-ink">{{ str($order->steadfast_status ?: 'pending')->replace('_', ' ') }}</span>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-6">
             <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
                 <div class="mb-5 flex items-center gap-3 border-b border-gray-100 pb-4">

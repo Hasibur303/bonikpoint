@@ -16,6 +16,13 @@ class Order extends Model
         'guest_token',
         'order_number',
         'parcel_id',
+        'steadfast_consignment_id',
+        'steadfast_tracking_code',
+        'steadfast_status',
+        'steadfast_cod_amount',
+        'steadfast_submitted_at',
+        'steadfast_last_synced_at',
+        'steadfast_last_error',
         'customer_name',
         'email',
         'mobile',
@@ -43,8 +50,11 @@ class Order extends Model
             'subtotal' => 'decimal:2',
             'shipping' => 'decimal:2',
             'total' => 'decimal:2',
+            'steadfast_cod_amount' => 'decimal:2',
             'advance_delivery_required' => 'boolean',
             'is_offline_sale' => 'boolean',
+            'steadfast_submitted_at' => 'datetime',
+            'steadfast_last_synced_at' => 'datetime',
         ];
     }
 
@@ -87,5 +97,17 @@ class Order extends Model
         }
 
         return max((float) $this->total - $this->paidAmount(), 0);
+    }
+
+    public function hasSteadfastShipment(): bool
+    {
+        return filled($this->steadfast_consignment_id);
+    }
+
+    public function canSendToSteadfast(): bool
+    {
+        return ! $this->is_offline_sale
+            && $this->status === 'confirmed'
+            && ! $this->hasSteadfastShipment();
     }
 }

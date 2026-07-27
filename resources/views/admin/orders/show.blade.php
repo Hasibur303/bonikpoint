@@ -14,7 +14,7 @@
                     <span class="mb-1 block text-[10px] font-black uppercase text-gray-500">Parcel ID</span>
                     <span class="relative block">
                         <i class="fa-solid fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
-                        <input name="parcel_id" value="{{ old('parcel_id', $order->parcel_id) }}" maxlength="120" placeholder="Enter courier parcel ID" class="h-10 w-full pl-9 text-sm sm:w-56">
+                        <input name="parcel_id" value="{{ old('parcel_id', $order->parcel_id) }}" maxlength="120" placeholder="Enter courier parcel ID" @readonly($order->hasSteadfastShipment()) class="h-10 w-full pl-9 text-sm sm:w-56 {{ $order->hasSteadfastShipment() ? 'cursor-not-allowed bg-gray-100 text-gray-500' : '' }}">
                     </span>
                 </label>
                 <label>
@@ -43,6 +43,91 @@
             @endforeach
         </div>
     </div>
+    @php
+        $steadfastStatusClass = match($order->steadfast_status) {
+            'delivered' => 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+            'cancelled', 'partial_delivered' => 'bg-red-50 text-red-700 ring-red-200',
+            'in_review', 'pending' => 'bg-amber-50 text-amber-800 ring-amber-200',
+            default => 'bg-blue-50 text-blue-700 ring-blue-200',
+        };
+    @endphp
+    <section class="mb-6 overflow-hidden rounded-lg border border-[#d8e3e0] bg-white shadow-sm">
+        <div class="flex flex-col gap-4 border-b border-[#e5ecea] bg-[#f4f8f7] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-[#d71920] text-white shadow-sm"><i class="fa-solid fa-truck-fast"></i></span>
+                <div>
+                    <h2 class="font-black text-ink">Steadfast Courier</h2>
+                    <p class="mt-0.5 text-xs text-gray-500">{{ $order->hasSteadfastShipment() ? 'Parcel submitted and connected to this order.' : 'Send confirmed order details directly to Steadfast.' }}</p>
+                </div>
+            </div>
+
+            @if($order->hasSteadfastShipment())
+                <form method="POST" action="{{ route('admin.orders.steadfast.status', $order) }}">
+                    @csrf
+                    <button class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#ccd9d6] bg-white px-4 text-xs font-black text-ink shadow-sm transition hover:border-primary hover:text-primary">
+                        <i class="fa-solid fa-rotate"></i>
+                        Refresh Status
+                    </button>
+                </form>
+            @elseif($order->canSendToSteadfast() && $steadfastConfigured)
+                <form method="POST" action="{{ route('admin.orders.steadfast.send', $order) }}" onsubmit="return confirm('Send this order to Steadfast with COD amount BDT {{ number_format($order->dueAmount(), 2, '.', '') }}? This action cannot be repeated.');">
+                    @csrf
+                    <button class="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#d71920] px-4 text-xs font-black text-white shadow-[0_4px_0_#99171b] transition hover:-translate-y-0.5 hover:bg-[#bf151b] hover:shadow-[0_5px_0_#871317] active:translate-y-1 active:shadow-none">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        Send to Steadfast
+                    </button>
+                </form>
+            @endif
+        </div>
+
+        <div class="p-5">
+            @if($order->hasSteadfastShipment())
+                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-md border border-gray-100 bg-[#fafcfc] p-3">
+                        <p class="text-[10px] font-black uppercase text-gray-400">Consignment ID</p>
+                        <p class="mt-1 break-all font-mono text-sm font-black text-ink">{{ $order->steadfast_consignment_id }}</p>
+                    </div>
+                    <div class="rounded-md border border-gray-100 bg-[#fafcfc] p-3">
+                        <p class="text-[10px] font-black uppercase text-gray-400">Tracking Code</p>
+                        <p class="mt-1 break-all font-mono text-sm font-black text-primary">{{ $order->steadfast_tracking_code ?: 'Not provided' }}</p>
+                    </div>
+                    <div class="rounded-md border border-gray-100 bg-[#fafcfc] p-3">
+                        <p class="text-[10px] font-black uppercase text-gray-400">Courier Status</p>
+                        <span class="mt-1.5 inline-flex rounded-full px-2.5 py-1 text-[10px] font-black capitalize ring-1 {{ $steadfastStatusClass }}">{{ str($order->steadfast_status ?: 'pending')->replace('_', ' ') }}</span>
+                    </div>
+                    <div class="rounded-md border border-gray-100 bg-[#fafcfc] p-3">
+                        <p class="text-[10px] font-black uppercase text-gray-400">COD Submitted</p>
+                        <p class="mt-1 text-sm font-black text-red-700">BDT {{ number_format($order->steadfast_cod_amount, 2) }}</p>
+                    </div>
+                </div>
+                <p class="mt-3 text-[11px] font-semibold text-gray-400">
+                    Submitted {{ $order->steadfast_submitted_at?->format('d M Y, h:i A') ?: 'recently' }}
+                    @if($order->steadfast_last_synced_at)
+                        · Last checked {{ $order->steadfast_last_synced_at->diffForHumans() }}
+                    @endif
+                </p>
+            @elseif(! $steadfastConfigured)
+                <div class="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                    <i class="fa-solid fa-key mt-0.5"></i>
+                    <p><span class="font-black">API credentials are not active here.</span> Add the Steadfast API key and secret to this server’s <code>.env</code>, then rebuild the configuration cache.</p>
+                </div>
+            @elseif($order->is_offline_sale)
+                <p class="text-sm font-semibold text-gray-500">Offline sales are recorded for profit reporting and are not submitted to a courier.</p>
+            @elseif($order->status !== 'confirmed')
+                <div class="flex items-start gap-3 rounded-md border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+                    <i class="fa-solid fa-circle-info mt-0.5"></i>
+                    <p>Change the store order status to <strong>Confirmed</strong> after checking the customer and payment details. The Send to Steadfast button will then become available.</p>
+                </div>
+            @endif
+
+            @if($order->steadfast_last_error)
+                <div class="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-800">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                    Last API error: {{ $order->steadfast_last_error }}
+                </div>
+            @endif
+        </div>
+    </section>
     <div class="grid min-w-0 gap-8 lg:grid-cols-[1fr_360px]">
         <div class="min-w-0 rounded-lg bg-white p-6 shadow-sm">
             <h2 class="mb-4 text-xl font-black text-ink">Items</h2>
