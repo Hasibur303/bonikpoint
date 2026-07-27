@@ -36,6 +36,30 @@
                 <p class="mt-1 text-xs font-semibold text-gray-500">You can change the price for this sale only.</p>
                 @error('selling_price')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
             </div>
+            <div class="border-t border-gray-100 pt-5 sm:col-span-2">
+                <p class="text-sm font-black text-ink">Customer Details <span class="font-medium text-gray-400">(optional)</span></p>
+                <p class="mt-1 text-xs text-gray-500">Add these details when you want the offline order and receipt to include the buyer information.</p>
+            </div>
+            <div>
+                <label for="offline-customer-name" class="mb-1.5 block text-sm font-black text-ink">Customer Name</label>
+                <input id="offline-customer-name" name="customer_name" value="{{ old('customer_name') }}" maxlength="120" placeholder="Buyer name" class="h-11 w-full text-sm">
+                @error('customer_name')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div>
+                <label for="offline-mobile" class="mb-1.5 block text-sm font-black text-ink">Phone Number</label>
+                <input id="offline-mobile" name="mobile" value="{{ old('mobile') }}" maxlength="30" inputmode="tel" placeholder="01XXXXXXXXX" class="h-11 w-full text-sm">
+                @error('mobile')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div class="sm:col-span-2">
+                <label for="offline-address" class="mb-1.5 block text-sm font-black text-ink">Address</label>
+                <textarea id="offline-address" name="address" rows="2" maxlength="1000" placeholder="Delivery or customer address" class="w-full text-sm">{{ old('address') }}</textarea>
+                @error('address')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
+            </div>
+            <div>
+                <label for="offline-city" class="mb-1.5 block text-sm font-black text-ink">City / District</label>
+                <input id="offline-city" name="city" value="{{ old('city') }}" maxlength="100" placeholder="Dhaka" class="h-11 w-full text-sm">
+                @error('city')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
+            </div>
             <div class="sm:col-span-2">
                 <label for="offline-notes" class="mb-1.5 block text-sm font-black text-ink">Note <span class="font-medium text-gray-400">(optional)</span></label>
                 <textarea id="offline-notes" name="notes" rows="3" maxlength="500" placeholder="Example: Sold from shop counter, paid in cash" class="w-full text-sm">{{ old('notes') }}</textarea>

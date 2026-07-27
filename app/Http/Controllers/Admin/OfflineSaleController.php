@@ -29,6 +29,10 @@ class OfflineSaleController extends Controller
             'product_id' => ['required', 'integer', 'exists:products,id'],
             'quantity' => ['required', 'integer', 'min:1', 'max:10000'],
             'selling_price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
+            'customer_name' => ['nullable', 'string', 'max:120'],
+            'mobile' => ['nullable', 'string', 'max:30'],
+            'address' => ['nullable', 'string', 'max:1000'],
+            'city' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -46,11 +50,11 @@ class OfflineSaleController extends Controller
 
             $order = Order::create([
                 'order_number' => 'OFF-'.now()->format('YmdHis').'-'.Str::upper(Str::random(5)),
-                'customer_name' => 'Offline store sale',
+                'customer_name' => filled($data['customer_name'] ?? null) ? trim($data['customer_name']) : 'Offline store sale',
                 'email' => 'offline-sale@bonikpoint.local',
-                'mobile' => 'N/A',
-                'address' => 'Offline sale entered by admin',
-                'city' => 'Store',
+                'mobile' => filled($data['mobile'] ?? null) ? trim($data['mobile']) : 'N/A',
+                'address' => filled($data['address'] ?? null) ? trim($data['address']) : 'Offline sale entered by admin',
+                'city' => filled($data['city'] ?? null) ? trim($data['city']) : 'Store',
                 'status' => 'delivered',
                 'subtotal' => $total,
                 'shipping' => 0,
