@@ -818,53 +818,51 @@
             let offset = 0;
             let isDragging = false;
             let didDrag = false;
+            let isHoverPaused = false;
+            let isFocusPaused = false;
             let startX = 0;
             let startOffset = 0;
-            let timer = null;
-            let resetTimer = null;
-            const duration = 620;
+            let lastFrameTime = null;
+            let animationFrame = null;
+            const pixelsPerSecond = 24;
 
-            const panelWidth = () => Math.max(1, track.scrollWidth / 2);
-            const stepWidth = () => {
-                const card = track.querySelector('.trending-product-card');
-                const panel = track.querySelector('.trending-products-panel');
-                const gap = panel ? parseFloat(window.getComputedStyle(panel).gap) || 0 : 0;
-
-                return card ? Math.max(1, card.getBoundingClientRect().width + gap) : viewport.clientWidth;
-            };
+            const firstPanel = track.querySelector('.trending-products-panel');
+            const panelWidth = () => Math.max(1, firstPanel?.getBoundingClientRect().width || 1);
             const normalize = (value) => {
                 const width = panelWidth();
                 while (value <= -width) value += width;
                 while (value > 0) value -= width;
                 return value;
             };
-            const render = (animate = false) => {
-                track.style.transition = animate ? `transform ${duration}ms cubic-bezier(0.22, 1, 0.36, 1)` : 'none';
+            const render = () => {
+                track.style.transition = 'none';
                 track.style.transform = `translate3d(${offset}px, 0, 0)`;
             };
-            const scheduleReset = () => {
-                window.clearTimeout(resetTimer);
-                resetTimer = window.setTimeout(() => {
-                    if (!isDragging) {
-                        offset = normalize(offset);
-                        render();
-                    }
-                }, duration + 30);
+            const ensureTrackCoverage = () => {
+                if (!firstPanel) return;
+
+                while (track.scrollWidth < viewport.clientWidth + (panelWidth() * 2)) {
+                    const clone = firstPanel.cloneNode(true);
+                    clone.setAttribute('aria-hidden', 'true');
+                    clone.setAttribute('inert', '');
+                    track.appendChild(clone);
+                }
             };
-            const moveNext = () => {
-                if (isDragging) return;
-                offset -= stepWidth();
-                render(true);
-                scheduleReset();
-            };
-            const restart = () => {
-                window.clearInterval(timer);
-                timer = window.setInterval(moveNext, 3600);
+            const isPaused = () => isDragging || isHoverPaused || isFocusPaused || document.hidden;
+            const animate = (time) => {
+                if (lastFrameTime === null) lastFrameTime = time;
+                const elapsed = Math.min(50, time - lastFrameTime);
+                lastFrameTime = time;
+
+                if (!isPaused()) {
+                    offset = normalize(offset - ((pixelsPerSecond * elapsed) / 1000));
+                    render();
+                }
+
+                animationFrame = window.requestAnimationFrame(animate);
             };
 
             viewport.addEventListener('pointerdown', (event) => {
-                window.clearInterval(timer);
-                window.clearTimeout(resetTimer);
                 isDragging = true;
                 didDrag = false;
                 startX = event.clientX;
@@ -888,24 +886,44 @@
                 isDragging = false;
                 viewport.classList.remove('is-dragging');
                 if (viewport.hasPointerCapture?.(event.pointerId)) viewport.releasePointerCapture(event.pointerId);
-                if (didDrag) {
-                    offset = Math.round(offset / stepWidth()) * stepWidth();
-                    render(true);
-                    scheduleReset();
-                }
-                restart();
+                lastFrameTime = null;
             };
             viewport.addEventListener('pointerup', stopDrag);
             viewport.addEventListener('pointercancel', stopDrag);
-            viewport.addEventListener('pointerleave', stopDrag);
+            viewport.addEventListener('pointerenter', (event) => {
+                if (event.pointerType === 'mouse') isHoverPaused = true;
+            });
+            viewport.addEventListener('pointerleave', (event) => {
+                if (isDragging) stopDrag(event);
+                isHoverPaused = false;
+                lastFrameTime = null;
+            });
+            viewport.addEventListener('focusin', () => {
+                isFocusPaused = true;
+            });
+            viewport.addEventListener('focusout', () => {
+                isFocusPaused = false;
+                lastFrameTime = null;
+            });
+            viewport.addEventListener('click', (event) => {
+                if (!didDrag) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+                didDrag = false;
+            }, true);
+            document.addEventListener('visibilitychange', () => {
+                lastFrameTime = null;
+            });
             window.addEventListener('resize', () => {
+                ensureTrackCoverage();
                 offset = normalize(offset);
                 render();
-                restart();
             });
 
+            ensureTrackCoverage();
             render();
-            restart();
+            animationFrame = window.requestAnimationFrame(animate);
         });
     </script>
 
