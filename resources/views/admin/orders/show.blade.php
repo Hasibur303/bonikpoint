@@ -26,10 +26,10 @@
                     </select>
                 </label>
                 <label class="min-w-[190px] flex-1 sm:flex-none">
-                    <span class="mb-1 block text-[10px] font-black uppercase text-gray-500">Payment Screenshot <span class="normal-case text-gray-400">(optional)</span></span>
+                    <span class="mb-1 block text-[10px] font-black uppercase text-gray-500">Delivery Payment Screenshot <span class="normal-case text-gray-400">(optional)</span></span>
                     <span class="relative block">
                         <i class="fa-solid fa-image absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
-                        <input name="delivery_payment_proof" type="file" accept="image/jpeg,image/png,image/webp" class="h-10 w-full cursor-pointer text-xs sm:w-56">
+                        <input name="delivery_payment_proof" type="file" accept="image/jpeg,image/png,image/webp" class="h-10 w-full cursor-pointer text-xs sm:w-56" title="Uploading a screenshot marks the advance delivery charge as paid">
                     </span>
                 </label>
                 <label class="min-w-[220px] flex-1 sm:flex-none">
@@ -104,10 +104,10 @@
                     <p class="mt-1">Area: {{ $order->delivery_area === 'outside_dhaka' ? 'Outside Dhaka' : 'Inside Dhaka' }}</p>
                     <p>Charge: BDT {{ number_format($order->shipping, 2) }}</p>
                     <p>Option: {{ $order->delivery_charge_payment_option === 'pay_later' ? 'Pay Later' : 'Paid Now' }}</p>
-                    @if($order->delivery_charge_payment_option === 'pay_now')
-                        <p>Method: {{ $order->delivery_payment_method }}</p>
-                        <p>Payment Mobile: {{ $order->delivery_payment_mobile }}</p>
-                        <p>Transaction ID: {{ $order->delivery_transaction_id }}</p>
+                        @if($order->delivery_charge_payment_option === 'pay_now')
+                        <p>Method: {{ $order->delivery_payment_method ?: 'Admin recorded' }}</p>
+                        @if($order->delivery_payment_mobile)<p>Payment Mobile: {{ $order->delivery_payment_mobile }}</p>@endif
+                        @if($order->delivery_transaction_id)<p>Transaction ID: {{ $order->delivery_transaction_id }}</p>@endif
                         @if(! $order->delivery_payment_proof)
                             <p class="mt-2 text-xs font-semibold text-gray-500">No payment screenshot submitted.</p>
                         @endif

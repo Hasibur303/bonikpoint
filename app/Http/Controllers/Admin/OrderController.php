@@ -98,11 +98,24 @@ class OrderController extends Controller
             ? trim($validated['cancellation_note'])
             : null;
 
+        $adminRecordedDeliveryPayment = $request->hasFile('delivery_payment_proof')
+            && $order->advance_delivery_required
+            && $validated['status'] !== 'cancelled';
+
         if ($request->hasFile('delivery_payment_proof')) {
             $validated['delivery_payment_proof'] = $request->file('delivery_payment_proof')
                 ->store('delivery-payment-proofs', 'local');
         } else {
             unset($validated['delivery_payment_proof']);
+        }
+
+        if ($adminRecordedDeliveryPayment) {
+            $validated['delivery_charge_payment_option'] = 'pay_now';
+            $validated['delivery_payment_method'] = $order->delivery_payment_method ?: 'Admin recorded';
+
+            if ($order->status === 'waiting_delivery_charge' && $validated['status'] === 'waiting_delivery_charge') {
+                $validated['status'] = 'pending';
+            }
         }
 
         DB::transaction(function () use ($order, $validated) {
@@ -129,6 +142,8 @@ class OrderController extends Controller
             $order->update($validated);
         });
 
-        return back()->with('success', 'Order fulfillment details updated.');
+        return back()->with('success', $adminRecordedDeliveryPayment
+            ? 'Payment screenshot saved. Delivery charge marked paid and the order is ready for review.'
+            : 'Order fulfillment details updated.');
     }
 }

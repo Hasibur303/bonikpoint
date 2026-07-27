@@ -49,9 +49,9 @@
                             <p class="font-bold text-ink">Advance Delivery Charge</p>
                             <p class="mt-1">Area: {{ $order->delivery_area === 'outside_dhaka' ? 'Outside Dhaka' : 'Inside Dhaka' }}</p>
                             <p>Charge: BDT {{ number_format($order->shipping, 2) }}</p>
-                            <p>Method: {{ $order->delivery_payment_method }}</p>
-                            <p>Payment Mobile: {{ $order->delivery_payment_mobile }}</p>
-                            <p>Transaction ID: {{ $order->delivery_transaction_id }}</p>
+                            <p>Method: {{ $order->delivery_payment_method ?: 'Admin recorded' }}</p>
+                            @if($order->delivery_payment_mobile)<p>Payment Mobile: {{ $order->delivery_payment_mobile }}</p>@endif
+                            @if($order->delivery_transaction_id)<p>Transaction ID: {{ $order->delivery_transaction_id }}</p>@endif
                             @if($order->delivery_payment_proof)
                                 <p class="mt-2 inline-flex items-center gap-2 rounded bg-green-50 px-2 py-1 font-semibold text-green-700"><i class="fa-solid fa-circle-check"></i> Payment screenshot submitted</p>
                             @endif

@@ -111,9 +111,9 @@
                     <p>Payment status: <strong>{{ $order->delivery_charge_payment_option === 'pay_now' ? 'Submitted' : 'Not paid' }}</strong></p>
                     <p>Delivery charge: <strong>BDT {{ number_format($order->shipping, 2) }}</strong></p>
                     @if($order->delivery_charge_payment_option === 'pay_now')
-                        <p>Method: <strong>{{ $order->delivery_payment_method }}</strong></p>
-                        <p>Payment mobile: <strong>{{ $order->delivery_payment_mobile }}</strong></p>
-                        <p class="break-all sm:col-span-2">Transaction ID: <strong>{{ $order->delivery_transaction_id }}</strong></p>
+                        <p>Method: <strong>{{ $order->delivery_payment_method ?: 'Admin recorded' }}</strong></p>
+                        @if($order->delivery_payment_mobile)<p>Payment mobile: <strong>{{ $order->delivery_payment_mobile }}</strong></p>@endif
+                        @if($order->delivery_transaction_id)<p class="break-all sm:col-span-2">Transaction ID: <strong>{{ $order->delivery_transaction_id }}</strong></p>@endif
                     @endif
                 </div>
             </div>
