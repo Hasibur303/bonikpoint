@@ -58,16 +58,16 @@
 <body class="bg-[#f3f5f4] font-sans text-gray-700 antialiased">
     <header class="sticky top-0 z-50 bg-[#f3f5f4]/95 py-3 backdrop-blur">
         <div class="container relative">
-            <div class="flex h-16 items-center gap-2 rounded-lg bg-[#0f5555] px-3 text-white shadow-[0_12px_30px_rgba(9,50,51,0.16)] sm:gap-3 sm:px-4">
-                <button id="mobile-menu-button" type="button" class="grid h-10 w-10 shrink-0 place-items-center rounded-md text-white transition hover:bg-white/10 lg:hidden" aria-controls="mobile-menu" aria-expanded="false">
+            <div class="flex h-16 items-center gap-2 rounded-lg bg-[#0f5555] px-3 text-white shadow-[0_12px_30px_rgba(9,50,51,0.16)] max-[420px]:gap-1.5 max-[420px]:px-2 sm:gap-3 sm:px-4">
+                <button id="mobile-menu-button" type="button" class="grid h-10 w-10 shrink-0 place-items-center rounded-md text-white transition hover:bg-white/10 max-[420px]:h-9 max-[420px]:w-9 lg:hidden" aria-controls="mobile-menu" aria-expanded="false">
                     <span class="sr-only">Open menu</span>
                     <i class="fa-solid fa-bars text-lg"></i>
                 </button>
 
-                <a href="{{ route('home.index') }}" class="flex shrink-0 items-center gap-2.5" aria-label="Bonik Point home">
-                    <span class="grid h-9 w-9 place-items-center rounded-md bg-white text-lg font-black text-ink shadow-sm sm:h-10 sm:w-10 sm:text-xl">B</span>
+                <a href="{{ route('home.index') }}" class="flex shrink-0 items-center gap-2.5 max-[420px]:gap-1.5" aria-label="Bonik Point home">
+                    <span class="grid h-9 w-9 place-items-center rounded-md bg-white text-lg font-black text-ink shadow-sm max-[420px]:h-8 max-[420px]:w-8 max-[420px]:text-base sm:h-10 sm:w-10 sm:text-xl">B</span>
                     <span class="block">
-                        <span class="block text-xs font-black uppercase leading-tight text-white sm:text-base">Bonik Point</span>
+                        <span class="block text-xs font-black uppercase leading-tight text-white max-[420px]:text-[11px] sm:text-base">Bonik Point</span>
                         <span class="hidden text-[9px] font-bold uppercase tracking-wide text-[#d5e77a] lg:block">Shop with confidence</span>
                     </span>
                 </a>
@@ -160,7 +160,7 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="rounded-full bg-[#d5e77a] px-4 py-2.5 text-xs font-black text-ink hover:bg-white sm:px-5 sm:text-sm">Sign In</a>
+                        <a href="{{ route('login') }}" class="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[#d5e77a] px-3.5 text-xs font-black text-ink shadow-[0_4px_0_rgba(7,27,31,0.16)] transition hover:bg-white sm:px-5 sm:text-sm">Sign In</a>
                     @endauth
                 </div>
             </div>
