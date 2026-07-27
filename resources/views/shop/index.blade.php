@@ -166,6 +166,34 @@
                     transform: translate3d(-55%, 0, 0) rotate(8deg);
                 }
 
+                .trending-products-viewport {
+                    overflow: hidden;
+                    cursor: grab;
+                    touch-action: pan-y;
+                    user-select: none;
+                }
+
+                .trending-products-viewport.is-dragging {
+                    cursor: grabbing;
+                }
+
+                .trending-products-track {
+                    display: flex;
+                    width: max-content;
+                    will-change: transform;
+                }
+
+                .trending-products-panel {
+                    display: flex;
+                    flex: 0 0 auto;
+                    gap: 0.65rem;
+                    padding-right: 0.65rem;
+                }
+
+                .trending-product-card {
+                    flex: 0 0 clamp(8.7rem, 42vw, 10.5rem);
+                }
+
                 .festival-mosaic-viewport.is-animating .festival-mosaic-card {
                     transform: translate3d(0, 0, 0) scale(0.982);
                     filter: saturate(0.94) brightness(0.98);
@@ -216,6 +244,15 @@
                         flex: 0 0 calc((min(100vw, 1440px) - 1.5rem) / 4);
                         border-radius: 0.5rem;
                     }
+
+                    .trending-products-panel {
+                        gap: 1rem;
+                        padding-right: 1rem;
+                    }
+
+                    .trending-product-card {
+                        flex-basis: 12.5rem;
+                    }
                 }
 
                 @media (min-width: 1024px) {
@@ -240,6 +277,10 @@
 
                     .festival-mosaic-card:hover img {
                         transform: translateZ(32px) scale(1.095);
+                    }
+
+                    .trending-product-card {
+                        flex-basis: 14.5rem;
                     }
                 }
 
@@ -291,7 +332,34 @@
         </div>
     </section>
 
-    <section class="min-h-[60vh] bg-[#f3f5f4] py-5 md:py-8">
+    @if($featuredProducts->isNotEmpty())
+        <section class="border-b border-[#d6e0dd] bg-[#f7faf9] py-5 sm:py-7">
+            <div class="container">
+                <div class="mb-4 flex items-end justify-between gap-4">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-wide text-primary">Handpicked</p>
+                        <h2 class="mt-1 text-xl font-black text-ink sm:text-2xl">Trending Products</h2>
+                    </div>
+                    <a href="#shop-products" class="text-xs font-black text-primary hover:text-ink">View all</a>
+                </div>
+                <div id="trending-products-viewport" class="trending-products-viewport" aria-label="Trending products">
+                    <div id="trending-products-track" class="trending-products-track">
+                        @for($copy = 0; $copy < 2; $copy++)
+                            <div class="trending-products-panel" aria-hidden="{{ $copy === 1 ? 'true' : 'false' }}">
+                                @foreach($featuredProducts as $featuredProduct)
+                                    <div class="trending-product-card" @if($copy === 1) inert @endif>
+                                        <x-product-card :product="$featuredProduct" />
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endfor
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
+    <section id="shop-products" class="min-h-[60vh] bg-[#f3f5f4] py-5 md:py-8">
         <div class="container grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
             <aside class="lg:sticky lg:top-24">
                 <details id="shop-sidebar" class="group overflow-hidden rounded-lg border border-[#d4ddda] bg-white shadow-[0_12px_32px_rgba(20,49,51,0.08)]">
@@ -603,6 +671,105 @@
 
             renderFestivalTrack();
             restartFestivalTimer();
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const viewport = document.getElementById('trending-products-viewport');
+            const track = document.getElementById('trending-products-track');
+
+            if (!viewport || !track || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            let offset = 0;
+            let isDragging = false;
+            let didDrag = false;
+            let startX = 0;
+            let startOffset = 0;
+            let timer = null;
+            let resetTimer = null;
+            const duration = 620;
+
+            const panelWidth = () => Math.max(1, track.scrollWidth / 2);
+            const stepWidth = () => {
+                const card = track.querySelector('.trending-product-card');
+                const panel = track.querySelector('.trending-products-panel');
+                const gap = panel ? parseFloat(window.getComputedStyle(panel).gap) || 0 : 0;
+
+                return card ? Math.max(1, card.getBoundingClientRect().width + gap) : viewport.clientWidth;
+            };
+            const normalize = (value) => {
+                const width = panelWidth();
+                while (value <= -width) value += width;
+                while (value > 0) value -= width;
+                return value;
+            };
+            const render = (animate = false) => {
+                track.style.transition = animate ? `transform ${duration}ms cubic-bezier(0.22, 1, 0.36, 1)` : 'none';
+                track.style.transform = `translate3d(${offset}px, 0, 0)`;
+            };
+            const scheduleReset = () => {
+                window.clearTimeout(resetTimer);
+                resetTimer = window.setTimeout(() => {
+                    if (!isDragging) {
+                        offset = normalize(offset);
+                        render();
+                    }
+                }, duration + 30);
+            };
+            const moveNext = () => {
+                if (isDragging) return;
+                offset -= stepWidth();
+                render(true);
+                scheduleReset();
+            };
+            const restart = () => {
+                window.clearInterval(timer);
+                timer = window.setInterval(moveNext, 3600);
+            };
+
+            viewport.addEventListener('pointerdown', (event) => {
+                window.clearInterval(timer);
+                window.clearTimeout(resetTimer);
+                isDragging = true;
+                didDrag = false;
+                startX = event.clientX;
+                offset = normalize(offset);
+                startOffset = offset;
+                render();
+            });
+            viewport.addEventListener('pointermove', (event) => {
+                if (!isDragging) return;
+                const delta = event.clientX - startX;
+                if (!didDrag && Math.abs(delta) < 10) return;
+                didDrag = true;
+                viewport.classList.add('is-dragging');
+                viewport.setPointerCapture?.(event.pointerId);
+                offset = normalize(startOffset + delta);
+                render();
+                event.preventDefault();
+            });
+            const stopDrag = (event) => {
+                if (!isDragging) return;
+                isDragging = false;
+                viewport.classList.remove('is-dragging');
+                if (viewport.hasPointerCapture?.(event.pointerId)) viewport.releasePointerCapture(event.pointerId);
+                if (didDrag) {
+                    offset = Math.round(offset / stepWidth()) * stepWidth();
+                    render(true);
+                    scheduleReset();
+                }
+                restart();
+            };
+            viewport.addEventListener('pointerup', stopDrag);
+            viewport.addEventListener('pointercancel', stopDrag);
+            viewport.addEventListener('pointerleave', stopDrag);
+            window.addEventListener('resize', () => {
+                offset = normalize(offset);
+                render();
+                restart();
+            });
+
+            render();
+            restart();
         });
     </script>
 

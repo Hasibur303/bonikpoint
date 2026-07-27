@@ -64,6 +64,12 @@ class ShopController extends Controller
     private function renderIndex(Request $request, ?Category $selectedCategoryModel = null, ?string $selectedBrand = null)
     {
         $today = today()->toDateString();
+        $showTrendingProducts = ! $selectedCategoryModel
+            && ! $selectedBrand
+            && ! $request->filled('search')
+            && ! $request->filled('min_price')
+            && ! $request->filled('max_price')
+            && ! $request->filled('sort');
 
         $products = Product::with('category')
             ->where('is_active', true)
@@ -82,6 +88,14 @@ class ShopController extends Controller
 
         return view('shop.index', [
             'products' => $products,
+            'featuredProducts' => $showTrendingProducts
+                ? Product::with('category')
+                    ->where('is_active', true)
+                    ->where('is_featured', true)
+                    ->latest()
+                    ->take(10)
+                    ->get()
+                : collect(),
             'festivals' => Festival::where('is_active', true)
                 ->where(fn ($query) => $query->whereNull('starts_at')->orWhereDate('starts_at', '<=', $today))
                 ->where(fn ($query) => $query->whereNull('ends_at')->orWhereDate('ends_at', '>=', $today))
