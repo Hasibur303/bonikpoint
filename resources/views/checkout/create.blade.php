@@ -137,19 +137,19 @@
 
                             <div id="delivery-payment-fields" class="mt-4 grid gap-3 rounded-lg border border-gray-200 bg-[#f1f6f5] p-3 sm:mt-5 sm:grid-cols-2 sm:gap-4 sm:p-4">
                                 <div>
-                                    <label for="delivery-payment-mobile" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Payment mobile</label>
+                                    <label for="delivery-payment-mobile" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Payment mobile <span class="font-medium text-gray-400">(or screenshot)</span></label>
                                     <input id="delivery-payment-mobile" name="delivery_payment_mobile" value="{{ old('delivery_payment_mobile') }}" inputmode="tel" class="h-10 w-full rounded-md border-gray-200 bg-white text-sm shadow-sm focus:border-primary focus:ring-primary sm:h-11">
                                     @error('delivery_payment_mobile')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                                 </div>
                                 <div>
-                                    <label for="delivery-transaction-id" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Transaction ID</label>
+                                    <label for="delivery-transaction-id" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Transaction ID <span class="font-medium text-gray-400">(or screenshot)</span></label>
                                     <input id="delivery-transaction-id" name="delivery_transaction_id" value="{{ old('delivery_transaction_id') }}" class="h-10 w-full rounded-md border-gray-200 bg-white text-sm shadow-sm focus:border-primary focus:ring-primary sm:h-11">
                                     @error('delivery_transaction_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                                 </div>
                                 <div class="sm:col-span-2">
-                                    <label for="delivery-payment-proof" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Payment screenshot <span class="font-medium text-gray-400">(optional)</span></label>
+                                    <label for="delivery-payment-proof" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Payment screenshot <span class="font-medium text-gray-400">(or payment details)</span></label>
                                     <input id="delivery-payment-proof" name="delivery_payment_proof" type="file" accept="image/jpeg,image/png,image/webp" class="block w-full rounded-md border border-gray-200 bg-white text-xs text-gray-600 shadow-sm file:mr-3 file:border-0 file:bg-primary/10 file:px-4 file:py-2.5 file:font-bold file:text-primary hover:file:bg-primary hover:file:text-white sm:text-sm">
-                                    <p class="mt-1.5 text-[11px] text-gray-500 sm:text-xs">JPG, PNG or WebP, maximum 5 MB.</p>
+                                    <p class="mt-1.5 text-[11px] text-gray-500 sm:text-xs">Upload a screenshot, or enter both payment mobile number and transaction ID. JPG, PNG or WebP, maximum 5 MB.</p>
                                     @error('delivery_payment_proof')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                                 </div>
                             </div>

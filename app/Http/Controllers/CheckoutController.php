@@ -140,17 +140,26 @@ class CheckoutController extends Controller
         ];
 
         if ($advanceDeliveryRequired) {
+            $payingNow = $isGuestCheckout || $request->input('delivery_charge_payment_option') === 'pay_now';
+            $hasPaymentScreenshot = $request->hasFile('delivery_payment_proof');
+            $hasPaymentDetails = filled($request->input('delivery_payment_mobile'))
+                || filled($request->input('delivery_transaction_id'));
+
             $rules = [
                 ...$rules,
                 'delivery_charge_payment_option' => [$isGuestCheckout ? 'nullable' : 'required', $isGuestCheckout ? Rule::in(['pay_now']) : 'in:pay_now,pay_later'],
-                'delivery_payment_method' => [$isGuestCheckout ? 'required' : 'required_if:delivery_charge_payment_option,pay_now', 'nullable', 'in:Bkash,Nagad,Rocket'],
-                'delivery_payment_mobile' => [$isGuestCheckout ? 'required' : 'required_if:delivery_charge_payment_option,pay_now', 'nullable', 'string', 'max:30'],
-                'delivery_transaction_id' => [$isGuestCheckout ? 'required' : 'required_if:delivery_charge_payment_option,pay_now', 'nullable', 'string', 'max:120'],
-                'delivery_payment_proof' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+                'delivery_payment_method' => [Rule::requiredIf($payingNow), 'nullable', 'in:Bkash,Nagad,Rocket'],
+                'delivery_payment_mobile' => [Rule::requiredIf($payingNow && ! $hasPaymentScreenshot), 'nullable', 'string', 'max:30'],
+                'delivery_transaction_id' => [Rule::requiredIf($payingNow && ! $hasPaymentScreenshot), 'nullable', 'string', 'max:120'],
+                'delivery_payment_proof' => [Rule::requiredIf($payingNow && ! $hasPaymentDetails), 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             ];
         }
 
-        $data = $request->validate($rules);
+        $data = $request->validate($rules, [
+            'delivery_payment_mobile.required' => 'Enter the payment mobile number and transaction ID, or upload a payment screenshot.',
+            'delivery_transaction_id.required' => 'Enter the payment mobile number and transaction ID, or upload a payment screenshot.',
+            'delivery_payment_proof.required' => 'Upload a payment screenshot, or enter both payment mobile number and transaction ID.',
+        ]);
         $data['delivery_charge_payment_option'] = $advanceDeliveryRequired
             ? ($isGuestCheckout ? 'pay_now' : $data['delivery_charge_payment_option'])
             : null;
@@ -180,9 +189,9 @@ class CheckoutController extends Controller
                     'advance_delivery_required' => $advanceDeliveryRequired,
                     'delivery_area' => $advanceDeliveryRequired ? $deliveryArea : null,
                     'delivery_charge_payment_option' => $advanceDeliveryRequired ? $data['delivery_charge_payment_option'] : null,
-                    'delivery_payment_method' => $advanceDeliveryRequired ? $data['delivery_payment_method'] : null,
-                    'delivery_payment_mobile' => $advanceDeliveryRequired ? $data['delivery_payment_mobile'] : null,
-                    'delivery_transaction_id' => $advanceDeliveryRequired ? $data['delivery_transaction_id'] : null,
+                    'delivery_payment_method' => $advanceDeliveryRequired ? ($data['delivery_payment_method'] ?? null) : null,
+                    'delivery_payment_mobile' => $advanceDeliveryRequired ? ($data['delivery_payment_mobile'] ?? null) : null,
+                    'delivery_transaction_id' => $advanceDeliveryRequired ? ($data['delivery_transaction_id'] ?? null) : null,
                     'delivery_payment_proof' => $paymentProofPath,
                 ]);
 

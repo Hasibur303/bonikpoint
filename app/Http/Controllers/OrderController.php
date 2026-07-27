@@ -7,6 +7,7 @@ use App\Models\StoreSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Throwable;
 
@@ -61,11 +62,19 @@ class OrderController extends Controller
     {
         $this->authorizeDeliveryPayment($order);
 
+        $hasPaymentScreenshot = $request->hasFile('delivery_payment_proof');
+        $hasPaymentDetails = filled($request->input('delivery_payment_mobile'))
+            || filled($request->input('delivery_transaction_id'));
+
         $data = $request->validate([
             'delivery_payment_method' => ['required', 'in:Bkash,Nagad,Rocket'],
-            'delivery_payment_mobile' => ['required', 'string', 'max:30'],
-            'delivery_transaction_id' => ['required', 'string', 'max:120'],
-            'delivery_payment_proof' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'delivery_payment_mobile' => [Rule::requiredIf(! $hasPaymentScreenshot), 'nullable', 'string', 'max:30'],
+            'delivery_transaction_id' => [Rule::requiredIf(! $hasPaymentScreenshot), 'nullable', 'string', 'max:120'],
+            'delivery_payment_proof' => [Rule::requiredIf(! $hasPaymentDetails), 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ], [
+            'delivery_payment_mobile.required' => 'Enter the payment mobile number and transaction ID, or upload a payment screenshot.',
+            'delivery_transaction_id.required' => 'Enter the payment mobile number and transaction ID, or upload a payment screenshot.',
+            'delivery_payment_proof.required' => 'Upload a payment screenshot, or enter both payment mobile number and transaction ID.',
         ]);
 
         $paymentProofPath = $request->hasFile('delivery_payment_proof')
