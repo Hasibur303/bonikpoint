@@ -197,75 +197,71 @@
                 .trending-hot-icon {
                     position: relative;
                     display: inline-block;
-                    width: 1.15rem;
-                    height: 1.35rem;
-                    filter: drop-shadow(0 2px 3px rgba(220, 45, 12, 0.38));
+                    width: 1.08rem;
+                    height: 1.32rem;
+                    isolation: isolate;
                 }
 
                 .trending-hot-icon::before {
                     content: '';
                     position: absolute;
-                    inset: 0;
-                    border-radius: 58% 42% 60% 40%;
-                    background: linear-gradient(145deg, #ffca28 4%, #ff7518 38%, #f34316 66%, #ca1d13 100%);
-                    clip-path: polygon(50% 0, 64% 25%, 84% 45%, 80% 72%, 58% 100%, 29% 91%, 12% 69%, 17% 42%, 38% 23%);
+                    z-index: -1;
+                    inset: 19% 13% 4%;
+                    border-radius: 50%;
+                    background: rgba(255, 111, 24, 0.58);
+                    filter: blur(0.28rem);
                     transform-origin: 50% 100%;
-                    animation: trending-live-flame 540ms ease-in-out infinite alternate;
+                    animation: trending-fire-glow 700ms ease-in-out infinite alternate;
                 }
 
-                .trending-hot-core {
+                .trending-hot-image {
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    transform-origin: 50% 100%;
+                    filter: saturate(1.12) drop-shadow(0 2px 2px rgba(218, 57, 13, 0.32));
+                    animation: trending-fire-burn 510ms ease-in-out infinite alternate;
+                }
+
+                .trending-hot-icon::after {
+                    content: '';
                     position: absolute;
                     z-index: 1;
-                    left: 31%;
-                    bottom: 13%;
-                    width: 43%;
-                    height: 57%;
-                    border-radius: 58% 42% 54% 46%;
-                    background: linear-gradient(150deg, #fffde4 3%, #ffe270 42%, #ffc11f 100%);
-                    clip-path: polygon(57% 0, 81% 38%, 66% 100%, 26% 83%, 15% 51%);
-                    transform-origin: 50% 100%;
-                    animation: trending-live-core 390ms ease-in-out infinite alternate;
-                }
-
-                .trending-hot-spark {
-                    position: absolute;
-                    z-index: 2;
-                    width: 0.17rem;
-                    height: 0.17rem;
+                    right: 3%;
+                    bottom: 38%;
+                    width: 0.14rem;
+                    height: 0.14rem;
                     border-radius: 999px;
-                    background: #ffd54f;
-                    box-shadow: 0 0 4px #ff7a18;
+                    background: #ffe36a;
+                    box-shadow: -0.35rem 0.22rem 0 -0.02rem #ff9d1c;
                     opacity: 0;
                     animation: trending-live-spark 1.18s ease-out infinite;
                 }
 
-                .trending-hot-spark-one { left: 15%; bottom: 48%; animation-delay: 0s; }
-                .trending-hot-spark-two { right: 14%; bottom: 42%; animation-delay: 0.43s; }
-                }
-
-                @keyframes trending-live-flame {
+                @keyframes trending-fire-burn {
                     0% {
-                        clip-path: polygon(50% 4%, 61% 28%, 83% 45%, 77% 72%, 58% 100%, 29% 91%, 12% 69%, 17% 42%, 40% 25%);
-                        transform: skewX(-4deg) scaleX(0.93);
+                        transform: skewX(-2.5deg) scaleX(0.95) scaleY(0.99);
+                        filter: saturate(1.04) brightness(0.97) drop-shadow(0 2px 2px rgba(218, 57, 13, 0.25));
                     }
-                    47% {
-                        clip-path: polygon(43% 0, 68% 25%, 88% 49%, 78% 75%, 56% 100%, 26% 90%, 10% 65%, 20% 40%, 34% 20%);
-                        transform: skewX(4deg) scaleX(1.04);
+                    46% {
+                        transform: skewX(2.8deg) scaleX(1.04) scaleY(1.025);
+                        filter: saturate(1.2) brightness(1.08) drop-shadow(0 2px 4px rgba(255, 102, 18, 0.5));
                     }
                     100% {
-                        clip-path: polygon(56% 5%, 69% 31%, 82% 51%, 82% 74%, 59% 100%, 28% 93%, 13% 68%, 13% 46%, 39% 27%);
-                        transform: skewX(-1deg) scaleX(0.98);
+                        transform: skewX(-1deg) scaleX(0.985) scaleY(1.005);
+                        filter: saturate(1.1) brightness(1.02) drop-shadow(0 2px 3px rgba(255, 130, 15, 0.38));
                     }
                 }
 
-                @keyframes trending-live-core {
+                @keyframes trending-fire-glow {
                     0% {
-                        transform: translateX(-12%) skewX(-8deg) scale(0.78, 0.91);
-                        opacity: 0.68;
+                        transform: scale(0.8, 0.84);
+                        opacity: 0.3;
                     }
                     100% {
-                        transform: translateX(11%) skewX(7deg) scale(1.08, 1.04);
-                        opacity: 1;
+                        transform: scale(1.08, 1.06);
+                        opacity: 0.72;
                     }
                 }
 
@@ -380,8 +376,8 @@
                     }
 
                     .trending-hot-icon::before,
-                    .trending-hot-core,
-                    .trending-hot-spark {
+                    .trending-hot-icon::after,
+                    .trending-hot-image {
                         animation: none;
                     }
                 }
@@ -429,7 +425,7 @@
                 <div class="mb-4 flex items-end justify-between gap-4">
                     <div>
                         <p class="text-[10px] font-black uppercase tracking-wide text-primary">Handpicked</p>
-                        <h2 class="mt-1 flex items-center gap-2 text-xl font-black text-ink sm:text-2xl"><span>Trending Products</span><span class="trending-hot-icon" aria-hidden="true"><span class="trending-hot-core"></span><span class="trending-hot-spark trending-hot-spark-one"></span><span class="trending-hot-spark trending-hot-spark-two"></span></span><span class="sr-only">Hot products</span></h2>
+                        <h2 class="mt-1 flex items-center gap-2 text-xl font-black text-ink sm:text-2xl"><span>Trending Products</span><span class="trending-hot-icon" aria-hidden="true"><img class="trending-hot-image" src="{{ asset('images/trending-fire.png') }}" alt=""></span><span class="sr-only">Hot products</span></h2>
                     </div>
                     <a href="#shop-products" class="text-xs font-black text-primary hover:text-ink">View all</a>
                 </div>
