@@ -22,6 +22,7 @@ class Order extends Model
         'address',
         'city',
         'status',
+        'is_offline_sale',
         'subtotal',
         'shipping',
         'total',
@@ -43,6 +44,7 @@ class Order extends Model
             'shipping' => 'decimal:2',
             'total' => 'decimal:2',
             'advance_delivery_required' => 'boolean',
+            'is_offline_sale' => 'boolean',
         ];
     }
 

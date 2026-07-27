@@ -25,6 +25,7 @@
                     ['label' => 'Products', 'route' => 'admin.products.index', 'pattern' => 'admin.products.*', 'icon' => 'fa-box-open'],
                     ['label' => 'Categories', 'route' => 'admin.categories.index', 'pattern' => 'admin.categories.*', 'icon' => 'fa-layer-group'],
                     ['label' => 'Orders', 'route' => 'admin.orders.index', 'pattern' => 'admin.orders.*', 'icon' => 'fa-receipt'],
+                    ['label' => 'Offline Sale', 'route' => 'admin.offline-sales.create', 'pattern' => 'admin.offline-sales.*', 'icon' => 'fa-cash-register'],
                     ['label' => 'Reviews', 'route' => 'admin.reviews.index', 'pattern' => 'admin.reviews.*', 'icon' => 'fa-star-half-stroke'],
                     ['label' => 'Profit Report', 'route' => 'admin.profit.index', 'pattern' => 'admin.profit.*', 'icon' => 'fa-chart-line'],
                 ],

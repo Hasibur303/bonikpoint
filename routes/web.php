@@ -15,6 +15,7 @@ use App\Http\Controllers\VideoController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\FestivalController as AdminFestivalController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\OfflineSaleController;
 use App\Http\Controllers\Admin\ProfitController as AdminProfitController;
 use App\Http\Controllers\Admin\ProductFaqController as AdminProductFaqController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -155,6 +156,8 @@ Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(fu
     Route::delete('reviews/{review}', [AdminProductReviewController::class, 'destroy'])->name('reviews.destroy');
     Route::resource('festivals', AdminFestivalController::class)->except('show');
     Route::get('profit', [AdminProfitController::class, 'index'])->name('profit.index');
+    Route::get('offline-sales/create', [OfflineSaleController::class, 'create'])->name('offline-sales.create');
+    Route::post('offline-sales', [OfflineSaleController::class, 'store'])->name('offline-sales.store');
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::get('orders/{order}/receipt', [AdminOrderController::class, 'receipt'])->name('orders.receipt');

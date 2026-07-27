@@ -1,6 +1,6 @@
 <x-admin-layout>
     <div class="mb-6 flex flex-col items-start justify-between gap-4 xl:flex-row xl:gap-6">
-        <div><p class="text-xs font-black uppercase tracking-wide text-primary">Order</p><h1 class="mt-1 text-3xl font-black text-ink">{{ $order->order_number }}</h1></div>
+        <div><p class="text-xs font-black uppercase tracking-wide text-primary">{{ $order->is_offline_sale ? 'Offline Sale' : 'Order' }}</p><h1 class="mt-1 text-3xl font-black text-ink">{{ $order->order_number }}</h1></div>
         <div class="flex flex-wrap items-center gap-2">
             @if(in_array($order->status, ['confirmed', 'processing', 'delivered'], true))
                 <a href="{{ route('admin.orders.receipt', $order) }}" target="_blank" class="inline-flex items-center gap-2 rounded bg-ink px-4 py-2 font-semibold text-white hover:bg-primary">

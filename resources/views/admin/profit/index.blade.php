@@ -5,7 +5,10 @@
             <h1 class="mt-1 text-3xl font-black text-ink sm:text-4xl">Profit Report</h1>
             <p class="mt-2 text-sm text-gray-500">Delivered sales for <span class="font-bold text-ink">{{ $periodLabel }}</span>.</p>
         </div>
-        <a href="{{ route('admin.products.index') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#d7e1df] bg-white px-4 text-xs font-black text-ink shadow-sm hover:border-primary hover:text-primary"><i class="fa-solid fa-pen"></i>Update Buying Prices</a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('admin.offline-sales.create') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-xs font-black text-white shadow-sm hover:bg-ink"><i class="fa-solid fa-cash-register"></i>Add Offline Sale</a>
+            <a href="{{ route('admin.products.index') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#d7e1df] bg-white px-4 text-xs font-black text-ink shadow-sm hover:border-primary hover:text-primary"><i class="fa-solid fa-pen"></i>Update Buying Prices</a>
+        </div>
     </div>
 
     <form method="GET" action="{{ route('admin.profit.index') }}" class="mb-5 rounded-lg border border-[#dfe7e5] bg-white p-4 shadow-sm">
