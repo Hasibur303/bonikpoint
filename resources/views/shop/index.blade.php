@@ -338,7 +338,7 @@
                 <div class="mb-4 flex items-end justify-between gap-4">
                     <div>
                         <p class="text-[10px] font-black uppercase tracking-wide text-primary">Handpicked</p>
-                        <h2 class="mt-1 text-xl font-black text-ink sm:text-2xl">Trending Products</h2>
+                        <h2 class="mt-1 flex items-center gap-2 text-xl font-black text-ink sm:text-2xl"><span>Trending Products</span><i class="fa-solid fa-fire-flame-curved text-lg text-[#e66b2d]" aria-hidden="true"></i><span class="sr-only">Hot products</span></h2>
                     </div>
                     <a href="#shop-products" class="text-xs font-black text-primary hover:text-ink">View all</a>
                 </div>
