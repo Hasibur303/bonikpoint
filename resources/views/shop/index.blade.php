@@ -194,6 +194,28 @@
                     flex: 0 0 clamp(8.7rem, 42vw, 10.5rem);
                 }
 
+                .trending-hot-icon {
+                    color: #f4511e;
+                    filter: drop-shadow(0 2px 3px rgba(234, 88, 12, 0.32));
+                    transform-origin: 50% 85%;
+                    animation: trending-hot-flicker 1.15s ease-in-out infinite alternate;
+                }
+
+                @keyframes trending-hot-flicker {
+                    0% {
+                        color: #ef3f18;
+                        transform: translateY(1px) rotate(-4deg) scale(0.92);
+                    }
+                    55% {
+                        color: #ff7a18;
+                        transform: translateY(-2px) rotate(3deg) scale(1.08);
+                    }
+                    100% {
+                        color: #ffb000;
+                        transform: translateY(0) rotate(-1deg) scale(0.98);
+                    }
+                }
+
                 .festival-mosaic-viewport.is-animating .festival-mosaic-card {
                     transform: translate3d(0, 0, 0) scale(0.982);
                     filter: saturate(0.94) brightness(0.98);
@@ -293,6 +315,10 @@
                     .festival-mosaic-card::after {
                         animation: none !important;
                     }
+
+                    .trending-hot-icon {
+                        animation: none;
+                    }
                 }
             </style>
         </section>
@@ -338,7 +364,7 @@
                 <div class="mb-4 flex items-end justify-between gap-4">
                     <div>
                         <p class="text-[10px] font-black uppercase tracking-wide text-primary">Handpicked</p>
-                        <h2 class="mt-1 flex items-center gap-2 text-xl font-black text-ink sm:text-2xl"><span>Trending Products</span><i class="fa-solid fa-fire-flame-curved text-lg text-[#e66b2d]" aria-hidden="true"></i><span class="sr-only">Hot products</span></h2>
+                        <h2 class="mt-1 flex items-center gap-2 text-xl font-black text-ink sm:text-2xl"><span>Trending Products</span><i class="fa-solid fa-fire-flame-curved trending-hot-icon text-lg" aria-hidden="true"></i><span class="sr-only">Hot products</span></h2>
                     </div>
                     <a href="#shop-products" class="text-xs font-black text-primary hover:text-ink">View all</a>
                 </div>
