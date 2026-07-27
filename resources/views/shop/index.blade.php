@@ -119,12 +119,12 @@
                 .festival-mosaic {
                     flex: 0 0 auto;
                     display: flex;
-                    gap: 0.35rem;
-                    padding-right: 0.35rem;
+                    gap: 0.5rem;
+                    padding-right: 0.5rem;
                 }
 
                 .festival-mosaic-card {
-                    flex: 0 0 clamp(6.25rem, calc((100vw - 2.7rem) / 3), 8rem);
+                    flex: 0 0 calc((100vw - 2.65rem) / 2);
                     position: relative;
                     display: block;
                     aspect-ratio: 1 / 1;
@@ -257,12 +257,46 @@
         </section>
     @endif
 
+    <section class="border-b border-[#d6e0dd] bg-white py-4 lg:hidden">
+        <div class="container">
+            <div class="mb-3 flex items-center justify-between gap-3">
+                <h2 class="text-base font-black text-ink">Shop by Category</h2>
+                <a href="{{ route('shop.index') }}" class="text-xs font-black text-primary">All Products</a>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                @foreach($categories as $category)
+                    @php
+                        [$categoryIcon, $categoryTone] = match ($category->slug) {
+                            'vape-accessories' => ['fa-solid fa-wind', 'bg-[#103f44] text-white'],
+                            'electronics-gadgets' => ['fa-solid fa-microchip', 'bg-[#dceced] text-[#087c7f]'],
+                            'fashion-accessories' => ['fa-solid fa-bag-shopping', 'bg-[#eef2d7] text-[#667711]'],
+                            default => ['fa-solid fa-shapes', 'bg-gray-100 text-gray-600'],
+                        };
+                    @endphp
+                    <a href="{{ $category->public_url }}" class="flex min-w-0 items-center gap-2.5 rounded-md border border-[#dce5e2] bg-[#f9fbfa] p-2.5 shadow-sm transition hover:border-primary hover:bg-[#eef6f3]">
+                        @if($category->image)
+                            <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-11 w-11 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                        @else
+                            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
+                        @endif
+                        <span class="min-w-0">
+                            <span class="block truncate text-sm font-black text-ink">{{ $category->name }}</span>
+                            @if($category->children->isNotEmpty())
+                                <span class="mt-0.5 block text-[11px] font-semibold text-gray-500">{{ $category->children->count() }} {{ Str::plural('subcategory', $category->children->count()) }}</span>
+                            @endif
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
     <section class="min-h-[60vh] bg-[#f3f5f4] py-5 md:py-8">
         <div class="container grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
             <aside class="lg:sticky lg:top-24">
                 <details id="shop-sidebar" class="group overflow-hidden rounded-lg border border-[#d4ddda] bg-white shadow-[0_12px_32px_rgba(20,49,51,0.08)]">
                     <summary class="flex cursor-pointer list-none items-center justify-between gap-3 bg-ink p-4 font-black text-white lg:hidden">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-sliders text-[#c8dc62]"></i> Filters and categories</span>
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-sliders text-[#c8dc62]"></i> Filter products</span>
                         <i class="fa-solid fa-chevron-down text-xs text-gray-300 transition group-open:rotate-180"></i>
                     </summary>
 
@@ -309,7 +343,7 @@
                             </form>
                         </div>
 
-                        <div class="bg-white p-4">
+                        <div class="hidden bg-white p-4 lg:block">
                             <div class="flex items-center justify-between gap-3">
                                 <h2 class="font-black text-ink">Categories</h2>
                                 <a href="{{ route('shop.index', array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) }}" class="text-xs font-bold {{ $selectedCategory ? 'text-primary hover:text-ink' : 'text-gray-400' }}">All products</a>
