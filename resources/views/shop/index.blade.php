@@ -195,24 +195,55 @@
                 }
 
                 .trending-hot-icon {
-                    color: #f4511e;
-                    filter: drop-shadow(0 2px 3px rgba(234, 88, 12, 0.32));
-                    transform-origin: 50% 85%;
-                    animation: trending-hot-flicker 1.15s ease-in-out infinite alternate;
+                    position: relative;
+                    display: inline-block;
+                    width: 1rem;
+                    height: 1.25rem;
+                    border-radius: 60% 45% 55% 45%;
+                    background: radial-gradient(ellipse at 50% 76%, #ffe47a 0 11%, #ffbd20 21%, #ff6a14 48%, #df2915 70%, transparent 72%);
+                    clip-path: polygon(51% 0, 72% 29%, 88% 54%, 75% 82%, 51% 100%, 23% 84%, 10% 57%, 30% 28%);
+                    filter: drop-shadow(0 2px 3px rgba(220, 45, 12, 0.38));
+                    transform-origin: 50% 100%;
+                    animation: trending-live-flame 820ms ease-in-out infinite alternate;
                 }
 
-                @keyframes trending-hot-flicker {
+                .trending-hot-icon::after {
+                    content: '';
+                    position: absolute;
+                    left: 31%;
+                    bottom: 13%;
+                    width: 42%;
+                    height: 53%;
+                    border-radius: 55% 45% 58% 42%;
+                    background: #fff1a4;
+                    clip-path: polygon(55% 0, 82% 44%, 65% 100%, 23% 84%, 12% 48%);
+                    transform-origin: 50% 100%;
+                    animation: trending-live-core 560ms ease-in-out infinite alternate;
+                }
+
+                @keyframes trending-live-flame {
                     0% {
-                        color: #ef3f18;
-                        transform: translateY(1px) rotate(-4deg) scale(0.92);
+                        transform: translateY(1px) rotate(-5deg) scaleX(0.88) scaleY(0.95);
+                        filter: drop-shadow(0 2px 3px rgba(220, 45, 12, 0.28));
                     }
-                    55% {
-                        color: #ff7a18;
-                        transform: translateY(-2px) rotate(3deg) scale(1.08);
+                    48% {
+                        transform: translateY(-2px) rotate(3deg) scaleX(1.06) scaleY(1.08);
+                        filter: drop-shadow(0 3px 5px rgba(255, 92, 16, 0.5));
                     }
                     100% {
-                        color: #ffb000;
-                        transform: translateY(0) rotate(-1deg) scale(0.98);
+                        transform: translateY(0) rotate(-1deg) scaleX(0.96) scaleY(1.01);
+                        filter: drop-shadow(0 2px 4px rgba(255, 131, 20, 0.38));
+                    }
+                }
+
+                @keyframes trending-live-core {
+                    0% {
+                        transform: translateX(-8%) scale(0.82, 0.92);
+                        opacity: 0.76;
+                    }
+                    100% {
+                        transform: translateX(10%) scale(1.08, 1.05);
+                        opacity: 1;
                     }
                 }
 
@@ -319,6 +350,10 @@
                     .trending-hot-icon {
                         animation: none;
                     }
+
+                    .trending-hot-icon::after {
+                        animation: none;
+                    }
                 }
             </style>
         </section>
@@ -364,7 +399,7 @@
                 <div class="mb-4 flex items-end justify-between gap-4">
                     <div>
                         <p class="text-[10px] font-black uppercase tracking-wide text-primary">Handpicked</p>
-                        <h2 class="mt-1 flex items-center gap-2 text-xl font-black text-ink sm:text-2xl"><span>Trending Products</span><i class="fa-solid fa-fire-flame-curved trending-hot-icon text-lg" aria-hidden="true"></i><span class="sr-only">Hot products</span></h2>
+                        <h2 class="mt-1 flex items-center gap-2 text-xl font-black text-ink sm:text-2xl"><span>Trending Products</span><span class="trending-hot-icon" aria-hidden="true"></span><span class="sr-only">Hot products</span></h2>
                     </div>
                     <a href="#shop-products" class="text-xs font-black text-primary hover:text-ink">View all</a>
                 </div>
