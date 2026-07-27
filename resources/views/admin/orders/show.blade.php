@@ -8,7 +8,7 @@
                     Print / Download Receipt
                 </a>
             @endif
-            <form method="POST" action="{{ route('admin.orders.update', $order) }}" class="flex flex-wrap items-end gap-2">
+            <form method="POST" action="{{ route('admin.orders.update', $order) }}" enctype="multipart/form-data" class="flex flex-wrap items-end gap-2">
                 @csrf @method('PATCH')
                 <label class="min-w-[190px] flex-1 sm:flex-none">
                     <span class="mb-1 block text-[10px] font-black uppercase text-gray-500">Parcel ID</span>
@@ -25,9 +25,22 @@
                         @endforeach
                     </select>
                 </label>
+                <label class="min-w-[190px] flex-1 sm:flex-none">
+                    <span class="mb-1 block text-[10px] font-black uppercase text-gray-500">Payment Screenshot <span class="normal-case text-gray-400">(optional)</span></span>
+                    <span class="relative block">
+                        <i class="fa-solid fa-image absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
+                        <input name="delivery_payment_proof" type="file" accept="image/jpeg,image/png,image/webp" class="h-10 w-full cursor-pointer text-xs sm:w-56">
+                    </span>
+                </label>
+                <label class="min-w-[220px] flex-1 sm:flex-none">
+                    <span class="mb-1 block text-[10px] font-black uppercase text-gray-500">Cancellation Reason <span class="normal-case text-red-500">(required when cancelled)</span></span>
+                    <input name="cancellation_note" value="{{ old('cancellation_note', $order->cancellation_note) }}" maxlength="1000" placeholder="Reason for cancellation" class="h-10 w-full text-sm sm:w-72">
+                </label>
                 <button class="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-black text-white hover:bg-ink"><i class="fa-solid fa-check text-xs"></i>Update</button>
             </form>
-            @error('parcel_id')<p class="w-full text-right text-xs font-semibold text-red-600">{{ $message }}</p>@enderror
+            @foreach(['parcel_id', 'delivery_payment_proof', 'cancellation_note'] as $field)
+                @error($field)<p class="w-full text-right text-xs font-semibold text-red-600">{{ $message }}</p>@enderror
+            @endforeach
         </div>
     </div>
     <div class="grid min-w-0 gap-8 lg:grid-cols-[1fr_360px]">
@@ -70,6 +83,21 @@
                 <div class="mt-3 flex items-center justify-between gap-3 rounded-md bg-[#edf5f3] px-3 py-2 text-xs"><span class="font-bold text-gray-500">Parcel ID</span><span class="font-mono font-black text-primary">{{ $order->parcel_id }}</span></div>
             @endif
             @if($order->notes)<p class="mt-3 rounded bg-gray-50 p-3 text-sm">{{ $order->notes }}</p>@endif
+            @if($order->cancellation_note)
+                <div class="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+                    <p class="font-black">Cancellation reason</p>
+                    <p class="mt-1">{{ $order->cancellation_note }}</p>
+                </div>
+            @endif
+            @if($order->delivery_payment_proof)
+                <a href="{{ route('admin.orders.payment-proof', $order) }}" target="_blank" class="mt-3 block overflow-hidden rounded-md border border-primary/20 bg-white p-2 hover:border-primary">
+                    <img src="{{ route('admin.orders.payment-proof', $order) }}" alt="Payment proof for {{ $order->order_number }}" class="max-h-56 w-full rounded object-contain">
+                    <span class="mt-2 flex items-center justify-center gap-2 text-xs font-bold text-primary">
+                        <i class="fa-solid fa-up-right-from-square"></i>
+                        Open payment proof
+                    </span>
+                </a>
+            @endif
             @if($order->advance_delivery_required)
                 <div class="mt-5 rounded border border-accent/40 bg-accent/10 p-4 text-sm">
                     <p class="font-bold text-ink">Advance Delivery Charge</p>
@@ -80,15 +108,7 @@
                         <p>Method: {{ $order->delivery_payment_method }}</p>
                         <p>Payment Mobile: {{ $order->delivery_payment_mobile }}</p>
                         <p>Transaction ID: {{ $order->delivery_transaction_id }}</p>
-                        @if($order->delivery_payment_proof)
-                            <a href="{{ route('admin.orders.payment-proof', $order) }}" target="_blank" class="mt-3 block overflow-hidden rounded-md border border-primary/20 bg-white p-2 hover:border-primary">
-                                <img src="{{ route('admin.orders.payment-proof', $order) }}" alt="Delivery payment proof for {{ $order->order_number }}" class="max-h-56 w-full rounded object-contain">
-                                <span class="mt-2 flex items-center justify-center gap-2 text-xs font-bold text-primary">
-                                    <i class="fa-solid fa-up-right-from-square"></i>
-                                    Open payment proof
-                                </span>
-                            </a>
-                        @else
+                        @if(! $order->delivery_payment_proof)
                             <p class="mt-2 text-xs font-semibold text-gray-500">No payment screenshot submitted.</p>
                         @endif
                     @else

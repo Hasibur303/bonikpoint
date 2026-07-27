@@ -33,6 +33,7 @@ class Order extends Model
         'delivery_transaction_id',
         'delivery_payment_proof',
         'notes',
+        'cancellation_note',
     ];
 
     protected function casts(): array

@@ -87,11 +87,23 @@ class OrderController extends Controller
         $validated = $request->validate([
             'status' => ['required', 'in:waiting_delivery_charge,pending,confirmed,processing,delivered,cancelled'],
             'parcel_id' => ['nullable', 'string', 'max:120', Rule::unique('orders', 'parcel_id')->ignore($order)],
+            'delivery_payment_proof' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'cancellation_note' => ['nullable', 'string', 'max:1000', 'required_if:status,cancelled'],
         ]);
 
         $validated['parcel_id'] = filled($validated['parcel_id'] ?? null)
             ? trim($validated['parcel_id'])
             : null;
+        $validated['cancellation_note'] = filled($validated['cancellation_note'] ?? null)
+            ? trim($validated['cancellation_note'])
+            : null;
+
+        if ($request->hasFile('delivery_payment_proof')) {
+            $validated['delivery_payment_proof'] = $request->file('delivery_payment_proof')
+                ->store('delivery-payment-proofs', 'local');
+        } else {
+            unset($validated['delivery_payment_proof']);
+        }
 
         DB::transaction(function () use ($order, $validated) {
             $order->loadMissing('items');
