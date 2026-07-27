@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,20 @@ class ProfitController extends Controller
         }
 
         [$start, $end, $periodLabel] = $this->period($filter, $request);
+        $categories = Category::query()->with('children')->orderBy('name')->get();
+        $selectedCategoryId = $request->integer('category') ?: null;
+        $selectedCategory = $selectedCategoryId
+            ? $categories->firstWhere('id', $selectedCategoryId)
+            : null;
+        $categoryIds = null;
+
+        if ($selectedCategoryId) {
+            $categoryIds = $selectedCategory
+                ? collect([$selectedCategory->id])
+                    ->merge($categories->where('parent_id', $selectedCategory->id)->pluck('id'))
+                    ->all()
+                : [];
+        }
 
         $baseQuery = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -31,6 +46,10 @@ class ProfitController extends Controller
                     });
             })
             ->when($start && $end, fn ($query) => $query->whereBetween('orders.created_at', [$start, $end]));
+
+        if ($categoryIds !== null) {
+            $baseQuery->whereIn('products.category_id', $categoryIds);
+        }
 
         $costExpression = 'COALESCE(order_items.buying_price, products.buying_price, 0)';
 
@@ -60,6 +79,9 @@ class ProfitController extends Controller
             'date' => $request->input('date', now()->toDateString()),
             'month' => $request->input('month', now()->format('Y-m')),
             'year' => $request->input('year', now()->year),
+            'categories' => $categories,
+            'selectedCategoryId' => $selectedCategoryId,
+            'selectedCategoryName' => $selectedCategory?->name,
         ]);
     }
 

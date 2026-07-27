@@ -3,7 +3,7 @@
         <div>
             <p class="text-xs font-black uppercase tracking-wide text-primary">Finance</p>
             <h1 class="mt-1 text-3xl font-black text-ink sm:text-4xl">Profit Report</h1>
-            <p class="mt-2 text-sm text-gray-500">Delivered online sales and recorded offline sales for <span class="font-bold text-ink">{{ $periodLabel }}</span>.</p>
+            <p class="mt-2 text-sm text-gray-500">Delivered online sales and recorded offline sales for <span class="font-bold text-ink">{{ $periodLabel }}</span>@if($selectedCategoryName) in <span class="font-bold text-ink">{{ $selectedCategoryName }}</span>@endif.</p>
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('admin.offline-sales.create') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-xs font-black text-white shadow-sm hover:bg-ink"><i class="fa-solid fa-cash-register"></i>Add Offline Sale</a>
@@ -12,8 +12,9 @@
     </div>
 
     <form method="GET" action="{{ route('admin.profit.index') }}" class="mb-5 rounded-lg border border-[#dfe7e5] bg-white p-4 shadow-sm">
-        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-[180px_1fr_1fr_1fr_auto]">
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-[160px_1fr_1fr_1fr_1fr_auto]">
             <div><label class="mb-1.5 block text-xs font-black">Report Type</label><select name="filter" class="h-11 w-full text-sm"><option value="day" @selected($filter === 'day')>Selected Date</option><option value="month" @selected($filter === 'month')>Full Month</option><option value="year" @selected($filter === 'year')>Full Year</option><option value="all" @selected($filter === 'all')>All Time</option></select></div>
+            <div><label class="mb-1.5 block text-xs font-black">Category</label><select name="category" class="h-11 w-full text-sm"><option value="">All Categories</option>@foreach($categories->whereNull('parent_id') as $category)<option value="{{ $category->id }}" @selected($selectedCategoryId === $category->id)>{{ $category->name }} (all)</option>@foreach($category->children as $child)<option value="{{ $child->id }}" @selected($selectedCategoryId === $child->id)>-- {{ $child->name }}</option>@endforeach @endforeach</select></div>
             <div><label class="mb-1.5 block text-xs font-black">Date</label><input type="date" name="date" value="{{ $date }}" class="h-11 w-full text-sm"></div>
             <div><label class="mb-1.5 block text-xs font-black">Month</label><input type="month" name="month" value="{{ $month }}" class="h-11 w-full text-sm"></div>
             <div><label class="mb-1.5 block text-xs font-black">Year</label><input type="number" name="year" value="{{ $year }}" min="2000" max="2100" class="h-11 w-full text-sm"></div>
@@ -37,7 +38,7 @@
     </div>
 
     <section class="mt-6 overflow-hidden rounded-lg border border-[#dfe7e5] bg-white shadow-sm">
-        <div class="border-b border-[#e7edeb] px-5 py-4"><h2 class="text-base font-black text-ink">Product Performance</h2><p class="mt-0.5 text-xs text-gray-500">Revenue, cost, and gross profit by product.</p></div>
+        <div class="border-b border-[#e7edeb] px-5 py-4"><h2 class="text-base font-black text-ink">Product Performance</h2><p class="mt-0.5 text-xs text-gray-500">Revenue, cost, and gross profit by product{{ $selectedCategoryName ? ' in '.$selectedCategoryName : '' }}.</p></div>
         <div class="overflow-x-auto"><table class="min-w-[720px] w-full text-left text-sm"><thead><tr><th class="px-5 py-3">Product</th><th class="px-4 py-3">Quantity</th><th class="px-4 py-3">Revenue</th><th class="px-4 py-3">Buying Cost</th><th class="px-5 py-3 text-right">Profit</th></tr></thead><tbody>
             @forelse($products as $product)
                 <tr><td class="px-5 py-4 font-black text-ink">{{ $product->product_name }}</td><td class="px-4 py-4 font-bold text-gray-600">{{ $product->quantity_sold }}</td><td class="px-4 py-4 font-bold text-ink">BDT {{ number_format((float) $product->revenue, 2) }}</td><td class="px-4 py-4 text-gray-600">BDT {{ number_format((float) $product->cost, 2) }}</td><td class="px-5 py-4 text-right font-black text-emerald-700">BDT {{ number_format((float) $product->profit, 2) }}</td></tr>
