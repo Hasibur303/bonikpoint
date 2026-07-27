@@ -197,8 +197,8 @@
                 .trending-hot-icon {
                     position: relative;
                     display: inline-block;
-                    width: 1.08rem;
-                    height: 1.32rem;
+                    width: 1.3rem;
+                    height: 1.55rem;
                     isolation: isolate;
                 }
 
@@ -206,52 +206,70 @@
                     content: '';
                     position: absolute;
                     z-index: -1;
-                    inset: 19% 13% 4%;
+                    inset: 24% 14% 3%;
                     border-radius: 50%;
-                    background: rgba(255, 111, 24, 0.58);
-                    filter: blur(0.28rem);
+                    background: rgba(255, 91, 16, 0.55);
+                    filter: blur(0.32rem);
                     transform-origin: 50% 100%;
                     animation: trending-fire-glow 700ms ease-in-out infinite alternate;
                 }
 
-                .trending-hot-image {
+                .trending-fire-svg {
                     display: block;
                     width: 100%;
                     height: 100%;
-                    object-fit: contain;
+                    overflow: visible;
+                    filter: drop-shadow(0 2px 2px rgba(203, 45, 9, 0.35));
+                }
+
+                .trending-fire-outer,
+                .trending-fire-middle,
+                .trending-fire-core {
+                    transform-box: fill-box;
                     transform-origin: 50% 100%;
-                    filter: saturate(1.12) drop-shadow(0 2px 2px rgba(218, 57, 13, 0.32));
-                    animation: trending-fire-burn 510ms ease-in-out infinite alternate;
                 }
 
-                .trending-hot-icon::after {
-                    content: '';
-                    position: absolute;
-                    z-index: 1;
-                    right: 3%;
-                    bottom: 38%;
-                    width: 0.14rem;
-                    height: 0.14rem;
-                    border-radius: 999px;
-                    background: #ffe36a;
-                    box-shadow: -0.35rem 0.22rem 0 -0.02rem #ff9d1c;
+                .trending-fire-outer {
+                    fill: url(#trending-fire-outer-gradient);
+                    animation: trending-fire-outer-burn 760ms cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+                }
+
+                .trending-fire-middle {
+                    fill: url(#trending-fire-middle-gradient);
+                    animation: trending-fire-middle-burn 540ms cubic-bezier(0.45, 0, 0.55, 1) 90ms infinite alternate;
+                }
+
+                .trending-fire-core {
+                    fill: url(#trending-fire-core-gradient);
+                    animation: trending-fire-core-burn 390ms ease-in-out 40ms infinite alternate;
+                }
+
+                .trending-fire-spark {
+                    transform-box: fill-box;
+                    transform-origin: center;
+                    fill: #ffd83d;
                     opacity: 0;
-                    animation: trending-live-spark 1.18s ease-out infinite;
+                    animation: trending-fire-spark-rise 1.35s ease-out infinite;
                 }
 
-                @keyframes trending-fire-burn {
-                    0% {
-                        transform: skewX(-2.5deg) scaleX(0.95) scaleY(0.99);
-                        filter: saturate(1.04) brightness(0.97) drop-shadow(0 2px 2px rgba(218, 57, 13, 0.25));
-                    }
-                    46% {
-                        transform: skewX(2.8deg) scaleX(1.04) scaleY(1.025);
-                        filter: saturate(1.2) brightness(1.08) drop-shadow(0 2px 4px rgba(255, 102, 18, 0.5));
-                    }
-                    100% {
-                        transform: skewX(-1deg) scaleX(0.985) scaleY(1.005);
-                        filter: saturate(1.1) brightness(1.02) drop-shadow(0 2px 3px rgba(255, 130, 15, 0.38));
-                    }
+                .trending-fire-spark-two {
+                    animation-delay: 0.52s;
+                }
+
+                @keyframes trending-fire-outer-burn {
+                    0% { transform: skewX(-3deg) scaleX(0.96) scaleY(0.98); }
+                    52% { transform: skewX(3.5deg) scaleX(1.035) scaleY(1.04); }
+                    100% { transform: skewX(-1deg) scaleX(0.985) scaleY(1.015); }
+                }
+
+                @keyframes trending-fire-middle-burn {
+                    0% { transform: translateX(-1px) skewX(-5deg) scale(0.93, 0.96); }
+                    100% { transform: translateX(1px) skewX(5deg) scale(1.04, 1.055); }
+                }
+
+                @keyframes trending-fire-core-burn {
+                    0% { transform: translateX(0.5px) skewX(4deg) scale(0.88, 0.94); opacity: 0.82; }
+                    100% { transform: translateX(-0.5px) skewX(-4deg) scale(1.04, 1.08); opacity: 1; }
                 }
 
                 @keyframes trending-fire-glow {
@@ -265,10 +283,10 @@
                     }
                 }
 
-                @keyframes trending-live-spark {
-                    0%, 28% { opacity: 0; transform: translate(0, 0) scale(0.4); }
-                    48% { opacity: 1; }
-                    100% { opacity: 0; transform: translate(0.16rem, -0.85rem) scale(0.15); }
+                @keyframes trending-fire-spark-rise {
+                    0%, 25% { opacity: 0; transform: translate(0, 4px) scale(0.45); }
+                    42% { opacity: 0.95; }
+                    100% { opacity: 0; transform: translate(5px, -21px) scale(0.12); }
                 }
 
                 .festival-mosaic-viewport.is-animating .festival-mosaic-card {
@@ -376,8 +394,10 @@
                     }
 
                     .trending-hot-icon::before,
-                    .trending-hot-icon::after,
-                    .trending-hot-image {
+                    .trending-fire-outer,
+                    .trending-fire-middle,
+                    .trending-fire-core,
+                    .trending-fire-spark {
                         animation: none;
                     }
                 }
@@ -425,7 +445,36 @@
                 <div class="mb-4 flex items-end justify-between gap-4">
                     <div>
                         <p class="text-[10px] font-black uppercase tracking-wide text-primary">Handpicked</p>
-                        <h2 class="mt-1 flex items-center gap-2 text-xl font-black text-ink sm:text-2xl"><span>Trending Products</span><span class="trending-hot-icon" aria-hidden="true"><img class="trending-hot-image" src="{{ asset('images/trending-fire.png') }}" alt=""></span><span class="sr-only">Hot products</span></h2>
+                        <h2 class="mt-1 flex items-center gap-2 text-xl font-black text-ink sm:text-2xl">
+                            <span>Trending Products</span>
+                            <span class="trending-hot-icon" aria-hidden="true">
+                                <svg class="trending-fire-svg" viewBox="0 0 64 82" role="presentation">
+                                    <defs>
+                                        <linearGradient id="trending-fire-outer-gradient" x1="22" y1="78" x2="44" y2="5" gradientUnits="userSpaceOnUse">
+                                            <stop offset="0" stop-color="#ff9b16"/>
+                                            <stop offset="0.56" stop-color="#f4511e"/>
+                                            <stop offset="1" stop-color="#c81d16"/>
+                                        </linearGradient>
+                                        <linearGradient id="trending-fire-middle-gradient" x1="32" y1="75" x2="32" y2="22" gradientUnits="userSpaceOnUse">
+                                            <stop offset="0" stop-color="#ffd51f"/>
+                                            <stop offset="0.62" stop-color="#ff8a16"/>
+                                            <stop offset="1" stop-color="#ff5b15"/>
+                                        </linearGradient>
+                                        <linearGradient id="trending-fire-core-gradient" x1="31" y1="76" x2="33" y2="42" gradientUnits="userSpaceOnUse">
+                                            <stop offset="0" stop-color="#fffde9"/>
+                                            <stop offset="0.48" stop-color="#fff17a"/>
+                                            <stop offset="1" stop-color="#ffd52d"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path class="trending-fire-outer" d="M33 2C43 14 52 23 49 38C56 32 63 43 60 57C57 72 46 80 31 80C15 80 4 70 4 56C4 46 10 38 16 30C15 40 21 43 25 45C21 28 27 17 33 2Z"/>
+                                    <path class="trending-fire-middle" d="M35 19C43 29 47 38 43 48C48 44 54 50 52 60C50 70 42 77 31 77C19 77 12 69 13 59C14 51 19 45 24 38C23 49 29 53 32 55C29 41 31 29 35 19Z"/>
+                                    <path class="trending-fire-core" d="M33 40C39 49 43 56 40 64C39 72 35 77 29 77C23 77 19 72 20 65C21 58 26 53 29 47C29 55 32 57 34 59C32 52 32 46 33 40Z"/>
+                                    <circle class="trending-fire-spark trending-fire-spark-one" cx="14" cy="34" r="2.2"/>
+                                    <circle class="trending-fire-spark trending-fire-spark-two" cx="52" cy="29" r="1.8"/>
+                                </svg>
+                            </span>
+                            <span class="sr-only">Hot products</span>
+                        </h2>
                     </div>
                     <a href="#shop-products" class="text-xs font-black text-primary hover:text-ink">View all</a>
                 </div>
