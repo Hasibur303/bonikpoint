@@ -197,54 +197,82 @@
                 .trending-hot-icon {
                     position: relative;
                     display: inline-block;
-                    width: 1rem;
-                    height: 1.25rem;
-                    border-radius: 60% 45% 55% 45%;
-                    background: radial-gradient(ellipse at 50% 76%, #ffe47a 0 11%, #ffbd20 21%, #ff6a14 48%, #df2915 70%, transparent 72%);
-                    clip-path: polygon(51% 0, 72% 29%, 88% 54%, 75% 82%, 51% 100%, 23% 84%, 10% 57%, 30% 28%);
+                    width: 1.15rem;
+                    height: 1.35rem;
                     filter: drop-shadow(0 2px 3px rgba(220, 45, 12, 0.38));
-                    transform-origin: 50% 100%;
-                    animation: trending-live-flame 820ms ease-in-out infinite alternate;
                 }
 
-                .trending-hot-icon::after {
+                .trending-hot-icon::before {
                     content: '';
                     position: absolute;
+                    inset: 0;
+                    border-radius: 58% 42% 60% 40%;
+                    background: linear-gradient(145deg, #ffca28 4%, #ff7518 38%, #f34316 66%, #ca1d13 100%);
+                    clip-path: polygon(50% 0, 64% 25%, 84% 45%, 80% 72%, 58% 100%, 29% 91%, 12% 69%, 17% 42%, 38% 23%);
+                    transform-origin: 50% 100%;
+                    animation: trending-live-flame 540ms ease-in-out infinite alternate;
+                }
+
+                .trending-hot-core {
+                    position: absolute;
+                    z-index: 1;
                     left: 31%;
                     bottom: 13%;
-                    width: 42%;
-                    height: 53%;
-                    border-radius: 55% 45% 58% 42%;
-                    background: #fff1a4;
-                    clip-path: polygon(55% 0, 82% 44%, 65% 100%, 23% 84%, 12% 48%);
+                    width: 43%;
+                    height: 57%;
+                    border-radius: 58% 42% 54% 46%;
+                    background: linear-gradient(150deg, #fffde4 3%, #ffe270 42%, #ffc11f 100%);
+                    clip-path: polygon(57% 0, 81% 38%, 66% 100%, 26% 83%, 15% 51%);
                     transform-origin: 50% 100%;
-                    animation: trending-live-core 560ms ease-in-out infinite alternate;
+                    animation: trending-live-core 390ms ease-in-out infinite alternate;
+                }
+
+                .trending-hot-spark {
+                    position: absolute;
+                    z-index: 2;
+                    width: 0.17rem;
+                    height: 0.17rem;
+                    border-radius: 999px;
+                    background: #ffd54f;
+                    box-shadow: 0 0 4px #ff7a18;
+                    opacity: 0;
+                    animation: trending-live-spark 1.18s ease-out infinite;
+                }
+
+                .trending-hot-spark-one { left: 15%; bottom: 48%; animation-delay: 0s; }
+                .trending-hot-spark-two { right: 14%; bottom: 42%; animation-delay: 0.43s; }
                 }
 
                 @keyframes trending-live-flame {
                     0% {
-                        transform: translateY(1px) rotate(-5deg) scaleX(0.88) scaleY(0.95);
-                        filter: drop-shadow(0 2px 3px rgba(220, 45, 12, 0.28));
+                        clip-path: polygon(50% 4%, 61% 28%, 83% 45%, 77% 72%, 58% 100%, 29% 91%, 12% 69%, 17% 42%, 40% 25%);
+                        transform: skewX(-4deg) scaleX(0.93);
                     }
-                    48% {
-                        transform: translateY(-2px) rotate(3deg) scaleX(1.06) scaleY(1.08);
-                        filter: drop-shadow(0 3px 5px rgba(255, 92, 16, 0.5));
+                    47% {
+                        clip-path: polygon(43% 0, 68% 25%, 88% 49%, 78% 75%, 56% 100%, 26% 90%, 10% 65%, 20% 40%, 34% 20%);
+                        transform: skewX(4deg) scaleX(1.04);
                     }
                     100% {
-                        transform: translateY(0) rotate(-1deg) scaleX(0.96) scaleY(1.01);
-                        filter: drop-shadow(0 2px 4px rgba(255, 131, 20, 0.38));
+                        clip-path: polygon(56% 5%, 69% 31%, 82% 51%, 82% 74%, 59% 100%, 28% 93%, 13% 68%, 13% 46%, 39% 27%);
+                        transform: skewX(-1deg) scaleX(0.98);
                     }
                 }
 
                 @keyframes trending-live-core {
                     0% {
-                        transform: translateX(-8%) scale(0.82, 0.92);
-                        opacity: 0.76;
+                        transform: translateX(-12%) skewX(-8deg) scale(0.78, 0.91);
+                        opacity: 0.68;
                     }
                     100% {
-                        transform: translateX(10%) scale(1.08, 1.05);
+                        transform: translateX(11%) skewX(7deg) scale(1.08, 1.04);
                         opacity: 1;
                     }
+                }
+
+                @keyframes trending-live-spark {
+                    0%, 28% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+                    48% { opacity: 1; }
+                    100% { opacity: 0; transform: translate(0.16rem, -0.85rem) scale(0.15); }
                 }
 
                 .festival-mosaic-viewport.is-animating .festival-mosaic-card {
@@ -351,7 +379,9 @@
                         animation: none;
                     }
 
-                    .trending-hot-icon::after {
+                    .trending-hot-icon::before,
+                    .trending-hot-core,
+                    .trending-hot-spark {
                         animation: none;
                     }
                 }
@@ -399,7 +429,7 @@
                 <div class="mb-4 flex items-end justify-between gap-4">
                     <div>
                         <p class="text-[10px] font-black uppercase tracking-wide text-primary">Handpicked</p>
-                        <h2 class="mt-1 flex items-center gap-2 text-xl font-black text-ink sm:text-2xl"><span>Trending Products</span><span class="trending-hot-icon" aria-hidden="true"></span><span class="sr-only">Hot products</span></h2>
+                        <h2 class="mt-1 flex items-center gap-2 text-xl font-black text-ink sm:text-2xl"><span>Trending Products</span><span class="trending-hot-icon" aria-hidden="true"><span class="trending-hot-core"></span><span class="trending-hot-spark trending-hot-spark-one"></span><span class="trending-hot-spark trending-hot-spark-two"></span></span><span class="sr-only">Hot products</span></h2>
                     </div>
                     <a href="#shop-products" class="text-xs font-black text-primary hover:text-ink">View all</a>
                 </div>
