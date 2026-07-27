@@ -65,6 +65,10 @@ class Order extends Model
 
     public function paidAmount(): float
     {
+        if ($this->is_offline_sale) {
+            return (float) $this->total;
+        }
+
         if ($this->status === 'delivered') {
             return (float) $this->total;
         }

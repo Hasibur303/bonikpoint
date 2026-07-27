@@ -3,7 +3,7 @@
         <div>
             <p class="text-xs font-black uppercase tracking-wide text-primary">Finance</p>
             <h1 class="mt-1 text-3xl font-black text-ink sm:text-4xl">Profit Report</h1>
-            <p class="mt-2 text-sm text-gray-500">Delivered sales for <span class="font-bold text-ink">{{ $periodLabel }}</span>.</p>
+            <p class="mt-2 text-sm text-gray-500">Delivered online sales and recorded offline sales for <span class="font-bold text-ink">{{ $periodLabel }}</span>.</p>
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('admin.offline-sales.create') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-xs font-black text-white shadow-sm hover:bg-ink"><i class="fa-solid fa-cash-register"></i>Add Offline Sale</a>
@@ -46,5 +46,5 @@
             @endforelse
         </tbody></table></div>
     </section>
-    <p class="mt-4 flex items-start gap-2 text-xs text-gray-500"><i class="fa-solid fa-circle-info mt-0.5 text-primary"></i><span>Profit accuracy depends on each product's buying price. Existing order costs are used when available.</span></p>
+    <p class="mt-4 flex items-start gap-2 text-xs text-gray-500"><i class="fa-solid fa-circle-info mt-0.5 text-primary"></i><span>Profit includes delivered online sales and all non-cancelled offline sales. Accuracy depends on each product's buying price.</span></p>
 </x-admin-layout>

@@ -23,7 +23,13 @@ class ProfitController extends Controller
         $baseQuery = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->leftJoin('products', 'order_items.product_id', '=', 'products.id')
-            ->where('orders.status', 'delivered')
+            ->where(function ($query) {
+                $query->where('orders.status', 'delivered')
+                    ->orWhere(function ($offlineSales) {
+                        $offlineSales->where('orders.is_offline_sale', true)
+                            ->where('orders.status', '!=', 'cancelled');
+                    });
+            })
             ->when($start && $end, fn ($query) => $query->whereBetween('orders.created_at', [$start, $end]));
 
         $costExpression = 'COALESCE(order_items.buying_price, products.buying_price, 0)';

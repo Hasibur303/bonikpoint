@@ -55,7 +55,7 @@ class OfflineSaleController extends Controller
                 'mobile' => filled($data['mobile'] ?? null) ? trim($data['mobile']) : 'N/A',
                 'address' => filled($data['address'] ?? null) ? trim($data['address']) : 'Offline sale entered by admin',
                 'city' => filled($data['city'] ?? null) ? trim($data['city']) : 'Store',
-                'status' => 'delivered',
+                'status' => 'confirmed',
                 'subtotal' => $total,
                 'shipping' => 0,
                 'total' => $total,
