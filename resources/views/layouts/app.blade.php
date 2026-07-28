@@ -116,6 +116,9 @@
                     </div>
                     <a href="{{ route('videos.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('videos.*') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Videos</a>
                     <a href="{{ route('cart.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('cart.*') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Cart</a>
+                    @guest
+                        <a href="{{ route('guest.orders.track') }}" class="border-b-2 py-2 transition {{ request()->routeIs('guest.orders.track*') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Track</a>
+                    @endguest
                     @auth
                         <a href="{{ route('orders.index') }}" class="border-b-2 py-2 transition {{ request()->routeIs('orders.*') ? 'border-[#c8dc62] text-white' : 'border-transparent hover:border-white/30 hover:text-white' }}">Orders</a>
                         @if(auth()->user()->isAdmin())
@@ -217,6 +220,7 @@
                             <button type="submit" class="w-full rounded-md px-3 py-2 text-left hover:bg-red-50 hover:text-red-700">Sign Out</button>
                         </form>
                     @else
+                        <a href="{{ route('guest.orders.track') }}" class="rounded-md px-3 py-2 {{ request()->routeIs('guest.orders.track*') ? 'bg-ink text-white' : 'hover:bg-[#edf3f1] hover:text-primary' }}">Track Order</a>
                         <a href="{{ route('login') }}" class="rounded-md px-3 py-2 hover:bg-[#edf3f1] hover:text-primary">Sign In</a>
                         <a href="{{ route('register') }}" class="rounded-md px-3 py-2 hover:bg-[#edf3f1] hover:text-primary">Register</a>
                     @endauth
@@ -257,7 +261,7 @@
                 <span id="cart-drawer-subtotal">BDT 0.00</span>
             </div>
             <div class="grid gap-3">
-                <a href="{{ route('checkout.start') }}" id="cart-drawer-checkout" class="rounded-lg bg-primary px-5 py-3 text-center font-semibold text-white hover:bg-ink">Place Order</a>
+                <a href="{{ route(auth()->check() ? 'checkout.create' : 'guest.checkout.create') }}" id="cart-drawer-checkout" class="rounded-lg bg-primary px-5 py-3 text-center font-semibold text-white hover:bg-ink">Place Order</a>
                 <a href="{{ route('shop.index') }}" class="rounded-lg border border-gray-200 px-5 py-3 text-center font-semibold text-ink hover:border-primary hover:text-primary">Continue Shopping</a>
             </div>
         </div>
@@ -275,7 +279,11 @@
                     <a href="{{ route('shop.index') }}" class="block hover:text-accent">All Products</a>
                     <a href="{{ route('cart.index') }}" class="block hover:text-accent">Cart</a>
                     <a href="{{ route('videos.index') }}" class="block hover:text-accent">Videos</a>
-                    <a href="{{ route('orders.index') }}" class="block hover:text-accent">Orders</a>
+                    @auth
+                        <a href="{{ route('orders.index') }}" class="block hover:text-accent">Orders</a>
+                    @else
+                        <a href="{{ route('guest.orders.track') }}" class="block hover:text-accent">Track Order</a>
+                    @endauth
                     <a href="{{ route('order-instructions') }}" class="block hover:text-accent">Order Instructions</a>
                     <a href="{{ route('return-policy') }}" class="block hover:text-accent">Return & Refund Policy</a>
                 </div>

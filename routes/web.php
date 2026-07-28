@@ -121,6 +121,10 @@ Route::get('/guest-checkout', [CheckoutController::class, 'guestCreate'])->name(
 Route::post('/guest-checkout', [CheckoutController::class, 'guestStore'])->name('guest.checkout.store');
 Route::get('/guest-orders/{order:order_number}/{token}', [OrderController::class, 'guestShow'])->name('guest.orders.show');
 Route::get('/guest-orders/{order:order_number}/{token}/receipt', [OrderController::class, 'guestReceipt'])->name('guest.orders.receipt');
+Route::get('/track-order', [OrderController::class, 'trackForm'])->name('guest.orders.track');
+Route::post('/track-order', [OrderController::class, 'track'])
+    ->middleware('throttle:6,1')
+    ->name('guest.orders.track.lookup');
 
 Route::get('/dashboard', function () {
     if (auth()->user()?->utype === 'adm') {

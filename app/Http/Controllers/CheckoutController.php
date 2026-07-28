@@ -11,6 +11,7 @@ use App\Models\StoreSetting;
 use App\Support\BotProtection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -21,6 +22,10 @@ use Throwable;
 
 class CheckoutController extends Controller
 {
+    private const CHECKOUT_DETAILS_COOKIE = 'bonikpoint_checkout_details';
+
+    private const CHECKOUT_DETAILS_COOKIE_MINUTES = 129600;
+
     private const BANGLADESH_CITIES = [
         'Bagerhat', 'Bandarban', 'Barguna', 'Barishal', 'Bhola', 'Bogura',
         'Brahmanbaria', 'Chandpur', 'Chapainawabganj', 'Chattogram', 'Chuadanga',
@@ -41,26 +46,9 @@ class CheckoutController extends Controller
         return $this->renderCheckout(false);
     }
 
-    public function start(): View|RedirectResponse
+    public function start(): RedirectResponse
     {
-        if (auth()->check()) {
-            return redirect()->route('checkout.create');
-        }
-
-        $cartItems = app(CartController::class)->items();
-
-        if (count($cartItems) === 0) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
-        }
-
-        if ($this->ageConfirmationRequired($cartItems)) {
-            return redirect()->route('cart.index')->with('error', 'Please confirm your age before checkout.');
-        }
-
-        return view('checkout.start', [
-            'cartItems' => $cartItems,
-            'subtotal' => CartController::subtotal(),
-        ]);
+        return redirect()->route(auth()->check() ? 'checkout.create' : 'guest.checkout.create');
     }
 
     public function accountRedirect(string $screen): RedirectResponse
@@ -89,7 +77,8 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Please confirm your age before checkout.');
         }
 
-        $city = $this->canonicalCity(old('city'));
+        $rememberedDetails = $this->rememberedCheckoutDetails();
+        $city = $this->canonicalCity(old('city', $rememberedDetails['city'] ?? null));
 
         return view('checkout.create', [
             'cartItems' => $cartItems,
@@ -99,6 +88,7 @@ class CheckoutController extends Controller
             'deliverySettings' => StoreSetting::deliverySettings(),
             'cities' => self::BANGLADESH_CITIES,
             'isGuestCheckout' => $isGuestCheckout,
+            'rememberedDetails' => $rememberedDetails,
         ]);
     }
 
@@ -137,6 +127,7 @@ class CheckoutController extends Controller
             'address' => ['required', 'string', 'max:1000'],
             'city' => ['required', 'string', Rule::in(self::BANGLADESH_CITIES)],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'remember_details' => ['nullable', 'boolean'],
         ];
 
         if ($advanceDeliveryRequired) {
@@ -160,6 +151,8 @@ class CheckoutController extends Controller
             'delivery_transaction_id.required' => 'Enter the payment mobile number and transaction ID, or upload a payment screenshot.',
             'delivery_payment_proof.required' => 'Upload a payment screenshot, or enter both payment mobile number and transaction ID.',
         ]);
+        $rememberDetails = $request->boolean('remember_details');
+        unset($data['remember_details']);
         $data['delivery_charge_payment_option'] = $advanceDeliveryRequired
             ? ($isGuestCheckout ? 'pay_now' : $data['delivery_charge_payment_option'])
             : null;
@@ -225,6 +218,7 @@ class CheckoutController extends Controller
         }
 
         session()->forget('cart');
+        $this->storeRememberedCheckoutDetails($data, $rememberDetails);
 
         if ($isGuestCheckout) {
             return redirect()->route('guest.orders.show', [$order->order_number, $order->guest_token])->with('success', 'Order placed successfully.');
@@ -353,5 +347,45 @@ class CheckoutController extends Controller
         }
 
         return $city;
+    }
+
+    private function rememberedCheckoutDetails(): array
+    {
+        $details = json_decode((string) request()->cookie(self::CHECKOUT_DETAILS_COOKIE), true);
+
+        if (! is_array($details)) {
+            return [];
+        }
+
+        return collect($details)
+            ->only(['customer_name', 'email', 'mobile', 'address', 'city'])
+            ->map(fn ($value) => is_string($value) ? trim($value) : '')
+            ->filter(fn ($value) => $value !== '')
+            ->all();
+    }
+
+    private function storeRememberedCheckoutDetails(array $data, bool $remember): void
+    {
+        if (! $remember) {
+            Cookie::queue(Cookie::forget(self::CHECKOUT_DETAILS_COOKIE));
+
+            return;
+        }
+
+        $details = collect($data)
+            ->only(['customer_name', 'email', 'mobile', 'address', 'city'])
+            ->all();
+
+        Cookie::queue(
+            self::CHECKOUT_DETAILS_COOKIE,
+            json_encode($details, JSON_UNESCAPED_UNICODE),
+            self::CHECKOUT_DETAILS_COOKIE_MINUTES,
+            '/',
+            null,
+            app()->environment('production'),
+            true,
+            false,
+            'lax'
+        );
     }
 }

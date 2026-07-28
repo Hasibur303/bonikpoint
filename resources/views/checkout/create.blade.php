@@ -31,31 +31,38 @@
                     <div class="border-b border-gray-100 px-4 py-4 sm:px-7 sm:py-5">
                         <h2 class="text-lg font-black uppercase text-ink sm:text-xl">{{ $isGuestCheckout ? 'Guest checkout details' : 'Customer and delivery details' }}</h2>
                         @if($isGuestCheckout)
-                            <p class="mt-1 text-xs leading-5 text-gray-500 sm:text-sm">You can place this order without creating an account. Delivery charge pay later is not available for guest checkout.</p>
+                            <p class="mt-1 text-xs leading-5 text-gray-500 sm:text-sm">অ্যাকাউন্ট বা সাইন ইন ছাড়াই সরাসরি অর্ডার করুন। Guest checkout-এ delivery charge pay later পাওয়া যাবে না।</p>
                         @endif
                     </div>
+
+                    @if($rememberedDetails)
+                        <div class="mx-4 mt-4 flex items-start gap-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900 sm:mx-6 sm:mt-5 sm:text-sm">
+                            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-emerald-600 text-[10px] text-white"><i class="fa-solid fa-check"></i></span>
+                            <p class="pt-0.5"><span class="font-black">আগের তথ্য পূরণ করা হয়েছে।</span> অর্ডার দেওয়ার আগে নাম, ফোন ও ঠিকানা একবার দেখে নিন।</p>
+                        </div>
+                    @endif
 
                     <div class="grid gap-3 p-4 sm:grid-cols-2 sm:gap-4 sm:p-6">
                         <div>
                             <label for="checkout-name" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Full name</label>
-                            <input id="checkout-name" name="customer_name" value="{{ old('customer_name', auth()->user()?->name) }}" autocomplete="name" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                            <input id="checkout-name" name="customer_name" value="{{ old('customer_name', auth()->user()?->name ?? ($rememberedDetails['customer_name'] ?? '')) }}" autocomplete="name" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
                             @error('customer_name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>
                             <label for="checkout-mobile" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Mobile number</label>
-                            <input id="checkout-mobile" name="mobile" value="{{ old('mobile', auth()->user()?->mobile) }}" autocomplete="tel" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                            <input id="checkout-mobile" name="mobile" value="{{ old('mobile', auth()->user()?->mobile ?? ($rememberedDetails['mobile'] ?? '')) }}" autocomplete="tel" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
                             @error('mobile')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>
                             <label for="checkout-email" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Email address</label>
-                            <input id="checkout-email" name="email" type="email" value="{{ old('email', auth()->user()?->email) }}" autocomplete="email" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                            <input id="checkout-email" name="email" type="email" value="{{ old('email', auth()->user()?->email ?? ($rememberedDetails['email'] ?? '')) }}" autocomplete="email" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
                             @error('email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>
                             <label for="checkout-city" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">City or district</label>
                             <div class="relative">
                                 <i class="fa-solid fa-location-dot absolute left-4 top-1/2 -translate-y-1/2 text-sm text-primary"></i>
-                                <input id="checkout-city" name="city" list="bangladesh-cities" value="{{ old('city') }}" placeholder="Search city or district" autocomplete="address-level2" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 pr-4 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                                <input id="checkout-city" name="city" list="bangladesh-cities" value="{{ old('city', $rememberedDetails['city'] ?? '') }}" placeholder="Search city or district" autocomplete="address-level2" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 pr-4 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
                             </div>
                             <datalist id="bangladesh-cities">
                                 @foreach($cities as $city)
@@ -66,7 +73,7 @@
                         </div>
                         <div class="sm:col-span-2">
                             <label for="checkout-address" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Full delivery address</label>
-                            <textarea id="checkout-address" name="address" rows="2" autocomplete="street-address" placeholder="House, road, area, and any delivery details" class="w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20" required>{{ old('address') }}</textarea>
+                            <textarea id="checkout-address" name="address" rows="2" autocomplete="street-address" placeholder="House, road, area, and any delivery details" class="w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20" required>{{ old('address', $rememberedDetails['address'] ?? '') }}</textarea>
                             @error('address')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div class="sm:col-span-2">
@@ -161,6 +168,14 @@
                     @endif
 
                     <div class="sticky bottom-0 z-20 border-t border-gray-100 bg-white/95 p-4 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur sm:static sm:px-7 sm:py-5 sm:shadow-none">
+                        <input type="hidden" name="remember_details" value="0">
+                        <label class="mb-3 flex cursor-pointer items-start gap-3 rounded-md border border-[#dce6e3] bg-[#f6f9f8] p-3">
+                            <input type="checkbox" name="remember_details" value="1" @checked((bool) old('remember_details', true)) class="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary">
+                            <span>
+                                <span class="block text-xs font-black text-ink sm:text-sm">এই ডিভাইসে আমার তথ্য মনে রাখুন</span>
+                                <span class="mt-0.5 block text-[11px] leading-4 text-gray-500">পরের অর্ডারে নাম, ফোন, ইমেইল ও ঠিকানা নিজে থেকে পূরণ হবে। Payment information সংরক্ষণ হবে না।</span>
+                            </span>
+                        </label>
                         @if($isGuestCheckout)
                             <x-bot-protection />
                         @endif

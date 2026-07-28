@@ -70,7 +70,7 @@ class CartController extends Controller
         session(['cart' => $cart]);
 
         if ($request->boolean('buy_now') && ! $request->expectsJson()) {
-            return redirect()->route('checkout.start');
+            return redirect()->route(auth()->check() ? 'checkout.create' : 'guest.checkout.create');
         }
 
         if ($request->expectsJson()) {

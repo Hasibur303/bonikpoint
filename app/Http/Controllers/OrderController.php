@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\StoreSetting;
+use App\Support\BotProtection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -46,6 +47,33 @@ class OrderController extends Controller
         $this->authorizeGuestOrder($order, $token);
 
         return view('orders.receipt', ['order' => $order->load('items')]);
+    }
+
+    public function trackForm(): View
+    {
+        return view('orders.track', ['order' => null]);
+    }
+
+    public function track(Request $request): View
+    {
+        BotProtection::ensureHuman($request);
+
+        $data = $request->validate([
+            'order_number' => ['required', 'string', 'max:80'],
+            'mobile' => ['required', 'string', 'max:30'],
+        ]);
+
+        $order = Order::where('order_number', trim($data['order_number']))->first();
+        $providedMobile = $this->normalizedMobile($data['mobile']);
+        $orderMobile = $order ? $this->normalizedMobile($order->mobile) : '';
+
+        if (! $order || $providedMobile === '' || ! hash_equals($orderMobile, $providedMobile)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'order_number' => 'No matching order was found. Check the order number and mobile number.',
+            ]);
+        }
+
+        return view('orders.track', ['order' => $order]);
     }
 
     public function deliveryPayment(Order $order): View
@@ -108,5 +136,20 @@ class OrderController extends Controller
     private function authorizeGuestOrder(Order $order, string $token): void
     {
         abort_unless($order->user_id === null && $order->guest_token && hash_equals($order->guest_token, $token), 403);
+    }
+
+    private function normalizedMobile(?string $mobile): string
+    {
+        $digits = preg_replace('/\D+/', '', (string) $mobile);
+
+        if (strlen($digits) === 13 && str_starts_with($digits, '880')) {
+            return '0'.substr($digits, 3);
+        }
+
+        if (strlen($digits) === 10 && str_starts_with($digits, '1')) {
+            return '0'.$digits;
+        }
+
+        return $digits;
     }
 }
