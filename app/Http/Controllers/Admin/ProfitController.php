@@ -52,11 +52,16 @@ class ProfitController extends Controller
         }
 
         $costExpression = 'COALESCE(order_items.buying_price, products.buying_price, 0)';
+        $revenueExpression = '(order_items.total + CASE
+            WHEN orders.subtotal > 0
+            THEN (order_items.total / orders.subtotal) * (COALESCE(orders.extra_charge_amount, 0) - COALESCE(orders.discount_amount, 0))
+            ELSE 0
+        END)';
 
         $summary = (clone $baseQuery)
-            ->selectRaw('COALESCE(SUM(order_items.total), 0) as revenue')
+            ->selectRaw("COALESCE(SUM({$revenueExpression}), 0) as revenue")
             ->selectRaw("COALESCE(SUM({$costExpression} * order_items.quantity), 0) as cost")
-            ->selectRaw("COALESCE(SUM(order_items.total - ({$costExpression} * order_items.quantity)), 0) as profit")
+            ->selectRaw("COALESCE(SUM({$revenueExpression} - ({$costExpression} * order_items.quantity)), 0) as profit")
             ->selectRaw('COALESCE(SUM(order_items.quantity), 0) as units')
             ->selectRaw('COUNT(DISTINCT orders.id) as orders_count')
             ->first();
@@ -64,9 +69,9 @@ class ProfitController extends Controller
         $products = (clone $baseQuery)
             ->select('order_items.product_name')
             ->selectRaw('SUM(order_items.quantity) as quantity_sold')
-            ->selectRaw('SUM(order_items.total) as revenue')
+            ->selectRaw("SUM({$revenueExpression}) as revenue")
             ->selectRaw("SUM({$costExpression} * order_items.quantity) as cost")
-            ->selectRaw("SUM(order_items.total - ({$costExpression} * order_items.quantity)) as profit")
+            ->selectRaw("SUM({$revenueExpression} - ({$costExpression} * order_items.quantity)) as profit")
             ->groupBy('order_items.product_name')
             ->orderByDesc('profit')
             ->get();

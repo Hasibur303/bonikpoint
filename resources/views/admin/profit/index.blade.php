@@ -47,5 +47,5 @@
             @endforelse
         </tbody></table></div>
     </section>
-    <p class="mt-4 flex items-start gap-2 text-xs text-gray-500"><i class="fa-solid fa-circle-info mt-0.5 text-primary"></i><span>Profit includes delivered online sales and all non-cancelled offline sales. Accuracy depends on each product's buying price.</span></p>
+    <p class="mt-4 flex items-start gap-2 text-xs text-gray-500"><i class="fa-solid fa-circle-info mt-0.5 text-primary"></i><span>Profit includes delivered online sales and all non-cancelled offline sales. Order-level discounts and extra charges are allocated proportionally across the order's products. Accuracy depends on each product's buying price.</span></p>
 </x-admin-layout>

@@ -99,6 +99,12 @@
         <div class="ml-auto mt-6 max-w-sm space-y-2 text-sm">
             <div class="flex justify-between gap-4"><span>Subtotal</span><span class="text-right">BDT {{ number_format($order->subtotal, 2) }}</span></div>
             <div class="flex justify-between gap-4"><span>Delivery Charge</span><span class="text-right">BDT {{ number_format($order->shipping, 2) }}</span></div>
+            @if((float) $order->discount_amount > 0)
+                <div class="flex justify-between gap-4 text-green-700"><span>{{ $order->adjustmentLabel() }}</span><span class="text-right font-bold">- BDT {{ number_format($order->discount_amount, 2) }}</span></div>
+            @endif
+            @if((float) $order->extra_charge_amount > 0)
+                <div class="flex justify-between gap-4 text-amber-700"><span>Additional Charge</span><span class="text-right font-bold">+ BDT {{ number_format($order->extra_charge_amount, 2) }}</span></div>
+            @endif
             <div class="flex justify-between gap-4 border-t pt-3 text-lg font-black text-[#103f44]"><span>Total</span><span class="text-right">BDT {{ number_format($order->total, 2) }}</span></div>
             <div class="flex justify-between gap-4 text-green-700"><span>Paid Amount</span><span class="text-right font-bold">BDT {{ number_format($order->paidAmount(), 2) }}</span></div>
             <div class="flex justify-between gap-4 rounded bg-red-50 px-3 py-2 text-lg font-black text-red-700"><span>Due Amount</span><span class="text-right">BDT {{ number_format($order->dueAmount(), 2) }}</span></div>

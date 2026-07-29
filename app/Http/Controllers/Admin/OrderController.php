@@ -6,14 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\SteadfastCourier;
+use App\Support\OrderAdjustmentCalculator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
@@ -66,7 +69,7 @@ class OrderController extends Controller
     public function show(Order $order, SteadfastCourier $steadfast): View
     {
         return view('admin.orders.show', [
-            'order' => $order->load('items', 'user'),
+            'order' => $order->load('items', 'user', 'adjustedBy'),
             'steadfastConfigured' => $steadfast->configured(),
         ]);
     }
@@ -159,6 +162,131 @@ class OrderController extends Controller
             : 'Order fulfillment details updated.');
     }
 
+    public function updateAdjustment(Request $request, Order $order, OrderAdjustmentCalculator $calculator): RedirectResponse
+    {
+        $validated = $request->validate([
+            'adjustment_type' => ['required', Rule::in(['fixed_discount', 'percentage_discount', 'extra_charge'])],
+            'adjustment_value' => ['required', 'numeric', 'gt:0', 'max:99999999.99'],
+            'adjustment_reason' => ['required', 'string', 'max:255'],
+            'adjustment_note' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        DB::transaction(function () use ($order, $validated, $calculator) {
+            $lockedOrder = Order::whereKey($order->getKey())->lockForUpdate()->firstOrFail();
+            $this->ensureAdjustmentCanChange($lockedOrder);
+
+            $value = round((float) $validated['adjustment_value'], 2);
+            try {
+                $amounts = $calculator->calculate(
+                    (float) $lockedOrder->subtotal,
+                    (float) $lockedOrder->shipping,
+                    $validated['adjustment_type'],
+                    $value
+                );
+            } catch (InvalidArgumentException $exception) {
+                throw ValidationException::withMessages([
+                    'adjustment_value' => $exception->getMessage(),
+                ]);
+            }
+
+            $previous = $lockedOrder->only([
+                'total',
+                'adjustment_type',
+                'adjustment_value',
+                'discount_amount',
+                'extra_charge_amount',
+                'adjustment_reason',
+                'adjustment_note',
+                'adjusted_by',
+                'adjusted_at',
+            ]);
+
+            $lockedOrder->update([
+                'total' => $amounts['total'],
+                'adjustment_type' => $validated['adjustment_type'],
+                'adjustment_value' => $value,
+                'discount_amount' => $amounts['discount_amount'],
+                'extra_charge_amount' => $amounts['extra_charge_amount'],
+                'adjustment_reason' => trim($validated['adjustment_reason']),
+                'adjustment_note' => filled($validated['adjustment_note'] ?? null)
+                    ? trim($validated['adjustment_note'])
+                    : null,
+                'adjusted_by' => auth()->id(),
+                'adjusted_at' => now(),
+            ]);
+
+            Log::notice('Order adjustment updated.', [
+                'order_id' => $lockedOrder->id,
+                'order_number' => $lockedOrder->order_number,
+                'admin_id' => auth()->id(),
+                'previous' => $previous,
+                'current' => $lockedOrder->only([
+                    'total',
+                    'adjustment_type',
+                    'adjustment_value',
+                    'discount_amount',
+                    'extra_charge_amount',
+                    'adjustment_reason',
+                    'adjustment_note',
+                ]),
+            ]);
+        });
+
+        return back()->with('success', 'Order adjustment applied and payable totals recalculated.');
+    }
+
+    public function clearAdjustment(Request $request, Order $order): RedirectResponse
+    {
+        $validated = $request->validate([
+            'clear_reason' => ['required', 'string', 'max:255'],
+        ]);
+
+        DB::transaction(function () use ($order, $validated) {
+            $lockedOrder = Order::whereKey($order->getKey())->lockForUpdate()->firstOrFail();
+            $this->ensureAdjustmentCanChange($lockedOrder);
+
+            if (! $lockedOrder->hasAdjustment()) {
+                throw ValidationException::withMessages([
+                    'clear_reason' => 'This order does not have an adjustment to remove.',
+                ]);
+            }
+
+            $previous = $lockedOrder->only([
+                'total',
+                'adjustment_type',
+                'adjustment_value',
+                'discount_amount',
+                'extra_charge_amount',
+                'adjustment_reason',
+                'adjustment_note',
+                'adjusted_by',
+                'adjusted_at',
+            ]);
+
+            $lockedOrder->update([
+                'total' => $lockedOrder->originalTotal(),
+                'adjustment_type' => null,
+                'adjustment_value' => 0,
+                'discount_amount' => 0,
+                'extra_charge_amount' => 0,
+                'adjustment_reason' => null,
+                'adjustment_note' => null,
+                'adjusted_by' => null,
+                'adjusted_at' => null,
+            ]);
+
+            Log::notice('Order adjustment removed.', [
+                'order_id' => $lockedOrder->id,
+                'order_number' => $lockedOrder->order_number,
+                'admin_id' => auth()->id(),
+                'reason' => trim($validated['clear_reason']),
+                'previous' => $previous,
+            ]);
+        });
+
+        return back()->with('success', 'Order adjustment removed and the original total restored.');
+    }
+
     public function sendToSteadfast(Order $order, SteadfastCourier $steadfast): RedirectResponse
     {
         $lock = Cache::lock('steadfast-order-'.$order->getKey(), 30);
@@ -241,5 +369,20 @@ class OrderController extends Controller
         }
 
         return back()->with('success', 'Steadfast parcel status updated: '.str($status)->replace('_', ' ')->title());
+    }
+
+    private function ensureAdjustmentCanChange(Order $order): void
+    {
+        if (in_array($order->status, ['delivered', 'cancelled'], true)) {
+            throw ValidationException::withMessages([
+                'adjustment_value' => 'Delivered or cancelled orders cannot be adjusted.',
+            ]);
+        }
+
+        if ($order->hasSteadfastShipment()) {
+            throw ValidationException::withMessages([
+                'adjustment_value' => 'This parcel is already submitted to Steadfast. Adjustments are locked to prevent a COD mismatch.',
+            ]);
+        }
     }
 }

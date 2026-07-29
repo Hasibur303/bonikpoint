@@ -38,7 +38,8 @@ class SteadfastCourierTest extends TestCase
             'city' => 'Dhaka',
             'status' => 'confirmed',
             'shipping' => 60,
-            'total' => 1560,
+            'total' => 1360,
+            'discount_amount' => 200,
             'advance_delivery_required' => true,
             'delivery_charge_payment_option' => 'pay_now',
         ]);
@@ -59,7 +60,7 @@ class SteadfastCourierTest extends TestCase
             && $request->hasHeader('Api-Key', 'test-api-key')
             && $request->hasHeader('Secret-Key', 'test-secret-key')
             && $request['recipient_phone'] === '01712345678'
-            && (float) $request['cod_amount'] === 1500.0
+            && (float) $request['cod_amount'] === 1300.0
             && $request['invoice'] === 'BP-2026-1001');
     }
 

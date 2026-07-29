@@ -168,6 +168,8 @@ Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(fu
     Route::get('orders/{order}/payment-proof', [AdminOrderController::class, 'paymentProof'])->name('orders.payment-proof');
     Route::post('orders/{order}/steadfast', [AdminOrderController::class, 'sendToSteadfast'])->name('orders.steadfast.send');
     Route::post('orders/{order}/steadfast/status', [AdminOrderController::class, 'refreshSteadfastStatus'])->name('orders.steadfast.status');
+    Route::patch('orders/{order}/adjustment', [AdminOrderController::class, 'updateAdjustment'])->name('orders.adjustment.update');
+    Route::delete('orders/{order}/adjustment', [AdminOrderController::class, 'clearAdjustment'])->name('orders.adjustment.clear');
     Route::patch('orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
     Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('administrators', [AdminUserController::class, 'admins'])->name('users.admins');

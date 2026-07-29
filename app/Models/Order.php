@@ -33,6 +33,14 @@ class Order extends Model
         'subtotal',
         'shipping',
         'total',
+        'adjustment_type',
+        'adjustment_value',
+        'discount_amount',
+        'extra_charge_amount',
+        'adjustment_reason',
+        'adjustment_note',
+        'adjusted_by',
+        'adjusted_at',
         'advance_delivery_required',
         'delivery_area',
         'delivery_charge_payment_option',
@@ -50,17 +58,26 @@ class Order extends Model
             'subtotal' => 'decimal:2',
             'shipping' => 'decimal:2',
             'total' => 'decimal:2',
+            'adjustment_value' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
+            'extra_charge_amount' => 'decimal:2',
             'steadfast_cod_amount' => 'decimal:2',
             'advance_delivery_required' => 'boolean',
             'is_offline_sale' => 'boolean',
             'steadfast_submitted_at' => 'datetime',
             'steadfast_last_synced_at' => 'datetime',
+            'adjusted_at' => 'datetime',
         ];
     }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function adjustedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'adjusted_by');
     }
 
     public function items(): HasMany
@@ -97,6 +114,26 @@ class Order extends Model
         }
 
         return max((float) $this->total - $this->paidAmount(), 0);
+    }
+
+    public function hasAdjustment(): bool
+    {
+        return (float) $this->discount_amount > 0 || (float) $this->extra_charge_amount > 0;
+    }
+
+    public function originalTotal(): float
+    {
+        return (float) $this->subtotal + (float) $this->shipping;
+    }
+
+    public function adjustmentLabel(): ?string
+    {
+        return match ($this->adjustment_type) {
+            'fixed_discount' => 'Special discount',
+            'percentage_discount' => 'Special discount ('.rtrim(rtrim(number_format((float) $this->adjustment_value, 2, '.', ''), '0'), '.').'%)',
+            'extra_charge' => 'Additional charge',
+            default => null,
+        };
     }
 
     public function hasSteadfastShipment(): bool

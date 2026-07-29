@@ -92,6 +92,18 @@
                             <span class="break-all text-right font-mono text-sm font-black text-primary">{{ $order->steadfast_tracking_code ?: $order->parcel_id }}</span>
                         </div>
                     @endif
+
+                    @if($order->hasAdjustment())
+                        <div class="mt-4 flex items-start justify-between gap-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3">
+                            <div>
+                                <p class="text-xs font-black text-emerald-800">{{ $order->adjustmentLabel() ?: 'Order adjustment' }}</p>
+                                <p class="mt-0.5 text-[11px] text-emerald-700">{{ $order->adjustment_reason }}</p>
+                            </div>
+                            <span class="shrink-0 text-sm font-black {{ (float) $order->discount_amount > 0 ? 'text-emerald-700' : 'text-amber-700' }}">
+                                {{ (float) $order->discount_amount > 0 ? '-' : '+' }} BDT {{ number_format((float) $order->discount_amount > 0 ? $order->discount_amount : $order->extra_charge_amount, 2) }}
+                            </span>
+                        </div>
+                    @endif
                 </section>
             @endif
         </div>

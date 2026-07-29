@@ -128,6 +128,115 @@
             @endif
         </div>
     </section>
+    @php
+        $adjustmentLocked = in_array($order->status, ['delivered', 'cancelled'], true) || $order->hasSteadfastShipment();
+    @endphp
+    <section class="mb-6 overflow-hidden rounded-lg border border-[#d8e3e0] bg-white shadow-sm">
+        <div class="flex flex-col gap-3 border-b border-[#e5ecea] bg-[#f4f8f7] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-primary text-white shadow-sm"><i class="fa-solid fa-tags"></i></span>
+                <div>
+                    <h2 class="font-black text-ink">Order Adjustment</h2>
+                    <p class="mt-0.5 text-xs text-gray-500">Apply a negotiated discount or an additional charge without changing product prices.</p>
+                </div>
+            </div>
+            @if($order->hasAdjustment())
+                <span class="inline-flex w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-[10px] font-black uppercase text-emerald-700 ring-1 ring-emerald-200">Adjustment active</span>
+            @endif
+        </div>
+
+        <div class="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div>
+                @if($adjustmentLocked)
+                    <div class="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                        <i class="fa-solid fa-lock mt-0.5"></i>
+                        <p>
+                            <span class="font-black">Adjustment locked.</span>
+                            {{ $order->hasSteadfastShipment() ? 'This parcel has already been submitted to Steadfast, so changing the amount could create a COD mismatch.' : 'Delivered or cancelled orders cannot be adjusted.' }}
+                        </p>
+                    </div>
+                @else
+                    <form method="POST" action="{{ route('admin.orders.adjustment.update', $order) }}" class="grid gap-4 sm:grid-cols-2">
+                        @csrf
+                        @method('PATCH')
+                        <label>
+                            <span class="mb-1.5 block text-xs font-black text-ink">Adjustment type</span>
+                            <select name="adjustment_type" class="h-11 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary" required>
+                                <option value="">Select adjustment</option>
+                                <option value="fixed_discount" @selected(old('adjustment_type', $order->adjustment_type) === 'fixed_discount')>Fixed discount (BDT)</option>
+                                <option value="percentage_discount" @selected(old('adjustment_type', $order->adjustment_type) === 'percentage_discount')>Percentage discount (%)</option>
+                                <option value="extra_charge" @selected(old('adjustment_type', $order->adjustment_type) === 'extra_charge')>Additional charge (BDT)</option>
+                            </select>
+                            @error('adjustment_type')<p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>@enderror
+                        </label>
+                        <label>
+                            <span class="mb-1.5 block text-xs font-black text-ink">Value</span>
+                            <input name="adjustment_value" type="number" min="0.01" max="99999999.99" step="0.01" value="{{ old('adjustment_value', $order->hasAdjustment() ? $order->adjustment_value : '') }}" placeholder="Example: 200 or 10" class="h-11 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary" required>
+                            @error('adjustment_value')<p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>@enderror
+                        </label>
+                        <label class="sm:col-span-2">
+                            <span class="mb-1.5 block text-xs font-black text-ink">Reason <span class="text-red-500">(required)</span></span>
+                            <input name="adjustment_reason" maxlength="255" value="{{ old('adjustment_reason', $order->adjustment_reason) }}" placeholder="Example: Customer negotiated bundle price" class="h-11 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary" required>
+                            @error('adjustment_reason')<p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>@enderror
+                        </label>
+                        <label class="sm:col-span-2">
+                            <span class="mb-1.5 block text-xs font-black text-ink">Internal note <span class="font-medium text-gray-400">(optional, admin only)</span></span>
+                            <textarea name="adjustment_note" rows="2" maxlength="1000" placeholder="Add any internal context for your team" class="w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">{{ old('adjustment_note', $order->adjustment_note) }}</textarea>
+                            @error('adjustment_note')<p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>@enderror
+                        </label>
+                        <div class="sm:col-span-2">
+                            <button class="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-black text-white shadow-[0_4px_0_#075f62] transition hover:-translate-y-0.5 hover:bg-ink active:translate-y-1 active:shadow-none">
+                                <i class="fa-solid fa-calculator"></i>
+                                {{ $order->hasAdjustment() ? 'Replace Adjustment' : 'Apply Adjustment' }}
+                            </button>
+                        </div>
+                    </form>
+                @endif
+            </div>
+
+            <aside class="rounded-md border border-[#dce6e3] bg-[#f7faf9] p-4">
+                <p class="text-[10px] font-black uppercase text-gray-400">Payable calculation</p>
+                <div class="mt-3 space-y-2 text-sm">
+                    <div class="flex justify-between gap-3"><span class="text-gray-500">Product subtotal</span><span class="font-bold text-ink">BDT {{ number_format($order->subtotal, 2) }}</span></div>
+                    <div class="flex justify-between gap-3"><span class="text-gray-500">Delivery charge</span><span class="font-bold text-ink">BDT {{ number_format($order->shipping, 2) }}</span></div>
+                    @if((float) $order->discount_amount > 0)
+                        <div class="flex justify-between gap-3 text-emerald-700"><span>{{ $order->adjustmentLabel() }}</span><span class="font-black">- BDT {{ number_format($order->discount_amount, 2) }}</span></div>
+                    @endif
+                    @if((float) $order->extra_charge_amount > 0)
+                        <div class="flex justify-between gap-3 text-amber-700"><span>Additional charge</span><span class="font-black">+ BDT {{ number_format($order->extra_charge_amount, 2) }}</span></div>
+                    @endif
+                    <div class="flex justify-between gap-3 border-t border-[#d8e3e0] pt-3 text-base"><span class="font-black text-ink">Final total</span><span class="font-black text-primary">BDT {{ number_format($order->total, 2) }}</span></div>
+                </div>
+
+                @if($order->hasAdjustment())
+                    <div class="mt-4 border-t border-[#d8e3e0] pt-4">
+                        <p class="text-xs font-black text-ink">{{ $order->adjustment_reason }}</p>
+                        @if($order->adjustment_note)<p class="mt-1 text-xs leading-5 text-gray-500">{{ $order->adjustment_note }}</p>@endif
+                        <p class="mt-2 text-[10px] font-semibold text-gray-400">
+                            Applied by {{ $order->adjustedBy?->name ?: 'Administrator' }}
+                            @if($order->adjusted_at) on {{ $order->adjusted_at->format('d M Y, h:i A') }}@endif
+                        </p>
+
+                        @unless($adjustmentLocked)
+                            <form method="POST" action="{{ route('admin.orders.adjustment.clear', $order) }}" class="mt-3">
+                                @csrf
+                                @method('DELETE')
+                                <label>
+                                    <span class="mb-1 block text-[10px] font-black uppercase text-gray-500">Removal reason</span>
+                                    <input name="clear_reason" maxlength="255" placeholder="Why is it being removed?" class="h-9 w-full rounded-md border-gray-200 bg-white text-xs focus:border-red-400 focus:ring-red-200" required>
+                                </label>
+                                @error('clear_reason')<p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>@enderror
+                                <button class="mt-2 inline-flex h-9 items-center gap-2 rounded-md border border-red-200 bg-white px-3 text-xs font-black text-red-700 hover:bg-red-50">
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                    Restore Original Total
+                                </button>
+                            </form>
+                        @endunless
+                    </div>
+                @endif
+            </aside>
+        </div>
+    </section>
     <div class="grid min-w-0 gap-8 lg:grid-cols-[1fr_360px]">
         <div class="min-w-0 rounded-lg bg-white p-6 shadow-sm">
             <h2 class="mb-4 text-xl font-black text-ink">Items</h2>
@@ -202,7 +311,15 @@
                 </div>
             @endif
             <div class="mt-5 space-y-2 border-t pt-5 text-sm">
-                <div class="flex justify-between gap-4"><span class="text-gray-500">Order total</span><span class="font-bold text-ink">BDT {{ number_format($order->total, 2) }}</span></div>
+                <div class="flex justify-between gap-4"><span class="text-gray-500">Product subtotal</span><span class="font-bold text-ink">BDT {{ number_format($order->subtotal, 2) }}</span></div>
+                <div class="flex justify-between gap-4"><span class="text-gray-500">Delivery charge</span><span class="font-bold text-ink">BDT {{ number_format($order->shipping, 2) }}</span></div>
+                @if((float) $order->discount_amount > 0)
+                    <div class="flex justify-between gap-4 text-green-700"><span>{{ $order->adjustmentLabel() }}</span><span class="font-bold">- BDT {{ number_format($order->discount_amount, 2) }}</span></div>
+                @endif
+                @if((float) $order->extra_charge_amount > 0)
+                    <div class="flex justify-between gap-4 text-amber-700"><span>Additional charge</span><span class="font-bold">+ BDT {{ number_format($order->extra_charge_amount, 2) }}</span></div>
+                @endif
+                <div class="flex justify-between gap-4 border-t pt-2"><span class="font-black text-ink">Final order total</span><span class="font-black text-primary">BDT {{ number_format($order->total, 2) }}</span></div>
                 <div class="flex justify-between gap-4"><span class="text-gray-500">Paid amount</span><span class="font-bold text-green-700">BDT {{ number_format($order->paidAmount(), 2) }}</span></div>
                 <div class="flex justify-between gap-4 border-t pt-2 text-lg font-black"><span class="text-ink">Due amount</span><span class="text-red-700">BDT {{ number_format($order->dueAmount(), 2) }}</span></div>
             </div>
