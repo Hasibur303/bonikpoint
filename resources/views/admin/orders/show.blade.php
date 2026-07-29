@@ -57,7 +57,7 @@
                 <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-[#d71920] text-white shadow-sm"><i class="fa-solid fa-truck-fast"></i></span>
                 <div>
                     <h2 class="font-black text-ink">Steadfast Courier</h2>
-                    <p class="mt-0.5 text-xs text-gray-500">{{ $order->hasSteadfastShipment() ? 'Parcel submitted and connected to this order.' : 'Send confirmed order details directly to Steadfast.' }}</p>
+                    <p class="mt-0.5 text-xs text-gray-500">{{ $order->hasSteadfastShipment() ? 'Parcel connected. Status is checked automatically every 30 minutes when the server scheduler is active.' : 'Send confirmed order details directly to Steadfast.' }}</p>
                 </div>
             </div>
 

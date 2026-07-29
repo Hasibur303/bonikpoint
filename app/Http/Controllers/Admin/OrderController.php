@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\SteadfastCourier;
+use App\Services\SteadfastOrderSynchronizer;
 use App\Support\OrderAdjustmentCalculator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -342,33 +343,31 @@ class OrderController extends Controller
         }
     }
 
-    public function refreshSteadfastStatus(Order $order, SteadfastCourier $steadfast): RedirectResponse
+    public function refreshSteadfastStatus(Order $order, SteadfastOrderSynchronizer $synchronizer): RedirectResponse
     {
         if (! $order->hasSteadfastShipment()) {
             return back()->withErrors(['steadfast' => 'This order has not been submitted to Steadfast yet.']);
         }
 
         try {
-            $status = $steadfast->status($order->steadfast_consignment_id);
-
-            $order->update([
-                'steadfast_status' => $status,
-                'steadfast_last_synced_at' => now(),
-                'steadfast_last_error' => null,
-            ]);
+            $previousStatus = $order->status;
+            $status = $synchronizer->sync($order);
+            $order->refresh();
         } catch (Throwable $exception) {
             report($exception);
-
-            $order->update([
-                'steadfast_last_error' => $exception->getMessage(),
-            ]);
 
             return back()->withErrors([
                 'steadfast' => 'Could not refresh Steadfast status: '.$exception->getMessage(),
             ]);
         }
 
-        return back()->with('success', 'Steadfast parcel status updated: '.str($status)->replace('_', ' ')->title());
+        $message = 'Steadfast parcel status updated: '.str($status)->replace('_', ' ')->title().'.';
+
+        if ($previousStatus !== 'delivered' && $order->status === 'delivered') {
+            $message .= ' Store order marked Delivered automatically.';
+        }
+
+        return back()->with('success', $message);
     }
 
     private function ensureAdjustmentCanChange(Order $order): void
