@@ -269,10 +269,40 @@
         </div>
         <aside class="h-fit min-w-0 rounded-lg bg-white p-6 shadow-sm">
             <h2 class="mb-4 text-xl font-black text-ink">Customer</h2>
-            <p class="font-semibold">{{ $order->customer_name }}</p>
-            <p class="text-sm text-gray-600">{{ $order->email }}</p>
-            <p class="text-sm text-gray-600">{{ $order->mobile }}</p>
-            <p class="mt-3 text-sm text-gray-600">{{ $order->address }}, {{ $order->city }}</p>
+            <dl class="divide-y divide-[#e7edeb]">
+                <div class="flex items-start gap-3 py-3 first:pt-0">
+                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[#edf5f3] text-primary"><i class="fa-solid fa-user text-xs"></i></span>
+                    <div class="min-w-0">
+                        <dt class="text-[10px] font-black uppercase text-gray-400">Customer name</dt>
+                        <dd class="mt-0.5 break-words text-sm font-black text-ink">{{ $order->customer_name }}</dd>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 py-3">
+                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-blue-50 text-blue-600"><i class="fa-solid fa-envelope text-xs"></i></span>
+                    <div class="min-w-0">
+                        <dt class="text-[10px] font-black uppercase text-gray-400">Email address</dt>
+                        <dd class="mt-0.5 break-all text-sm font-semibold text-ink">
+                            <a href="mailto:{{ $order->email }}" class="hover:text-primary">{{ $order->email }}</a>
+                        </dd>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 py-3">
+                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-emerald-50 text-emerald-600"><i class="fa-solid fa-phone text-xs"></i></span>
+                    <div class="min-w-0">
+                        <dt class="text-[10px] font-black uppercase text-gray-400">Phone number</dt>
+                        <dd class="mt-0.5 text-sm font-black text-ink">
+                            <a href="tel:{{ $order->mobile }}" class="hover:text-primary">{{ $order->mobile }}</a>
+                        </dd>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 py-3 last:pb-0">
+                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-amber-50 text-amber-600"><i class="fa-solid fa-location-dot text-xs"></i></span>
+                    <div class="min-w-0">
+                        <dt class="text-[10px] font-black uppercase text-gray-400">Delivery address</dt>
+                        <dd class="mt-0.5 break-words text-sm font-semibold leading-5 text-ink">{{ $order->address }}, {{ $order->city }}</dd>
+                    </div>
+                </div>
+            </dl>
             @if($order->parcel_id)
                 <div class="mt-3 flex items-center justify-between gap-3 rounded-md bg-[#edf5f3] px-3 py-2 text-xs"><span class="font-bold text-gray-500">Parcel ID</span><span class="font-mono font-black text-primary">{{ $order->parcel_id }}</span></div>
             @endif
