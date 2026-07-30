@@ -37,16 +37,30 @@
         </div>
     </div>
 
-    <section class="overflow-hidden rounded-lg border border-[#dfe7e5] bg-white shadow-sm">
-        <div class="flex items-center justify-between border-b border-[#e7edeb] px-5 py-3.5">
-            <p class="text-xs font-bold text-gray-500">{{ $orders->total() }} {{ str('order')->plural($orders->total()) }}</p>
-            @if($selectedStatus || $search)
-                <a href="{{ route('admin.orders.index') }}" class="text-[11px] font-black text-primary hover:text-ink">Clear all filters</a>
-            @endif
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-[1050px] w-full text-left text-sm">
-                <thead><tr><th class="px-5 py-3">Order</th><th class="px-4 py-3">Parcel ID</th><th class="px-4 py-3">Customer</th><th class="px-4 py-3">Payment</th><th class="px-4 py-3">Total</th><th class="px-4 py-3">Status</th><th class="px-4 py-3">Placed</th><th class="px-5 py-3 text-right">Action</th></tr></thead>
+    @error('order_ids')
+        <div class="mb-4 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"><i class="fa-solid fa-triangle-exclamation mt-0.5"></i>{{ $message }}</div>
+    @enderror
+
+    <form id="bulk-order-delete-form" method="POST" action="{{ route('admin.orders.bulk-destroy') }}" onsubmit="return confirm('Permanently delete the selected orders? This cannot be undone and will remove their items, reviews, and payment proofs.');">
+        @csrf
+        @method('DELETE')
+        <section class="overflow-hidden rounded-lg border border-[#dfe7e5] bg-white shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#e7edeb] px-5 py-3.5">
+                <p class="text-xs font-bold text-gray-500">{{ $orders->total() }} {{ str('order')->plural($orders->total()) }}</p>
+                <div class="flex items-center gap-3">
+                    <button id="delete-selected-orders" type="submit" disabled class="inline-flex h-9 items-center gap-2 rounded-md bg-red-600 px-3 text-xs font-black text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>Delete Selected</span>
+                        <span id="selected-order-count" class="hidden rounded-full bg-white/20 px-1.5 py-0.5 text-[10px]">0</span>
+                    </button>
+                    @if($selectedStatus || $search)
+                        <a href="{{ route('admin.orders.index') }}" class="text-[11px] font-black text-primary hover:text-ink">Clear all filters</a>
+                    @endif
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-[1100px] w-full text-left text-sm">
+                    <thead><tr><th class="w-12 px-4 py-3"><label class="grid h-7 w-7 cursor-pointer place-items-center" title="Select all orders on this page"><span class="sr-only">Select all orders on this page</span><input id="select-all-orders" type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary"></label></th><th class="px-3 py-3">Order</th><th class="px-4 py-3">Parcel ID</th><th class="px-4 py-3">Customer</th><th class="px-4 py-3">Payment</th><th class="px-4 py-3">Total</th><th class="px-4 py-3">Status</th><th class="px-4 py-3">Placed</th><th class="px-5 py-3 text-right">Action</th></tr></thead>
                 <tbody>
                     @forelse($orders as $order)
                         @php
@@ -62,7 +76,8 @@
                             $paymentPending = $order->advance_delivery_required && $order->delivery_charge_payment_option === 'pay_later' && ! in_array($order->status, ['delivered', 'cancelled'], true);
                         @endphp
                         <tr>
-                            <td class="px-5 py-4">
+                            <td class="px-4 py-4"><label class="grid h-7 w-7 cursor-pointer place-items-center"><span class="sr-only">Select order {{ $order->order_number }}</span><input name="order_ids[]" value="{{ $order->id }}" type="checkbox" @checked(in_array($order->id, old('order_ids', []))) class="order-select rounded border-gray-300 text-primary focus:ring-primary"></label></td>
+                            <td class="px-3 py-4">
                                 <a href="{{ route('admin.orders.show', $order) }}" class="font-black text-ink hover:text-primary">{{ $order->order_number }}</a>
                                 <span class="mt-0.5 block text-[11px] text-gray-400">{{ $order->user_id ? 'Customer account' : 'Guest order' }}</span>
                             </td>
@@ -89,11 +104,40 @@
                             <td class="px-5 py-4 text-right"><a href="{{ route('admin.orders.show', $order) }}" class="inline-flex h-9 items-center gap-2 rounded-md border border-gray-200 px-3 text-xs font-black text-ink transition hover:border-primary hover:text-primary">Manage<i class="fa-solid fa-arrow-right text-[10px]"></i></a></td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" class="px-5 py-14 text-center"><span class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-gray-100 text-gray-400"><i class="fa-solid fa-receipt"></i></span><p class="mt-3 font-bold text-ink">No orders found</p><p class="mt-1 text-xs text-gray-500">Try a different parcel ID, order number, or status.</p></td></tr>
+                        <tr><td colspan="9" class="px-5 py-14 text-center"><span class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-gray-100 text-gray-400"><i class="fa-solid fa-receipt"></i></span><p class="mt-3 font-bold text-ink">No orders found</p><p class="mt-1 text-xs text-gray-500">Try a different parcel ID, order number, or status.</p></td></tr>
                     @endforelse
                 </tbody>
             </table>
-        </div>
-    </section>
+            </div>
+        </section>
+    </form>
     <div class="mt-6">{{ $orders->links() }}</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectAll = document.getElementById('select-all-orders');
+            const checkboxes = Array.from(document.querySelectorAll('.order-select'));
+            const deleteButton = document.getElementById('delete-selected-orders');
+            const countBadge = document.getElementById('selected-order-count');
+
+            if (!selectAll || !deleteButton || !countBadge) return;
+
+            const refreshSelection = () => {
+                const selected = checkboxes.filter((checkbox) => checkbox.checked).length;
+                deleteButton.disabled = selected === 0;
+                countBadge.textContent = selected;
+                countBadge.classList.toggle('hidden', selected === 0);
+                selectAll.checked = checkboxes.length > 0 && selected === checkboxes.length;
+                selectAll.indeterminate = selected > 0 && selected < checkboxes.length;
+            };
+
+            selectAll.addEventListener('change', function () {
+                checkboxes.forEach((checkbox) => checkbox.checked = this.checked);
+                refreshSelection();
+            });
+
+            checkboxes.forEach((checkbox) => checkbox.addEventListener('change', refreshSelection));
+            refreshSelection();
+        });
+    </script>
 </x-admin-layout>

@@ -124,4 +124,35 @@ class OrderPaymentAmountsTest extends TestCase
 
         $this->assertFalse($order->canSendToSteadfast());
     }
+
+    public function test_active_steadfast_parcel_cannot_be_permanently_deleted(): void
+    {
+        $order = new Order([
+            'status' => 'processing',
+            'steadfast_consignment_id' => '123456',
+        ]);
+
+        $this->assertTrue($order->hasActiveSteadfastShipment());
+        $this->assertTrue($order->shouldRestoreStockWhenDeleted());
+
+        $order->status = 'delivered';
+
+        $this->assertFalse($order->hasActiveSteadfastShipment());
+        $this->assertFalse($order->shouldRestoreStockWhenDeleted());
+    }
+
+    public function test_unfulfilled_order_restores_stock_when_deleted(): void
+    {
+        foreach (['waiting_delivery_charge', 'pending', 'confirmed', 'processing'] as $status) {
+            $order = new Order(['status' => $status]);
+
+            $this->assertTrue($order->shouldRestoreStockWhenDeleted());
+        }
+
+        foreach (['delivered', 'cancelled'] as $status) {
+            $order = new Order(['status' => $status]);
+
+            $this->assertFalse($order->shouldRestoreStockWhenDeleted());
+        }
+    }
 }

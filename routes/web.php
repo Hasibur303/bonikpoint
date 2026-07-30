@@ -169,6 +169,7 @@ Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(fu
     Route::get('offline-sales/create', [OfflineSaleController::class, 'create'])->name('offline-sales.create');
     Route::post('offline-sales', [OfflineSaleController::class, 'store'])->name('offline-sales.store');
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::delete('orders/bulk', [AdminOrderController::class, 'bulkDestroy'])->name('orders.bulk-destroy');
     Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::get('orders/{order}/receipt', [AdminOrderController::class, 'receipt'])->name('orders.receipt');
     Route::get('orders/{order}/payment-proof', [AdminOrderController::class, 'paymentProof'])->name('orders.payment-proof');

@@ -75,6 +75,79 @@ class OrderController extends Controller
         ]);
     }
 
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'order_ids' => ['required', 'array', 'min:1', 'max:100'],
+            'order_ids.*' => ['required', 'integer', 'distinct', 'exists:orders,id'],
+        ], [
+            'order_ids.required' => 'Select at least one order to delete.',
+        ]);
+
+        $orderIds = collect($validated['order_ids'])->map(fn ($id) => (int) $id)->unique()->values();
+        $paymentProofs = [];
+        $deletedOrders = [];
+
+        DB::transaction(function () use ($orderIds, &$paymentProofs, &$deletedOrders): void {
+            $orders = Order::query()
+                ->with('items')
+                ->whereKey($orderIds)
+                ->lockForUpdate()
+                ->get();
+
+            if ($orders->count() !== $orderIds->count()) {
+                throw ValidationException::withMessages([
+                    'order_ids' => 'One or more selected orders no longer exist. Refresh the page and try again.',
+                ]);
+            }
+
+            $activeParcel = $orders->first(fn (Order $order) => $order->hasActiveSteadfastShipment());
+
+            if ($activeParcel) {
+                throw ValidationException::withMessages([
+                    'order_ids' => "Order {$activeParcel->order_number} has an active Steadfast parcel. Cancel the courier parcel and mark the order cancelled before deleting it.",
+                ]);
+            }
+
+            foreach ($orders as $order) {
+                if ($order->shouldRestoreStockWhenDeleted()) {
+                    foreach ($order->items as $item) {
+                        if ($item->product_id) {
+                            Product::whereKey($item->product_id)
+                                ->lockForUpdate()
+                                ->increment('stock', $item->quantity);
+                        }
+                    }
+                }
+
+                if ($order->delivery_payment_proof) {
+                    $paymentProofs[] = $order->delivery_payment_proof;
+                }
+
+                $deletedOrders[] = [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => $order->status,
+                ];
+
+                $order->delete();
+            }
+        });
+
+        foreach ($deletedOrders as $deletedOrder) {
+            Log::warning('Order permanently deleted by administrator.', [
+                ...$deletedOrder,
+                'admin_id' => auth()->id(),
+            ]);
+        }
+
+        if ($paymentProofs) {
+            Storage::disk('local')->delete($paymentProofs);
+        }
+
+        return back()->with('success', $orderIds->count().' selected '.str('order')->plural($orderIds->count()).' permanently deleted.');
+    }
+
     public function receipt(Order $order): View
     {
         return view('orders.receipt', [

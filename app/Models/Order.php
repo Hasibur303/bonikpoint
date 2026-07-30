@@ -146,6 +146,17 @@ class Order extends Model
         return filled($this->steadfast_consignment_id);
     }
 
+    public function hasActiveSteadfastShipment(): bool
+    {
+        return $this->hasSteadfastShipment()
+            && ! in_array($this->status, ['delivered', 'cancelled'], true);
+    }
+
+    public function shouldRestoreStockWhenDeleted(): bool
+    {
+        return ! in_array($this->status, ['delivered', 'cancelled'], true);
+    }
+
     public function customerCanEditDetails(): bool
     {
         return in_array($this->status, ['waiting_delivery_charge', 'pending'], true)
