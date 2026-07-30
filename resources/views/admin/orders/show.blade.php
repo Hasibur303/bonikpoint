@@ -268,7 +268,12 @@
             </div>
         </div>
         <aside class="h-fit min-w-0 rounded-lg bg-white p-6 shadow-sm">
-            <h2 class="mb-4 text-xl font-black text-ink">Customer</h2>
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <h2 class="text-xl font-black text-ink">Customer</h2>
+                @if($order->customerCanEditDetails())
+                    <span class="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase text-amber-700 ring-1 ring-amber-200">Editable until confirmed</span>
+                @endif
+            </div>
             <dl class="divide-y divide-[#e7edeb]">
                 <div class="flex items-start gap-3 py-3 first:pt-0">
                     <span class="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[#edf5f3] text-primary"><i class="fa-solid fa-user text-xs"></i></span>

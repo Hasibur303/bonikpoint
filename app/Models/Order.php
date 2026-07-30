@@ -141,6 +141,12 @@ class Order extends Model
         return filled($this->steadfast_consignment_id);
     }
 
+    public function customerCanEditDetails(): bool
+    {
+        return in_array($this->status, ['waiting_delivery_charge', 'pending'], true)
+            && ! $this->hasSteadfastShipment();
+    }
+
     public function canSendToSteadfast(): bool
     {
         return ! $this->is_offline_sale

@@ -40,10 +40,9 @@
 
                 <aside class="h-fit rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-100 sm:p-6">
                     <h2 class="mb-4 text-xl font-black text-ink">Delivery</h2>
-                    <p class="font-semibold">{{ $order->customer_name }}</p>
-                    <p class="text-sm text-gray-600">{{ $order->mobile }}</p>
-                    <p class="text-sm text-gray-600">{{ $order->email }}</p>
-                    <p class="mt-3 text-sm text-gray-600">{{ $order->address }}, {{ $order->city }}</p>
+                    @include('orders.partials.customer-details', [
+                        'updateRoute' => route('guest.orders.details.update', [$order->order_number, $order->guest_token]),
+                    ])
                     @if($order->advance_delivery_required)
                         <div class="mt-5 rounded border border-accent/40 bg-accent/10 p-3 text-sm sm:p-4">
                             <p class="font-bold text-ink">Advance Delivery Charge</p>

@@ -120,6 +120,9 @@ Route::get('/checkout/account/{screen}', [CheckoutController::class, 'accountRed
 Route::get('/guest-checkout', [CheckoutController::class, 'guestCreate'])->name('guest.checkout.create');
 Route::post('/guest-checkout', [CheckoutController::class, 'guestStore'])->name('guest.checkout.store');
 Route::get('/guest-orders/{order:order_number}/{token}', [OrderController::class, 'guestShow'])->name('guest.orders.show');
+Route::patch('/guest-orders/{order:order_number}/{token}/details', [OrderController::class, 'guestUpdateDetails'])
+    ->middleware('throttle:10,1')
+    ->name('guest.orders.details.update');
 Route::get('/guest-orders/{order:order_number}/{token}/receipt', [OrderController::class, 'guestReceipt'])->name('guest.orders.receipt');
 Route::get('/track-order', [OrderController::class, 'trackForm'])->name('guest.orders.track');
 Route::post('/track-order', [OrderController::class, 'track'])
@@ -140,6 +143,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::patch('/orders/{order}/details', [OrderController::class, 'updateDetails'])
+        ->middleware('throttle:10,1')
+        ->name('orders.details.update');
     Route::get('/orders/{order}/delivery-payment', [OrderController::class, 'deliveryPayment'])->name('orders.delivery-payment');
     Route::patch('/orders/{order}/delivery-payment', [OrderController::class, 'updateDeliveryPayment'])->name('orders.delivery-payment.update');
     Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');

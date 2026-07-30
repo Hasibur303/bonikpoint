@@ -7,8 +7,10 @@ use App\Models\StoreSetting;
 use App\Support\BotProtection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Throwable;
 
@@ -47,6 +49,24 @@ class OrderController extends Controller
         $this->authorizeGuestOrder($order, $token);
 
         return view('orders.receipt', ['order' => $order->load('items')]);
+    }
+
+    public function updateDetails(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->user_id === auth()->id(), 403);
+
+        return $this->updateCustomerDetails($request, $order, function (Order $lockedOrder): void {
+            abort_unless($lockedOrder->user_id === auth()->id(), 403);
+        });
+    }
+
+    public function guestUpdateDetails(Request $request, Order $order, string $token): RedirectResponse
+    {
+        $this->authorizeGuestOrder($order, $token);
+
+        return $this->updateCustomerDetails($request, $order, function (Order $lockedOrder) use ($token): void {
+            $this->authorizeGuestOrder($lockedOrder, $token);
+        });
     }
 
     public function trackForm(): View
@@ -136,6 +156,36 @@ class OrderController extends Controller
     private function authorizeGuestOrder(Order $order, string $token): void
     {
         abort_unless($order->user_id === null && $order->guest_token && hash_equals($order->guest_token, $token), 403);
+    }
+
+    private function updateCustomerDetails(Request $request, Order $order, callable $authorize): RedirectResponse
+    {
+        $data = $request->validate([
+            'customer_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'mobile' => ['required', 'string', 'max:30'],
+            'address' => ['required', 'string', 'max:1000'],
+        ]);
+
+        DB::transaction(function () use ($order, $data, $authorize): void {
+            $lockedOrder = Order::query()->lockForUpdate()->findOrFail($order->getKey());
+            $authorize($lockedOrder);
+
+            if (! $lockedOrder->customerCanEditDetails()) {
+                throw ValidationException::withMessages([
+                    'order_details' => 'Order details can only be changed before the order is confirmed.',
+                ]);
+            }
+
+            $lockedOrder->update([
+                'customer_name' => trim($data['customer_name']),
+                'email' => trim($data['email']),
+                'mobile' => trim($data['mobile']),
+                'address' => trim($data['address']),
+            ]);
+        });
+
+        return back()->with('success', 'Order contact and delivery details updated successfully.');
     }
 
     private function normalizedMobile(?string $mobile): string

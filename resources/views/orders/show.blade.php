@@ -99,9 +99,10 @@
                     <h2 class="text-lg font-black text-ink">Delivery</h2>
                 </div>
                 <div class="p-5">
-                <p class="font-semibold">{{ $order->customer_name }}</p>
-                <p class="text-sm text-gray-600">{{ $order->mobile }}</p>
-                <p class="mt-3 text-sm text-gray-600">{{ $order->address }}, {{ $order->city }}</p>
+                @include('orders.partials.customer-details', [
+                    'updateRoute' => route('orders.details.update', $order),
+                    'canEdit' => $order->user_id === auth()->id(),
+                ])
                 @if($order->advance_delivery_required)
                     <div class="mt-5 rounded border border-accent/40 bg-accent/10 p-3 text-sm sm:p-4">
                         <p class="font-bold text-ink">Advance Delivery Charge</p>
