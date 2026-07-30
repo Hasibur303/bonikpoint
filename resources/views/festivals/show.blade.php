@@ -35,7 +35,7 @@
                     @php($offerPrice = $festival->discountedPrice($product))
                     <div class="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-100 transition hover:-translate-y-1 hover:shadow-lg">
                         <a href="{{ route('shop.show', $product) }}" class="block aspect-square overflow-hidden bg-gray-100">
-                            <img src="{{ $product->image_url }}" alt="{{ $product->image_alt ?: $product->name.' product image' }}" width="640" height="640" loading="lazy" decoding="async" class="h-full w-full object-cover transition duration-500 hover:scale-105">
+                            <img src="{{ $product->image_url }}" @if($product->image_srcset) srcset="{{ $product->image_srcset }}" sizes="(min-width: 1280px) 20vw, (min-width: 640px) 50vw, 100vw" @endif alt="{{ $product->image_alt ?: $product->name.' product image' }}" width="640" height="640" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-500 hover:scale-105">
                         </a>
                         <div class="p-4">
                             <p class="text-xs font-semibold uppercase tracking-wide text-primary">{{ $product->category?->name }}</p>

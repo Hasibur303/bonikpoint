@@ -142,4 +142,9 @@ class Product extends Model
 
         return OptimizedImage::url($this->image);
     }
+
+    public function getImageSrcsetAttribute(): string
+    {
+        return OptimizedImage::srcSet($this->image ?: 'assets/images/product/product-01.jpg');
+    }
 }

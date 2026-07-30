@@ -27,7 +27,9 @@
     <meta name="twitter:image" content="{{ $seoImage }}">
     <link href="{{ asset('favicon.jpg') }}" rel="shortcut icon" type="image/x-icon">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous"></noscript>
+    @stack('head')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @if(request()->routeIs('home.index'))
         <script type="application/ld+json">

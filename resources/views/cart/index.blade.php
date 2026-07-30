@@ -11,7 +11,7 @@
                 <div class="space-y-3 md:space-y-4">
                     @foreach($cartItems as $item)
                         <div class="grid grid-cols-[72px_minmax(0,1fr)] gap-3 rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-100 md:grid-cols-[96px_minmax(0,1fr)_auto] md:items-center md:gap-4 md:p-4">
-                            <img src="{{ $item['product']->image_url }}" alt="{{ $item['product']->name }}" width="96" height="96" loading="lazy" decoding="async" class="h-[72px] w-[72px] rounded-md object-cover md:h-24 md:w-24">
+                            <img src="{{ $item['product']->image_url }}" @if($item['product']->image_srcset) srcset="{{ $item['product']->image_srcset }}" sizes="(min-width: 768px) 96px, 72px" @endif alt="{{ $item['product']->name }}" width="96" height="96" loading="lazy" decoding="async" class="h-[72px] w-[72px] rounded-md object-cover md:h-24 md:w-24">
                             <div class="min-w-0">
                                 <a href="{{ route('shop.show', $item['product']) }}" class="line-clamp-2 text-sm font-black leading-5 text-ink hover:text-primary md:text-base">{{ $item['product']->name }}</a>
                                 @if($item['festival_title'])

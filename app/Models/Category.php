@@ -66,4 +66,9 @@ class Category extends Model
 
         return OptimizedImage::url($this->image);
     }
+
+    public function getImageSrcsetAttribute(): string
+    {
+        return OptimizedImage::srcSet($this->image ?: 'assets/images/page-banner.jpg');
+    }
 }

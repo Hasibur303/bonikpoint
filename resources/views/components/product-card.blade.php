@@ -8,7 +8,17 @@
 
 <article class="group flex h-full flex-col overflow-hidden rounded-md border border-[#d9e0de] bg-white shadow-[0_6px_20px_rgba(25,52,54,0.06)] transition duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_16px_34px_rgba(18,59,62,0.13)] sm:rounded-lg">
     <a href="{{ route('shop.show', $product) }}" class="relative block aspect-square overflow-hidden bg-[#f8f9f7] p-1 sm:aspect-[4/3] sm:p-3">
-        <img src="{{ $product->image_url }}" alt="{{ $product->image_alt ?: $product->name.' product image' }}" width="640" height="640" loading="lazy" decoding="async" class="h-full w-full object-contain transition duration-500 group-hover:scale-[1.04]">
+        <img
+            src="{{ $product->image_url }}"
+            @if($product->image_srcset) srcset="{{ $product->image_srcset }}" @endif
+            sizes="(min-width: 1280px) 250px, (min-width: 768px) 30vw, 33vw"
+            alt="{{ $product->image_alt ?: $product->name.' product image' }}"
+            width="640"
+            height="640"
+            loading="lazy"
+            decoding="async"
+            class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+        >
         @if($discount)
             <span class="absolute left-1.5 top-1.5 rounded bg-[#f2b84b] px-1.5 py-0.5 text-[9px] font-black leading-none text-[#3b2b06] sm:left-3 sm:top-3 sm:rounded-md sm:px-2.5 sm:py-1 sm:text-xs">{{ $discount }}% OFF</span>
         @endif

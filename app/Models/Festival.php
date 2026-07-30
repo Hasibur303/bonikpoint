@@ -99,6 +99,11 @@ class Festival extends Model
         return OptimizedImage::url($this->banner);
     }
 
+    public function getBannerSrcsetAttribute(): string
+    {
+        return OptimizedImage::srcSet($this->banner ?: 'assets/images/slider/slider-item-1.png');
+    }
+
     public function discountedPrice(Product $product): float
     {
         $discount = min(100, max(0, (float) $this->discount_percentage));

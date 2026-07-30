@@ -6,10 +6,12 @@
     $galleryImages = collect([
         [
             'url' => $product->image_url,
+            'srcset' => $product->image_srcset,
             'label' => $primaryImageAlt,
         ],
     ])->merge($product->images->map(fn ($image, $index) => [
         'url' => $image->image_url,
+        'srcset' => $image->image_srcset,
         'label' => $product->name.' product image '.($index + 2),
     ]));
     $firstColor = $product->colors->first();
@@ -129,6 +131,17 @@
 @section('meta_image', $product->image_url)
 @section('og_type', 'product')
 
+@push('head')
+    <link
+        rel="preload"
+        as="image"
+        href="{{ $product->image_url }}"
+        @if($product->image_srcset) imagesrcset="{{ $product->image_srcset }}" @endif
+        imagesizes="(min-width: 1024px) 55vw, 100vw"
+        fetchpriority="high"
+    >
+@endpush
+
 @push('schema')
     <script type="application/ld+json">
         {!! json_encode($productSchema, $safeSchemaOptions) !!}
@@ -185,7 +198,7 @@
                 <div>
                     <div class="overflow-hidden rounded-lg bg-white p-2 shadow-[0_18px_45px_rgba(8,28,31,0.10)] ring-1 ring-gray-100 md:p-3">
                         <div class="group relative overflow-hidden rounded-md bg-gray-100">
-                            <img id="product-gallery-main" src="{{ $galleryImages->first()['url'] }}" alt="{{ $galleryImages->first()['label'] }}" width="1000" height="1000" fetchpriority="high" class="aspect-square w-full cursor-zoom-in object-contain">
+                            <img id="product-gallery-main" src="{{ $galleryImages->first()['url'] }}" @if($galleryImages->first()['srcset']) srcset="{{ $galleryImages->first()['srcset'] }}" sizes="(min-width: 1024px) 55vw, 100vw" @endif alt="{{ $galleryImages->first()['label'] }}" width="1000" height="1000" fetchpriority="high" decoding="async" class="aspect-square w-full cursor-zoom-in object-contain">
                             <button id="open-product-zoom" type="button" class="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-md bg-white/95 text-primary shadow-lg transition hover:bg-primary hover:text-white" aria-label="Zoom product image" title="Zoom image">
                                 <i class="fa-solid fa-magnifying-glass-plus"></i>
                             </button>
@@ -195,8 +208,8 @@
                     @if($galleryImages->count() > 1)
                         <div class="mt-3 grid grid-cols-5 gap-2 md:mt-4 md:gap-3">
                             @foreach($galleryImages as $index => $galleryImage)
-                                <button type="button" aria-label="View product image {{ $index + 1 }}" data-gallery-src="{{ $galleryImage['url'] }}" data-gallery-alt="{{ $galleryImage['label'] }}" class="product-gallery-thumb overflow-hidden rounded-md border bg-white p-1 shadow-sm transition hover:border-primary md:p-1.5 {{ $index === 0 ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200' }}">
-                                    <img src="{{ $galleryImage['url'] }}" alt="{{ $galleryImage['label'] }}" width="200" height="200" loading="lazy" decoding="async" class="aspect-square w-full rounded object-contain">
+                                <button type="button" aria-label="View product image {{ $index + 1 }}" data-gallery-src="{{ $galleryImage['url'] }}" data-gallery-srcset="{{ $galleryImage['srcset'] }}" data-gallery-alt="{{ $galleryImage['label'] }}" class="product-gallery-thumb overflow-hidden rounded-md border bg-white p-1 shadow-sm transition hover:border-primary md:p-1.5 {{ $index === 0 ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200' }}">
+                                    <img src="{{ $galleryImage['url'] }}" @if($galleryImage['srcset']) srcset="{{ $galleryImage['srcset'] }}" sizes="120px" @endif alt="{{ $galleryImage['label'] }}" width="200" height="200" loading="lazy" decoding="async" class="aspect-square w-full rounded object-contain">
                                 </button>
                             @endforeach
                         </div>
@@ -556,6 +569,7 @@
                     }
 
                     mainImage.src = thumb.dataset.gallerySrc;
+                    mainImage.srcset = thumb.dataset.gallerySrcset || '';
                     mainImage.alt = thumb.dataset.galleryAlt;
 
                     thumbs.forEach(function (item) {

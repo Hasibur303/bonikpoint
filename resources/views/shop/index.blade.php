@@ -77,6 +77,19 @@
     @endpush
 @endif
 
+@if($festivals->isNotEmpty())
+    @push('head')
+        <link
+            rel="preload"
+            as="image"
+            href="{{ $festivals->first()->banner_url }}"
+            @if($festivals->first()->banner_srcset) imagesrcset="{{ $festivals->first()->banner_srcset }}" @endif
+            imagesizes="(min-width: 1440px) 360px, (min-width: 768px) 25vw, 50vw"
+            fetchpriority="high"
+        >
+    @endpush
+@endif
+
 <x-app-layout>
     @if($festivals->isNotEmpty())
         <section class="border-b border-[#d6e0dd] bg-[#e8eeec] py-3 md:py-4">
@@ -86,8 +99,24 @@
                         @for($copy = 0; $copy < 2; $copy++)
                             <div class="festival-mosaic" aria-hidden="{{ $copy === 1 ? 'true' : 'false' }}">
                                 @foreach($festivals as $festival)
+                                    @php
+                                        $isPrimaryFestivalImage = $copy === 0 && $loop->first;
+                                    @endphp
                                     <a href="{{ route('festivals.show', $festival) }}" class="festival-mosaic-card group" @if($copy === 1) tabindex="-1" @endif>
-                                        <img src="{{ $festival->banner_url }}" alt="{{ $festival->title }}" width="1200" height="1200" decoding="async" @if($copy === 1) loading="lazy" @endif draggable="false" onload="if (this.naturalWidth / Math.max(this.naturalHeight, 1) > 2.1) this.closest('.festival-mosaic-card')?.classList.add('is-wide')" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]">
+                                        <img
+                                            src="{{ $festival->banner_url }}"
+                                            @if($festival->banner_srcset) srcset="{{ $festival->banner_srcset }}" @endif
+                                            sizes="(min-width: 1440px) 360px, (min-width: 768px) 25vw, 50vw"
+                                            alt="{{ $copy === 0 ? $festival->title : '' }}"
+                                            width="1200"
+                                            height="1200"
+                                            loading="{{ $isPrimaryFestivalImage ? 'eager' : 'lazy' }}"
+                                            fetchpriority="{{ $isPrimaryFestivalImage ? 'high' : 'low' }}"
+                                            decoding="async"
+                                            draggable="false"
+                                            onload="if (this.naturalWidth / Math.max(this.naturalHeight, 1) > 2.1) this.closest('.festival-mosaic-card')?.classList.add('is-wide')"
+                                            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.035]"
+                                        >
                                     </a>
                                 @endforeach
                             </div>
@@ -135,7 +164,7 @@
                     box-shadow: 0 16px 25px rgba(7, 27, 31, 0.18), 0 5px 10px rgba(7, 27, 31, 0.08);
                     transform: translate3d(0, 0, 0) scale(1);
                     transform-style: preserve-3d;
-                    transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1), filter 620ms ease, box-shadow 620ms ease;
+                    transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
                 }
 
                 .festival-mosaic-card::before {
@@ -291,8 +320,6 @@
 
                 .festival-mosaic-viewport.is-animating .festival-mosaic-card {
                     transform: translate3d(0, 0, 0) scale(0.982);
-                    filter: saturate(0.94) brightness(0.98);
-                    box-shadow: 0 7px 18px rgba(12, 42, 44, 0.1);
                 }
 
                 .festival-mosaic-viewport.is-animating .festival-mosaic-card img {
@@ -305,7 +332,6 @@
 
                 .festival-mosaic-viewport.is-dragging .festival-mosaic-card {
                     transform: translate3d(0, 0, 0) scale(0.975);
-                    filter: saturate(0.92) brightness(0.97);
                     transition-duration: 160ms;
                 }
 
@@ -423,7 +449,7 @@
                     @endphp
                     <a href="{{ $category->public_url }}" class="flex min-w-0 items-center gap-2.5 rounded-md border border-[#dce5e2] bg-[#f9fbfa] p-2.5 shadow-sm transition hover:border-primary hover:bg-[#eef6f3]">
                         @if($category->image)
-                            <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-11 w-11 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                            <img src="{{ $category->image_url }}" @if($category->image_srcset) srcset="{{ $category->image_srcset }}" sizes="44px" @endif alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-11 w-11 shrink-0 rounded-md object-cover ring-1 ring-black/5">
                         @else
                             <span class="grid h-11 w-11 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
                         @endif
@@ -570,7 +596,7 @@
                                         <details class="group/category rounded-md {{ $isMainActive || $hasActiveChild ? 'bg-[#edf5f3]' : '' }}" {{ $isMainActive || $hasActiveChild ? 'open' : '' }}>
                                             <summary class="flex cursor-pointer list-none items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f2f5f4]">
                                                 @if($category->image)
-                                                    <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                                                    <img src="{{ $category->image_url }}" @if($category->image_srcset) srcset="{{ $category->image_srcset }}" sizes="40px" @endif alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
                                                 @else
                                                     <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
                                                 @endif
@@ -590,7 +616,7 @@
                                     @else
                                         <a href="{{ $category->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-[#f2f5f4] {{ $isMainActive ? 'bg-[#edf5f3]' : '' }}">
                                             @if($category->image)
-                                                <img src="{{ $category->image_url }}" alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                                                <img src="{{ $category->image_url }}" @if($category->image_srcset) srcset="{{ $category->image_srcset }}" sizes="40px" @endif alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-black/5">
                                             @else
                                                 <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
                                             @endif
