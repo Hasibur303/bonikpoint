@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Services\SteadfastCourier;
 use App\Services\SteadfastOrderSynchronizer;
 use App\Support\OrderAdjustmentCalculator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -416,21 +417,55 @@ class OrderController extends Controller
         }
     }
 
-    public function refreshSteadfastStatus(Order $order, SteadfastOrderSynchronizer $synchronizer): RedirectResponse
+    public function refreshSteadfastStatus(Request $request, Order $order, SteadfastOrderSynchronizer $synchronizer): RedirectResponse|JsonResponse
     {
         if (! $order->hasSteadfastShipment()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'This order has not been submitted to Steadfast yet.'], 422);
+            }
+
             return back()->withErrors(['steadfast' => 'This order has not been submitted to Steadfast yet.']);
         }
 
-        try {
-            $previousStatus = $order->status;
-            $status = $synchronizer->sync($order);
-            $order->refresh();
-        } catch (Throwable $exception) {
-            report($exception);
+        $previousStatus = $order->status;
+        $status = $order->steadfast_status ?: 'pending';
+        $automaticRequest = $request->expectsJson();
+        $needsRefresh = ! $automaticRequest
+            || ! $order->steadfast_last_synced_at
+            || $order->steadfast_last_synced_at->lte(now()->subMinutes(4));
 
-            return back()->withErrors([
-                'steadfast' => 'Could not refresh Steadfast status: '.$exception->getMessage(),
+        if ($needsRefresh) {
+            $lock = Cache::lock('steadfast-status-'.$order->getKey(), 30);
+
+            if ($lock->get()) {
+                try {
+                    $status = $synchronizer->sync($order);
+                    $order->refresh();
+                } catch (Throwable $exception) {
+                    report($exception);
+                    $order->refresh();
+
+                    if (! $automaticRequest) {
+                        return back()->withErrors([
+                            'steadfast' => 'Could not refresh Steadfast status: '.$exception->getMessage(),
+                        ]);
+                    }
+                } finally {
+                    $lock->release();
+                }
+            } else {
+                $order->refresh();
+                $status = $order->steadfast_status ?: $status;
+            }
+        }
+
+        if ($automaticRequest) {
+            return response()->json([
+                'steadfast_status' => $order->steadfast_status ?: 'pending',
+                'steadfast_status_label' => str($order->steadfast_status ?: 'pending')->replace('_', ' ')->title()->toString(),
+                'order_status' => $order->status,
+                'last_checked' => $order->steadfast_last_synced_at?->diffForHumans(),
+                'last_error' => $order->steadfast_last_error,
             ]);
         }
 

@@ -9,5 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('steadfast:sync-orders')
-    ->everyThirtyMinutes()
-    ->withoutOverlapping(25);
+    ->everyFiveMinutes()
+    ->withoutOverlapping(4);

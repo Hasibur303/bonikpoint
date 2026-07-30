@@ -21,7 +21,7 @@ class SyncSteadfastOrders extends Command
             ->whereNotIn('status', ['delivered', 'cancelled'])
             ->where(function ($query) {
                 $query->whereNull('steadfast_last_synced_at')
-                    ->orWhere('steadfast_last_synced_at', '<=', now()->subMinutes(20));
+                    ->orWhere('steadfast_last_synced_at', '<=', now()->subMinutes(4));
             })
             ->oldest('steadfast_last_synced_at')
             ->limit($limit)

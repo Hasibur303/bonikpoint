@@ -57,18 +57,24 @@
                 <span class="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-[#d71920] text-white shadow-sm"><i class="fa-solid fa-truck-fast"></i></span>
                 <div>
                     <h2 class="font-black text-ink">Steadfast Courier</h2>
-                    <p class="mt-0.5 text-xs text-gray-500">{{ $order->hasSteadfastShipment() ? 'Parcel connected. Status is checked automatically every 30 minutes when the server scheduler is active.' : 'Send confirmed order details directly to Steadfast.' }}</p>
+                    <p class="mt-0.5 text-xs text-gray-500">{{ $order->hasSteadfastShipment() ? 'Parcel connected. Courier status updates automatically about every 5 minutes.' : 'Send confirmed order details directly to Steadfast.' }}</p>
                 </div>
             </div>
 
             @if($order->hasSteadfastShipment())
-                <form method="POST" action="{{ route('admin.orders.steadfast.status', $order) }}">
-                    @csrf
-                    <button class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#ccd9d6] bg-white px-4 text-xs font-black text-ink shadow-sm transition hover:border-primary hover:text-primary">
-                        <i class="fa-solid fa-rotate"></i>
-                        Refresh Status
-                    </button>
-                </form>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="inline-flex h-9 items-center gap-2 rounded-full bg-emerald-50 px-3 text-[10px] font-black uppercase text-emerald-700 ring-1 ring-emerald-200">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                        Auto update on
+                    </span>
+                    <form id="steadfast-status-form" method="POST" action="{{ route('admin.orders.steadfast.status', $order) }}">
+                        @csrf
+                        <button class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#ccd9d6] bg-white px-4 text-xs font-black text-ink shadow-sm transition hover:border-primary hover:text-primary">
+                            <i class="fa-solid fa-rotate"></i>
+                            Refresh Now
+                        </button>
+                    </form>
+                </div>
             @elseif($order->canSendToSteadfast() && $steadfastConfigured)
                 <form method="POST" action="{{ route('admin.orders.steadfast.send', $order) }}" onsubmit="return confirm('Send this order to Steadfast with COD amount BDT {{ number_format($order->dueAmount(), 2, '.', '') }}? This action cannot be repeated.');">
                     @csrf
@@ -93,7 +99,7 @@
                     </div>
                     <div class="rounded-md border border-gray-100 bg-[#fafcfc] p-3">
                         <p class="text-[10px] font-black uppercase text-gray-400">Courier Status</p>
-                        <span class="mt-1.5 inline-flex rounded-full px-2.5 py-1 text-[10px] font-black capitalize ring-1 {{ $steadfastStatusClass }}">{{ str($order->steadfast_status ?: 'pending')->replace('_', ' ') }}</span>
+                        <span id="steadfast-status-badge" class="mt-1.5 inline-flex rounded-full px-2.5 py-1 text-[10px] font-black capitalize ring-1 {{ $steadfastStatusClass }}">{{ str($order->steadfast_status ?: 'pending')->replace('_', ' ') }}</span>
                     </div>
                     <div class="rounded-md border border-gray-100 bg-[#fafcfc] p-3">
                         <p class="text-[10px] font-black uppercase text-gray-400">COD Submitted</p>
@@ -102,9 +108,11 @@
                 </div>
                 <p class="mt-3 text-[11px] font-semibold text-gray-400">
                     Submitted {{ $order->steadfast_submitted_at?->format('d M Y, h:i A') ?: 'recently' }}
+                    <span id="steadfast-last-checked">
                     @if($order->steadfast_last_synced_at)
                         · Last checked {{ $order->steadfast_last_synced_at->diffForHumans() }}
                     @endif
+                    </span>
                 </p>
             @elseif($order->is_offline_sale && ! $order->requires_courier)
                 <p class="text-sm font-semibold text-gray-500">This was saved as a store-counter sale without courier delivery.</p>
@@ -128,6 +136,61 @@
             @endif
         </div>
     </section>
+    @if($order->hasSteadfastShipment())
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const form = document.getElementById('steadfast-status-form');
+                const badge = document.getElementById('steadfast-status-badge');
+                const lastChecked = document.getElementById('steadfast-last-checked');
+                const orderStatus = document.querySelector('select[name="status"]');
+
+                if (!form || !badge || !lastChecked) return;
+
+                const statusClasses = {
+                    delivered: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+                    cancelled: 'bg-red-50 text-red-700 ring-red-200',
+                    partial_delivered: 'bg-red-50 text-red-700 ring-red-200',
+                    in_review: 'bg-amber-50 text-amber-800 ring-amber-200',
+                    pending: 'bg-amber-50 text-amber-800 ring-amber-200',
+                };
+                let requestRunning = false;
+
+                const refreshStatus = async () => {
+                    if (requestRunning || document.hidden) return;
+                    requestRunning = true;
+
+                    try {
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            body: new FormData(form),
+                        });
+
+                        if (!response.ok) return;
+
+                        const data = await response.json();
+                        badge.textContent = data.steadfast_status_label;
+                        badge.className = 'mt-1.5 inline-flex rounded-full px-2.5 py-1 text-[10px] font-black capitalize ring-1 '
+                            + (statusClasses[data.steadfast_status] || 'bg-blue-50 text-blue-700 ring-blue-200');
+                        lastChecked.textContent = data.last_checked ? ` · Last checked ${data.last_checked}` : '';
+
+                        if (orderStatus && data.order_status === 'delivered') {
+                            orderStatus.value = 'delivered';
+                        }
+                    } finally {
+                        requestRunning = false;
+                    }
+                };
+
+                window.setInterval(refreshStatus, 30000);
+                document.addEventListener('visibilitychange', refreshStatus);
+                refreshStatus();
+            });
+        </script>
+    @endif
     @php
         $adjustmentLocked = in_array($order->status, ['delivered', 'cancelled'], true) || $order->hasSteadfastShipment();
     @endphp
