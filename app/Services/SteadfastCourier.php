@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Rules\BangladeshMobile;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -111,19 +112,13 @@ class SteadfastCourier
 
     private function phone(string $phone): string
     {
-        $digits = preg_replace('/\D+/', '', $phone);
+        $normalized = BangladeshMobile::normalize($phone);
 
-        if (strlen($digits) === 13 && str_starts_with($digits, '880')) {
-            $digits = '0'.substr($digits, 3);
-        } elseif (strlen($digits) === 10 && str_starts_with($digits, '1')) {
-            $digits = '0'.$digits;
-        }
-
-        if (! preg_match('/^01\d{9}$/', $digits)) {
+        if (! $normalized) {
             throw new RuntimeException('The customer phone number must be a valid 11-digit Bangladeshi mobile number.');
         }
 
-        return $digits;
+        return $normalized;
     }
 
     private function address(Order $order): string

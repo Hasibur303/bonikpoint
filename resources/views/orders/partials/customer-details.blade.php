@@ -37,7 +37,7 @@
 
             <label>
                 <span class="mb-1 block text-xs font-black text-ink">Phone number</span>
-                <input name="mobile" value="{{ old('mobile', $order->mobile) }}" inputmode="tel" autocomplete="tel" maxlength="30" required class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
+                <input name="mobile" value="{{ old('mobile', $order->mobile) }}" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="01712345678" required class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
                 @error('mobile')<span class="mt-1 block text-xs font-semibold text-red-600">{{ $message }}</span>@enderror
             </label>
 

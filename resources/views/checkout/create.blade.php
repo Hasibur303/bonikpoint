@@ -50,7 +50,8 @@
                         </div>
                         <div>
                             <label for="checkout-mobile" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Mobile number</label>
-                            <input id="checkout-mobile" name="mobile" value="{{ old('mobile', auth()->user()?->mobile ?? ($rememberedDetails['mobile'] ?? '')) }}" autocomplete="tel" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                            <input id="checkout-mobile" name="mobile" value="{{ old('mobile', auth()->user()?->mobile ?? ($rememberedDetails['mobile'] ?? '')) }}" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="01712345678" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                            <p class="mt-1 text-[11px] text-gray-500">Use an 11-digit Bangladesh mobile number.</p>
                             @error('mobile')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>

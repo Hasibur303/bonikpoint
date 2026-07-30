@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\StoreSetting;
+use App\Rules\BangladeshMobile;
 use App\Support\BotProtection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -78,16 +79,20 @@ class OrderController extends Controller
     {
         BotProtection::ensureHuman($request);
 
+        $request->merge([
+            'mobile' => BangladeshMobile::normalize($request->input('mobile')) ?? $request->input('mobile'),
+        ]);
+
         $data = $request->validate([
             'order_number' => ['required', 'string', 'max:80'],
-            'mobile' => ['required', 'string', 'max:30'],
+            'mobile' => ['required', 'string', 'max:30', new BangladeshMobile],
         ]);
 
         $order = Order::where('order_number', trim($data['order_number']))->first();
-        $providedMobile = $this->normalizedMobile($data['mobile']);
-        $orderMobile = $order ? $this->normalizedMobile($order->mobile) : '';
+        $providedMobile = BangladeshMobile::normalize($data['mobile']);
+        $orderMobile = $order ? BangladeshMobile::normalize($order->mobile) : null;
 
-        if (! $order || $providedMobile === '' || ! hash_equals($orderMobile, $providedMobile)) {
+        if (! $order || ! $providedMobile || ! $orderMobile || ! hash_equals($orderMobile, $providedMobile)) {
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'order_number' => 'No matching order was found. Check the order number and mobile number.',
             ]);
@@ -110,13 +115,20 @@ class OrderController extends Controller
     {
         $this->authorizeDeliveryPayment($order);
 
+        if (filled($request->input('delivery_payment_mobile'))) {
+            $request->merge([
+                'delivery_payment_mobile' => BangladeshMobile::normalize($request->input('delivery_payment_mobile'))
+                    ?? $request->input('delivery_payment_mobile'),
+            ]);
+        }
+
         $hasPaymentScreenshot = $request->hasFile('delivery_payment_proof');
         $hasPaymentDetails = filled($request->input('delivery_payment_mobile'))
             || filled($request->input('delivery_transaction_id'));
 
         $data = $request->validate([
             'delivery_payment_method' => ['required', 'in:Bkash,Nagad,Rocket'],
-            'delivery_payment_mobile' => [Rule::requiredIf(! $hasPaymentScreenshot), 'nullable', 'string', 'max:30'],
+            'delivery_payment_mobile' => [Rule::requiredIf(! $hasPaymentScreenshot), 'nullable', 'string', 'max:30', new BangladeshMobile],
             'delivery_transaction_id' => [Rule::requiredIf(! $hasPaymentScreenshot), 'nullable', 'string', 'max:120'],
             'delivery_payment_proof' => [Rule::requiredIf(! $hasPaymentDetails), 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ], [
@@ -160,10 +172,14 @@ class OrderController extends Controller
 
     private function updateCustomerDetails(Request $request, Order $order, callable $authorize): RedirectResponse
     {
+        $request->merge([
+            'mobile' => BangladeshMobile::normalize($request->input('mobile')) ?? $request->input('mobile'),
+        ]);
+
         $data = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'mobile' => ['required', 'string', 'max:30'],
+            'mobile' => ['required', 'string', 'max:30', new BangladeshMobile],
             'address' => ['required', 'string', 'max:1000'],
         ]);
 
@@ -188,18 +204,4 @@ class OrderController extends Controller
         return back()->with('success', 'Order contact and delivery details updated successfully.');
     }
 
-    private function normalizedMobile(?string $mobile): string
-    {
-        $digits = preg_replace('/\D+/', '', (string) $mobile);
-
-        if (strlen($digits) === 13 && str_starts_with($digits, '880')) {
-            return '0'.substr($digits, 3);
-        }
-
-        if (strlen($digits) === 10 && str_starts_with($digits, '1')) {
-            return '0'.$digits;
-        }
-
-        return $digits;
-    }
 }

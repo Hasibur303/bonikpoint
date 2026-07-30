@@ -24,7 +24,7 @@
 <!-- mobile -->
         <div class="mt-4">
             <x-input-label for="mobile" :value="__('mobile')" />
-            <x-text-input id="mobile" class="block mt-1 w-full" type="mobile" name="mobile" :value="old('mobile')" required autocomplete="mobile" />
+            <x-text-input id="mobile" class="block mt-1 w-full" type="tel" name="mobile" :value="old('mobile')" required autocomplete="tel" inputmode="tel" maxlength="30" placeholder="01712345678" />
             <x-input-error :messages="$errors->get('mobile')" class="mt-2" />
         </div>
 

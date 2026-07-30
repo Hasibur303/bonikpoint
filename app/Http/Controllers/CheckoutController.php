@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\ProductColor;
 use App\Models\ProductFlavor;
 use App\Models\StoreSetting;
+use App\Rules\BangladeshMobile;
 use App\Support\BotProtection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -118,12 +119,22 @@ class CheckoutController extends Controller
 
         $advanceDeliveryRequired = $this->advanceDeliveryRequired($cartItems);
 
-        $request->merge(['city' => $this->canonicalCity($request->input('city'))]);
+        $request->merge([
+            'city' => $this->canonicalCity($request->input('city')),
+            'mobile' => BangladeshMobile::normalize($request->input('mobile')) ?? $request->input('mobile'),
+        ]);
+
+        if (filled($request->input('delivery_payment_mobile'))) {
+            $request->merge([
+                'delivery_payment_mobile' => BangladeshMobile::normalize($request->input('delivery_payment_mobile'))
+                    ?? $request->input('delivery_payment_mobile'),
+            ]);
+        }
 
         $rules = [
             'customer_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'mobile' => ['required', 'string', 'max:30'],
+            'mobile' => ['required', 'string', 'max:30', new BangladeshMobile],
             'address' => ['required', 'string', 'max:1000'],
             'city' => ['required', 'string', Rule::in(self::BANGLADESH_CITIES)],
             'notes' => ['nullable', 'string', 'max:1000'],
@@ -140,7 +151,7 @@ class CheckoutController extends Controller
                 ...$rules,
                 'delivery_charge_payment_option' => [$isGuestCheckout ? 'nullable' : 'required', $isGuestCheckout ? Rule::in(['pay_now']) : 'in:pay_now,pay_later'],
                 'delivery_payment_method' => [Rule::requiredIf($payingNow), 'nullable', 'in:Bkash,Nagad,Rocket'],
-                'delivery_payment_mobile' => [Rule::requiredIf($payingNow && ! $hasPaymentScreenshot), 'nullable', 'string', 'max:30'],
+                'delivery_payment_mobile' => [Rule::requiredIf($payingNow && ! $hasPaymentScreenshot), 'nullable', 'string', 'max:30', new BangladeshMobile],
                 'delivery_transaction_id' => [Rule::requiredIf($payingNow && ! $hasPaymentScreenshot), 'nullable', 'string', 'max:120'],
                 'delivery_payment_proof' => [Rule::requiredIf($payingNow && ! $hasPaymentDetails), 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             ];
