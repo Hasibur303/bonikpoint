@@ -31,6 +31,8 @@ class Order extends Model
         'thana',
         'status',
         'is_offline_sale',
+        'requires_courier',
+        'offline_payment_collected',
         'subtotal',
         'shipping',
         'total',
@@ -65,6 +67,8 @@ class Order extends Model
             'steadfast_cod_amount' => 'decimal:2',
             'advance_delivery_required' => 'boolean',
             'is_offline_sale' => 'boolean',
+            'requires_courier' => 'boolean',
+            'offline_payment_collected' => 'boolean',
             'steadfast_submitted_at' => 'datetime',
             'steadfast_last_synced_at' => 'datetime',
             'adjusted_at' => 'datetime',
@@ -93,7 +97,7 @@ class Order extends Model
 
     public function paidAmount(): float
     {
-        if ($this->is_offline_sale) {
+        if ($this->is_offline_sale && $this->offline_payment_collected) {
             return (float) $this->total;
         }
 
@@ -150,7 +154,7 @@ class Order extends Model
 
     public function canSendToSteadfast(): bool
     {
-        return ! $this->is_offline_sale
+        return (! $this->is_offline_sale || $this->requires_courier)
             && $this->status === 'confirmed'
             && ! $this->hasSteadfastShipment();
     }

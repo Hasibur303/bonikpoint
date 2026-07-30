@@ -42,6 +42,7 @@ class ProfitController extends Controller
                 $query->where('orders.status', 'delivered')
                     ->orWhere(function ($offlineSales) {
                         $offlineSales->where('orders.is_offline_sale', true)
+                            ->where('orders.requires_courier', false)
                             ->where('orders.status', '!=', 'cancelled');
                     });
             })

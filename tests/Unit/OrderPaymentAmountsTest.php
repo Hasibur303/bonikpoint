@@ -80,4 +80,48 @@ class OrderPaymentAmountsTest extends TestCase
 
         $this->assertSame('Special discount (10%)', $order->adjustmentLabel());
     }
+
+    public function test_offline_courier_cod_remains_due_until_delivery(): void
+    {
+        $order = new Order([
+            'status' => 'confirmed',
+            'is_offline_sale' => true,
+            'requires_courier' => true,
+            'offline_payment_collected' => false,
+            'total' => 2160,
+            'shipping' => 60,
+        ]);
+
+        $this->assertSame(0.0, $order->paidAmount());
+        $this->assertSame(2160.0, $order->dueAmount());
+        $this->assertTrue($order->canSendToSteadfast());
+    }
+
+    public function test_paid_offline_courier_order_has_zero_cod_due(): void
+    {
+        $order = new Order([
+            'status' => 'confirmed',
+            'is_offline_sale' => true,
+            'requires_courier' => true,
+            'offline_payment_collected' => true,
+            'total' => 2160,
+        ]);
+
+        $this->assertSame(2160.0, $order->paidAmount());
+        $this->assertSame(0.0, $order->dueAmount());
+        $this->assertTrue($order->canSendToSteadfast());
+    }
+
+    public function test_counter_sale_cannot_be_sent_to_steadfast(): void
+    {
+        $order = new Order([
+            'status' => 'confirmed',
+            'is_offline_sale' => true,
+            'requires_courier' => false,
+            'offline_payment_collected' => true,
+            'total' => 2000,
+        ]);
+
+        $this->assertFalse($order->canSendToSteadfast());
+    }
 }

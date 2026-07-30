@@ -1,6 +1,6 @@
 <x-admin-layout>
     <div class="mb-6 flex flex-col items-start justify-between gap-4 xl:flex-row xl:gap-6">
-        <div><p class="text-xs font-black uppercase tracking-wide text-primary">{{ $order->is_offline_sale ? 'Offline Sale' : 'Order' }}</p><h1 class="mt-1 text-3xl font-black text-ink">{{ $order->order_number }}</h1></div>
+        <div><p class="text-xs font-black uppercase tracking-wide text-primary">{{ $order->is_offline_sale ? ($order->requires_courier ? 'Offline Courier Order' : 'Offline Sale') : 'Order' }}</p><h1 class="mt-1 text-3xl font-black text-ink">{{ $order->order_number }}</h1></div>
         <div class="flex flex-wrap items-center gap-2">
             @if(in_array($order->status, ['confirmed', 'processing', 'delivered'], true))
                 <a href="{{ route('admin.orders.receipt', $order) }}" target="_blank" class="inline-flex items-center gap-2 rounded bg-ink px-4 py-2 font-semibold text-white hover:bg-primary">
@@ -106,13 +106,13 @@
                         · Last checked {{ $order->steadfast_last_synced_at->diffForHumans() }}
                     @endif
                 </p>
+            @elseif($order->is_offline_sale && ! $order->requires_courier)
+                <p class="text-sm font-semibold text-gray-500">This was saved as a store-counter sale without courier delivery.</p>
             @elseif(! $steadfastConfigured)
                 <div class="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                     <i class="fa-solid fa-key mt-0.5"></i>
                     <p><span class="font-black">API credentials are not active here.</span> Add the Steadfast API key and secret to this server’s <code>.env</code>, then rebuild the configuration cache.</p>
                 </div>
-            @elseif($order->is_offline_sale)
-                <p class="text-sm font-semibold text-gray-500">Offline sales are recorded for profit reporting and are not submitted to a courier.</p>
             @elseif($order->status !== 'confirmed')
                 <div class="flex items-start gap-3 rounded-md border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
                     <i class="fa-solid fa-circle-info mt-0.5"></i>

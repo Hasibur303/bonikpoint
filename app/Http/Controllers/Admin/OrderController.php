@@ -299,8 +299,8 @@ class OrderController extends Controller
         try {
             $order->refresh()->loadMissing('items');
 
-            if ($order->is_offline_sale) {
-                return back()->withErrors(['steadfast' => 'Offline sales cannot be submitted to Steadfast.']);
+            if ($order->is_offline_sale && ! $order->requires_courier) {
+                return back()->withErrors(['steadfast' => 'This offline sale was saved as a store-counter sale without courier delivery.']);
             }
 
             if ($order->hasSteadfastShipment()) {
