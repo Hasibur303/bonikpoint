@@ -54,27 +54,39 @@
                             <p class="mt-1 text-[11px] text-gray-500">Use an 11-digit Bangladesh mobile number.</p>
                             @error('mobile')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
-                        <div>
-                            <label for="checkout-email" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Email address</label>
-                            <input id="checkout-email" name="email" type="email" value="{{ old('email', auth()->user()?->email ?? ($rememberedDetails['email'] ?? '')) }}" autocomplete="email" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
-                            @error('email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label for="checkout-city" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">City or district</label>
-                            <div class="relative">
-                                <i class="fa-solid fa-location-dot absolute left-4 top-1/2 -translate-y-1/2 text-sm text-primary"></i>
-                                <input id="checkout-city" name="city" list="bangladesh-cities" value="{{ old('city', $rememberedDetails['city'] ?? '') }}" placeholder="Search city or district" autocomplete="address-level2" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 pr-4 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                        <div class="sm:col-span-2">
+                            <div class="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
+                                <div>
+                                    <label for="checkout-email" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Email address</label>
+                                    <input id="checkout-email" name="email" type="email" value="{{ old('email', auth()->user()?->email ?? ($rememberedDetails['email'] ?? '')) }}" autocomplete="email" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                                    @error('email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="checkout-city" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">District / জেলা</label>
+                                    <div class="relative">
+                                        <i class="fa-solid fa-location-dot absolute left-4 top-1/2 -translate-y-1/2 text-sm text-primary"></i>
+                                        <input id="checkout-city" name="city" list="bangladesh-cities" value="{{ old('city', $rememberedDetails['city'] ?? '') }}" placeholder="Search district / জেলা খুঁজুন" autocomplete="address-level2" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 pr-4 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                                    </div>
+                                    <datalist id="bangladesh-cities">
+                                        @foreach($cities as $city)
+                                            <option value="{{ $city }}"></option>
+                                        @endforeach
+                                    </datalist>
+                                    @error('city')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="checkout-thana" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Thana / থানা</label>
+                                    <div class="relative">
+                                        <i class="fa-solid fa-map-pin absolute left-4 top-1/2 -translate-y-1/2 text-sm text-primary"></i>
+                                        <input id="checkout-thana" name="thana" value="{{ old('thana', $rememberedDetails['thana'] ?? '') }}" placeholder="Enter thana / থানার নাম" autocomplete="address-level3" maxlength="120" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 pr-4 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                                    </div>
+                                    @error('thana')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                </div>
                             </div>
-                            <datalist id="bangladesh-cities">
-                                @foreach($cities as $city)
-                                    <option value="{{ $city }}"></option>
-                                @endforeach
-                            </datalist>
-                            @error('city')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div class="sm:col-span-2">
-                            <label for="checkout-address" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Full delivery address</label>
-                            <textarea id="checkout-address" name="address" rows="2" autocomplete="street-address" placeholder="House, road, area, and any delivery details" class="w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20" required>{{ old('address', $rememberedDetails['address'] ?? '') }}</textarea>
+                            <label for="checkout-address" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Full Address / সম্পূর্ণ ঠিকানা</label>
+                            <textarea id="checkout-address" name="address" rows="2" autocomplete="street-address" placeholder="House, road, area / বাড়ি, রোড ও এলাকার নাম" class="w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20" required>{{ old('address', $rememberedDetails['address'] ?? '') }}</textarea>
                             @error('address')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div class="sm:col-span-2">

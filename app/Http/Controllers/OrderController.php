@@ -181,6 +181,7 @@ class OrderController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'mobile' => ['required', 'string', 'max:30', new BangladeshMobile],
             'address' => ['required', 'string', 'max:1000'],
+            'thana' => ['required', 'string', 'max:120'],
         ]);
 
         DB::transaction(function () use ($order, $data, $authorize): void {
@@ -198,6 +199,7 @@ class OrderController extends Controller
                 'email' => trim($data['email']),
                 'mobile' => trim($data['mobile']),
                 'address' => trim($data['address']),
+                'thana' => trim($data['thana']),
             ]);
         });
 

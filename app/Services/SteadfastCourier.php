@@ -123,7 +123,7 @@ class SteadfastCourier
 
     private function address(Order $order): string
     {
-        return collect([$order->address, $order->city])
+        return collect([$order->address, $order->thana, $order->city])
             ->filter(fn ($part) => filled($part))
             ->map(fn ($part) => trim((string) $part))
             ->unique()

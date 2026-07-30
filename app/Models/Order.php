@@ -28,6 +28,7 @@ class Order extends Model
         'mobile',
         'address',
         'city',
+        'thana',
         'status',
         'is_offline_sale',
         'subtotal',

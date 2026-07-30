@@ -35,7 +35,7 @@
             </div>
             <div class="min-w-0">
                 <h2 class="font-bold text-[#103f44]">Delivery Address</h2>
-                <p class="mt-2 text-sm text-gray-600">{{ $order->address }}, {{ $order->city }}</p>
+                <p class="mt-2 text-sm text-gray-600">{{ collect([$order->address, $order->thana, $order->city])->filter()->implode(', ') }}</p>
             </div>
         </div>
 

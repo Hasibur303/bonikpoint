@@ -10,12 +10,12 @@
     </p>
     <p class="flex items-start gap-2 text-gray-600">
         <i class="fa-solid fa-location-dot mt-0.5 w-4 text-center text-primary"></i>
-        <span>{{ $order->address }}, {{ $order->city }}</span>
+        <span>{{ collect([$order->address, $order->thana, $order->city])->filter()->implode(', ') }}</span>
     </p>
 </div>
 
 @if(($canEdit ?? true) && $order->customerCanEditDetails())
-    <details class="group mt-4 border-y border-[#dce8e5] py-3" @if($errors->hasAny(['customer_name', 'email', 'mobile', 'address', 'order_details'])) open @endif>
+    <details class="group mt-4 border-y border-[#dce8e5] py-3" @if($errors->hasAny(['customer_name', 'email', 'mobile', 'address', 'thana', 'order_details'])) open @endif>
         <summary class="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-black text-primary">
             <span class="inline-flex items-center gap-2"><i class="fa-solid fa-pen-to-square"></i> Edit order details</span>
             <i class="fa-solid fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
@@ -48,13 +48,19 @@
             </label>
 
             <label>
+                <span class="mb-1 block text-xs font-black text-ink">Thana / থানা</span>
+                <input name="thana" value="{{ old('thana', $order->thana) }}" maxlength="120" placeholder="Enter thana / থানার নাম" required class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">
+                @error('thana')<span class="mt-1 block text-xs font-semibold text-red-600">{{ $message }}</span>@enderror
+            </label>
+
+            <label>
                 <span class="mb-1 block text-xs font-black text-ink">Delivery address</span>
                 <textarea name="address" rows="3" autocomplete="street-address" maxlength="1000" required class="w-full rounded-md border-gray-200 bg-[#f8faf9] text-sm focus:border-primary focus:ring-primary">{{ old('address', $order->address) }}</textarea>
                 @error('address')<span class="mt-1 block text-xs font-semibold text-red-600">{{ $message }}</span>@enderror
             </label>
 
             <div class="rounded-md bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-900">
-                <span class="font-black">District: {{ $order->city }}</span>
+                <span class="font-black">District / জেলা: {{ $order->city }}</span>
                 <span class="block">Contact customer service to change the district because the delivery charge may also change.</span>
             </div>
 

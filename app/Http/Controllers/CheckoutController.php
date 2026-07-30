@@ -137,6 +137,7 @@ class CheckoutController extends Controller
             'mobile' => ['required', 'string', 'max:30', new BangladeshMobile],
             'address' => ['required', 'string', 'max:1000'],
             'city' => ['required', 'string', Rule::in(self::BANGLADESH_CITIES)],
+            'thana' => ['required', 'string', 'max:120'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'remember_details' => ['nullable', 'boolean'],
         ];
@@ -369,7 +370,7 @@ class CheckoutController extends Controller
         }
 
         return collect($details)
-            ->only(['customer_name', 'email', 'mobile', 'address', 'city'])
+            ->only(['customer_name', 'email', 'mobile', 'address', 'city', 'thana'])
             ->map(fn ($value) => is_string($value) ? trim($value) : '')
             ->filter(fn ($value) => $value !== '')
             ->all();
@@ -384,7 +385,7 @@ class CheckoutController extends Controller
         }
 
         $details = collect($data)
-            ->only(['customer_name', 'email', 'mobile', 'address', 'city'])
+            ->only(['customer_name', 'email', 'mobile', 'address', 'city', 'thana'])
             ->all();
 
         Cookie::queue(

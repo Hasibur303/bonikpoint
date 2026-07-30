@@ -304,7 +304,7 @@
                     <span class="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-amber-50 text-amber-600"><i class="fa-solid fa-location-dot text-xs"></i></span>
                     <div class="min-w-0">
                         <dt class="text-[10px] font-black uppercase text-gray-400">Delivery address</dt>
-                        <dd class="mt-0.5 break-words text-sm font-semibold leading-5 text-ink">{{ $order->address }}, {{ $order->city }}</dd>
+                        <dd class="mt-0.5 break-words text-sm font-semibold leading-5 text-ink">{{ collect([$order->address, $order->thana, $order->city])->filter()->implode(', ') }}</dd>
                     </div>
                 </div>
             </dl>
