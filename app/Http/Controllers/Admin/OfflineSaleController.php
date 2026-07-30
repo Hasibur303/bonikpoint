@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
 use App\Rules\BangladeshMobile;
@@ -22,12 +23,17 @@ class OfflineSaleController extends Controller
             'products' => Product::with('category')
                 ->orderBy('name')
                 ->get(),
+            'categories' => Category::with('parent')
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $requiresCourier = $request->boolean('requires_courier');
+        $productSource = $request->input('product_source', 'catalog');
 
         if (filled($request->input('mobile'))) {
             $request->merge([
@@ -36,7 +42,11 @@ class OfflineSaleController extends Controller
         }
 
         $data = $request->validate([
-            'product_id' => ['required', 'integer', 'exists:products,id'],
+            'product_source' => ['required', Rule::in(['catalog', 'custom'])],
+            'product_id' => [Rule::requiredIf($productSource === 'catalog'), 'nullable', 'integer', 'exists:products,id'],
+            'custom_product_name' => [Rule::requiredIf($productSource === 'custom'), 'nullable', 'string', 'max:255'],
+            'custom_category_id' => [Rule::requiredIf($productSource === 'custom'), 'nullable', 'integer', 'exists:categories,id'],
+            'custom_buying_price' => [Rule::requiredIf($productSource === 'custom'), 'nullable', 'numeric', 'min:0', 'max:999999.99'],
             'quantity' => ['required', 'integer', 'min:1', 'max:10000'],
             'selling_price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
             'requires_courier' => ['nullable', 'boolean'],
@@ -50,16 +60,23 @@ class OfflineSaleController extends Controller
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $order = DB::transaction(function () use ($data, $requiresCourier) {
-            $product = Product::query()->lockForUpdate()->findOrFail($data['product_id']);
+        $order = DB::transaction(function () use ($data, $requiresCourier, $productSource) {
+            $product = $productSource === 'catalog'
+                ? Product::query()->lockForUpdate()->findOrFail($data['product_id'])
+                : null;
 
-            if ($product->stock < $data['quantity']) {
+            if ($product && $product->stock < $data['quantity']) {
                 throw ValidationException::withMessages([
                     'quantity' => "Only {$product->stock} unit(s) of {$product->name} are currently in stock.",
                 ]);
             }
 
             $unitPrice = round((float) $data['selling_price'], 2);
+            $buyingPrice = $product
+                ? round((float) $product->buying_price, 2)
+                : round((float) $data['custom_buying_price'], 2);
+            $productName = $product ? $product->name : trim($data['custom_product_name']);
+            $categoryId = $product ? $product->category_id : (int) $data['custom_category_id'];
             $subtotal = round($unitPrice * $data['quantity'], 2);
             $shipping = $requiresCourier ? round((float) $data['delivery_charge'], 2) : 0;
             $total = $subtotal + $shipping;
@@ -84,15 +101,18 @@ class OfflineSaleController extends Controller
             ]);
 
             $order->items()->create([
-                'product_id' => $product->id,
-                'product_name' => $product->name,
-                'buying_price' => $product->buying_price,
+                'product_id' => $product?->id,
+                'category_id' => $categoryId,
+                'product_name' => $productName,
+                'buying_price' => $buyingPrice,
                 'unit_price' => $unitPrice,
                 'quantity' => $data['quantity'],
                 'total' => $subtotal,
             ]);
 
-            $product->decrement('stock', $data['quantity']);
+            if ($product) {
+                $product->decrement('stock', $data['quantity']);
+            }
 
             return $order;
         });

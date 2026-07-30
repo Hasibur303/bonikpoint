@@ -49,7 +49,7 @@ class ProfitController extends Controller
             ->when($start && $end, fn ($query) => $query->whereBetween('orders.created_at', [$start, $end]));
 
         if ($categoryIds !== null) {
-            $baseQuery->whereIn('products.category_id', $categoryIds);
+            $baseQuery->whereIn(DB::raw('COALESCE(order_items.category_id, products.category_id)'), $categoryIds);
         }
 
         $costExpression = 'COALESCE(order_items.buying_price, products.buying_price, 0)';

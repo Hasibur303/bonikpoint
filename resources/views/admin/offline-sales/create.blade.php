@@ -11,10 +11,25 @@
     <form method="POST" action="{{ route('admin.offline-sales.store') }}" class="max-w-3xl rounded-lg border border-[#dfe7e5] bg-white p-5 shadow-sm sm:p-7">
         @csrf
         <div class="grid gap-5 sm:grid-cols-2">
-            <div class="sm:col-span-2">
+            <fieldset class="sm:col-span-2">
+                <legend class="mb-2 text-sm font-black text-ink">Product Source</legend>
+                <div class="grid grid-cols-2 gap-2 rounded-lg bg-[#eef4f2] p-1.5">
+                    <label class="cursor-pointer">
+                        <input name="product_source" type="radio" value="catalog" @checked(old('product_source', 'catalog') === 'catalog') class="peer sr-only">
+                        <span class="flex h-11 items-center justify-center gap-2 rounded-md px-3 text-center text-xs font-black text-gray-500 transition peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm sm:text-sm"><i class="fa-solid fa-boxes-stacked"></i>Catalog Product</span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input name="product_source" type="radio" value="custom" @checked(old('product_source') === 'custom') class="peer sr-only">
+                        <span class="flex h-11 items-center justify-center gap-2 rounded-md px-3 text-center text-xs font-black text-gray-500 transition peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm sm:text-sm"><i class="fa-solid fa-pen-to-square"></i>Custom Product</span>
+                    </label>
+                </div>
+                @error('product_source')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
+            </fieldset>
+
+            <div id="offline-catalog-product" class="sm:col-span-2">
                 <label for="offline-product-search" class="mb-1.5 block text-sm font-black text-ink">Find Product</label>
                 <input id="offline-product-search" type="search" placeholder="Search by product name, SKU, or category" class="mb-2 h-11 w-full text-sm">
-                <select id="offline-product" name="product_id" class="h-12 w-full text-sm" required>
+                <select id="offline-product" name="product_id" class="h-12 w-full text-sm">
                     <option value="">Select a product</option>
                     @foreach($products as $product)
                         <option value="{{ $product->id }}" data-price="{{ $product->price }}" data-stock="{{ $product->stock }}" data-search="{{ str($product->name.' '.$product->sku.' '.$product->category?->name)->lower() }}" @selected(old('product_id') == $product->id)>
@@ -24,6 +39,36 @@
                 </select>
                 @error('product_id')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
             </div>
+
+            <div id="offline-custom-product" class="hidden sm:col-span-2">
+                <div class="grid gap-4 rounded-lg border border-[#cddfdb] bg-[#f7faf9] p-4 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
+                        <label for="offline-custom-name" class="mb-1.5 block text-sm font-black text-ink">Product Name</label>
+                        <input id="offline-custom-name" name="custom_product_name" value="{{ old('custom_product_name') }}" maxlength="255" placeholder="Write the sold product name" class="h-11 w-full text-sm">
+                        @error('custom_product_name')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="offline-custom-category" class="mb-1.5 block text-sm font-black text-ink">Category</label>
+                        <select id="offline-custom-category" name="custom_category_id" class="h-11 w-full text-sm">
+                            <option value="">Select category</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" @selected(old('custom_category_id') == $category->id)>
+                                    {{ $category->parent ? $category->parent->name.' / ' : '' }}{{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500">Used only for category-wise profit reporting.</p>
+                        @error('custom_category_id')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="offline-custom-buying-price" class="mb-1.5 block text-sm font-black text-ink">Buying Price Per Unit</label>
+                        <input id="offline-custom-buying-price" name="custom_buying_price" type="number" min="0" step="0.01" value="{{ old('custom_buying_price') }}" placeholder="Your cost per unit" class="h-11 w-full text-sm">
+                        <p class="mt-1 text-xs text-gray-500">Private cost used to calculate profit.</p>
+                        @error('custom_buying_price')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
+
             <div>
                 <label for="offline-quantity" class="mb-1.5 block text-sm font-black text-ink">Quantity</label>
                 <input id="offline-quantity" name="quantity" type="number" min="1" value="{{ old('quantity', 1) }}" class="h-11 w-full text-sm" required>
@@ -115,6 +160,14 @@
             const price = document.getElementById('offline-selling-price');
             const quantity = document.getElementById('offline-quantity');
             const stock = document.getElementById('offline-stock');
+            const sourceInputs = Array.from(document.querySelectorAll('input[name="product_source"]'));
+            const catalogPanel = document.getElementById('offline-catalog-product');
+            const customPanel = document.getElementById('offline-custom-product');
+            const customFields = [
+                document.getElementById('offline-custom-name'),
+                document.getElementById('offline-custom-category'),
+                document.getElementById('offline-custom-buying-price'),
+            ];
             const requiresCourier = document.getElementById('offline-requires-courier');
             const courierOptions = document.getElementById('offline-courier-options');
             const customerRequirement = document.getElementById('offline-customer-requirement');
@@ -129,7 +182,7 @@
                 document.getElementById('offline-address'),
             ];
 
-            const refreshProduct = () => {
+            const refreshProduct = (replacePrice = false) => {
                 const option = product.options[product.selectedIndex];
                 const available = option?.dataset.stock;
 
@@ -139,9 +192,31 @@
                     return;
                 }
 
-                price.value = option.dataset.price;
+                if (replacePrice || price.value === '') {
+                    price.value = option.dataset.price;
+                }
                 quantity.max = available;
                 stock.textContent = `${available} unit(s) currently in stock.`;
+            };
+
+            const refreshSource = () => {
+                const custom = document.querySelector('input[name="product_source"]:checked')?.value === 'custom';
+                catalogPanel.classList.toggle('hidden', custom);
+                customPanel.classList.toggle('hidden', !custom);
+                product.disabled = custom;
+                product.required = !custom;
+                search.disabled = custom;
+                customFields.forEach((field) => {
+                    field.disabled = !custom;
+                    field.required = custom;
+                });
+
+                if (custom) {
+                    quantity.removeAttribute('max');
+                    stock.textContent = 'Custom products do not change website stock.';
+                } else {
+                    refreshProduct();
+                }
             };
 
             search.addEventListener('input', function () {
@@ -153,7 +228,8 @@
                 });
             });
 
-            product.addEventListener('change', refreshProduct);
+            product.addEventListener('change', () => refreshProduct(true));
+            sourceInputs.forEach((input) => input.addEventListener('change', refreshSource));
 
             const refreshCourier = () => {
                 const enabled = requiresCourier.checked;
@@ -166,7 +242,7 @@
             };
 
             requiresCourier.addEventListener('change', refreshCourier);
-            refreshProduct();
+            refreshSource();
             refreshCourier();
         });
     </script>
