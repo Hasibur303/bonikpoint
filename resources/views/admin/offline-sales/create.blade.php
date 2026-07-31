@@ -128,12 +128,19 @@
             </div>
             <div>
                 <label for="offline-city" class="mb-1.5 block text-sm font-black text-ink">District / জেলা</label>
-                <input id="offline-city" name="city" value="{{ old('city') }}" maxlength="100" placeholder="Dhaka" autocomplete="address-level2" class="h-11 w-full text-sm">
+                <select id="offline-city" name="city" autocomplete="address-level2" class="h-11 w-full text-sm">
+                    <option value="">Select district / জেলা বাছাই করুন</option>
+                    @foreach($districts as $district)
+                        <option value="{{ $district }}" @selected(old('city') === $district)>{{ $district }}</option>
+                    @endforeach
+                </select>
                 @error('city')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label for="offline-thana" class="mb-1.5 block text-sm font-black text-ink">Thana / থানা</label>
-                <input id="offline-thana" name="thana" value="{{ old('thana') }}" maxlength="120" placeholder="Dhanmondi" autocomplete="address-level3" class="h-11 w-full text-sm">
+                <select id="offline-thana" name="thana" autocomplete="address-level3" class="h-11 w-full text-sm" data-selected="{{ old('thana') }}">
+                    <option value="">Select district first / আগে জেলা বাছাই করুন</option>
+                </select>
                 @error('thana')<p class="mt-1 text-sm font-semibold text-red-600">{{ $message }}</p>@enderror
             </div>
             <div class="sm:col-span-2">
@@ -172,6 +179,9 @@
             const courierOptions = document.getElementById('offline-courier-options');
             const customerRequirement = document.getElementById('offline-customer-requirement');
             const saveHint = document.getElementById('offline-save-hint');
+            const district = document.getElementById('offline-city');
+            const thana = document.getElementById('offline-thana');
+            const locations = @json($thanasByDistrict);
             const courierRequiredFields = [
                 document.getElementById('offline-payment-status'),
                 document.getElementById('offline-delivery-charge'),
@@ -231,6 +241,18 @@
             product.addEventListener('change', () => refreshProduct(true));
             sourceInputs.forEach((input) => input.addEventListener('change', refreshSource));
 
+            const refreshThanas = (preserveValue = false) => {
+                const selected = preserveValue ? thana.dataset.selected : '';
+                const options = locations[district.value] || [];
+                thana.replaceChildren();
+                thana.add(new Option(
+                    district.value ? 'Select thana / থানা বাছাই করুন' : 'Select district first / আগে জেলা বাছাই করুন',
+                    ''
+                ));
+                options.forEach((name) => thana.add(new Option(name, name, false, name === selected)));
+                thana.disabled = ! district.value;
+            };
+
             const refreshCourier = () => {
                 const enabled = requiresCourier.checked;
                 courierOptions.classList.toggle('hidden', !enabled);
@@ -242,7 +264,9 @@
             };
 
             requiresCourier.addEventListener('change', refreshCourier);
+            district.addEventListener('change', () => refreshThanas());
             refreshSource();
+            refreshThanas(true);
             refreshCourier();
         });
     </script>

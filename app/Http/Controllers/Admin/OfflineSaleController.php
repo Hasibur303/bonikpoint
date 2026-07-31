@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
 use App\Rules\BangladeshMobile;
+use App\Support\BangladeshLocations;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +28,8 @@ class OfflineSaleController extends Controller
                 ->where('is_active', true)
                 ->orderBy('name')
                 ->get(),
+            'districts' => BangladeshLocations::districts(),
+            'thanasByDistrict' => BangladeshLocations::thanasByDistrict(),
         ]);
     }
 
@@ -38,6 +41,15 @@ class OfflineSaleController extends Controller
         if (filled($request->input('mobile'))) {
             $request->merge([
                 'mobile' => BangladeshMobile::normalize($request->input('mobile')) ?? $request->input('mobile'),
+            ]);
+        }
+
+        if ($requiresCourier) {
+            $request->merge([
+                'city' => BangladeshLocations::canonicalDistrict($request->input('city')),
+            ]);
+            $request->merge([
+                'thana' => BangladeshLocations::canonicalThana($request->input('thana'), $request->input('city')),
             ]);
         }
 
@@ -54,8 +66,8 @@ class OfflineSaleController extends Controller
             'delivery_charge' => [Rule::requiredIf($requiresCourier), 'nullable', 'numeric', 'min:0', 'max:999999.99'],
             'customer_name' => [Rule::requiredIf($requiresCourier), 'nullable', 'string', 'max:120'],
             'mobile' => [Rule::requiredIf($requiresCourier), 'nullable', 'string', 'max:30', new BangladeshMobile],
-            'city' => [Rule::requiredIf($requiresCourier), 'nullable', 'string', 'max:100'],
-            'thana' => [Rule::requiredIf($requiresCourier), 'nullable', 'string', 'max:120'],
+            'city' => [Rule::requiredIf($requiresCourier), 'nullable', 'string', Rule::in(BangladeshLocations::districts())],
+            'thana' => [Rule::requiredIf($requiresCourier), 'nullable', 'string', Rule::in(BangladeshLocations::thanas((string) $request->input('city')))],
             'address' => [Rule::requiredIf($requiresCourier), 'nullable', 'string', 'max:1000'],
             'notes' => ['nullable', 'string', 'max:500'],
         ]);

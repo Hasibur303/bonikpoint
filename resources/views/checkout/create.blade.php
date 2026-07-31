@@ -78,8 +78,9 @@
                                     <label for="checkout-thana" class="mb-1.5 block text-xs font-bold text-ink sm:text-sm">Thana / থানা</label>
                                     <div class="relative">
                                         <i class="fa-solid fa-map-pin absolute left-4 top-1/2 -translate-y-1/2 text-sm text-primary"></i>
-                                        <input id="checkout-thana" name="thana" value="{{ old('thana', $rememberedDetails['thana'] ?? '') }}" placeholder="Enter thana / থানার নাম" autocomplete="address-level3" maxlength="120" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 pr-4 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
+                                        <input id="checkout-thana" name="thana" list="bangladesh-thanas" value="{{ old('thana', $rememberedDetails['thana'] ?? '') }}" placeholder="Select district first / আগে জেলা বাছাই করুন" autocomplete="address-level3" maxlength="120" class="h-10 w-full rounded-md border-gray-200 bg-[#f8faf9] pl-10 pr-4 text-sm shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-11" required>
                                     </div>
+                                    <datalist id="bangladesh-thanas"></datalist>
                                     @error('thana')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                                 </div>
                             </div>
@@ -281,6 +282,47 @@
             </div>
         </div>
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const locations = @json($thanasByDistrict);
+            const districtInput = document.getElementById('checkout-city');
+            const thanaInput = document.getElementById('checkout-thana');
+            const thanaList = document.getElementById('bangladesh-thanas');
+            let activeDistrict = '';
+
+            const matchingDistrict = () => Object.keys(locations).find(
+                (district) => district.toLowerCase() === districtInput.value.trim().toLowerCase()
+            ) || '';
+
+            const refreshThanas = (preserveValue = false) => {
+                const district = matchingDistrict();
+
+                if (district === activeDistrict && thanaList.children.length) {
+                    return;
+                }
+
+                activeDistrict = district;
+                thanaList.replaceChildren(...(locations[district] || []).map((thana) => {
+                    const option = document.createElement('option');
+                    option.value = thana;
+                    return option;
+                }));
+
+                if (! preserveValue) {
+                    thanaInput.value = '';
+                }
+
+                thanaInput.placeholder = district
+                    ? 'Search thana / থানা খুঁজুন'
+                    : 'Select district first / আগে জেলা বাছাই করুন';
+            };
+
+            districtInput.addEventListener('input', () => refreshThanas());
+            districtInput.addEventListener('change', () => refreshThanas());
+            refreshThanas(true);
+        });
+    </script>
 
     @if($advanceDeliveryRequired)
         <script>

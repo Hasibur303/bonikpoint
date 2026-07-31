@@ -9,6 +9,7 @@ use App\Models\ProductColor;
 use App\Models\ProductFlavor;
 use App\Models\StoreSetting;
 use App\Rules\BangladeshMobile;
+use App\Support\BangladeshLocations;
 use App\Support\BotProtection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,21 +27,6 @@ class CheckoutController extends Controller
     private const CHECKOUT_DETAILS_COOKIE = 'bonikpoint_checkout_details';
 
     private const CHECKOUT_DETAILS_COOKIE_MINUTES = 129600;
-
-    private const BANGLADESH_CITIES = [
-        'Bagerhat', 'Bandarban', 'Barguna', 'Barishal', 'Bhola', 'Bogura',
-        'Brahmanbaria', 'Chandpur', 'Chapainawabganj', 'Chattogram', 'Chuadanga',
-        "Cox's Bazar", 'Cumilla', 'Dhaka', 'Dinajpur', 'Faridpur', 'Feni',
-        'Gaibandha', 'Gazipur', 'Gopalganj', 'Habiganj', 'Jamalpur', 'Jashore',
-        'Jhalokati', 'Jhenaidah', 'Joypurhat', 'Khagrachhari', 'Khulna',
-        'Kishoreganj', 'Kurigram', 'Kushtia', 'Lakshmipur', 'Lalmonirhat',
-        'Madaripur', 'Magura', 'Manikganj', 'Meherpur', 'Moulvibazar',
-        'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj',
-        'Narsingdi', 'Natore', 'Netrokona', 'Nilphamari', 'Noakhali', 'Pabna',
-        'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari', 'Rajshahi',
-        'Rangamati', 'Rangpur', 'Satkhira', 'Shariatpur', 'Sherpur', 'Sirajganj',
-        'Sunamganj', 'Sylhet', 'Tangail', 'Thakurgaon',
-    ];
 
     public function create(): View|RedirectResponse
     {
@@ -87,7 +73,8 @@ class CheckoutController extends Controller
             'shipping' => $city ? $this->deliveryChargeForCity($city) : 0,
             'advanceDeliveryRequired' => $this->advanceDeliveryRequired($cartItems),
             'deliverySettings' => StoreSetting::deliverySettings(),
-            'cities' => self::BANGLADESH_CITIES,
+            'cities' => BangladeshLocations::districts(),
+            'thanasByDistrict' => BangladeshLocations::thanasByDistrict(),
             'isGuestCheckout' => $isGuestCheckout,
             'rememberedDetails' => $rememberedDetails,
         ]);
@@ -120,8 +107,12 @@ class CheckoutController extends Controller
         $advanceDeliveryRequired = $this->advanceDeliveryRequired($cartItems);
 
         $request->merge([
-            'city' => $this->canonicalCity($request->input('city')),
+            'city' => BangladeshLocations::canonicalDistrict($request->input('city')),
             'mobile' => BangladeshMobile::normalize($request->input('mobile')) ?? $request->input('mobile'),
+        ]);
+
+        $request->merge([
+            'thana' => BangladeshLocations::canonicalThana($request->input('thana'), $request->input('city')),
         ]);
 
         if (filled($request->input('delivery_payment_mobile'))) {
@@ -136,8 +127,8 @@ class CheckoutController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'mobile' => ['required', 'string', 'max:30', new BangladeshMobile],
             'address' => ['required', 'string', 'max:1000'],
-            'city' => ['required', 'string', Rule::in(self::BANGLADESH_CITIES)],
-            'thana' => ['required', 'string', 'max:120'],
+            'city' => ['required', 'string', Rule::in(BangladeshLocations::districts())],
+            'thana' => ['required', 'string', Rule::in(BangladeshLocations::thanas((string) $request->input('city')))],
             'notes' => ['nullable', 'string', 'max:1000'],
             'remember_details' => ['nullable', 'boolean'],
         ];
@@ -346,19 +337,7 @@ class CheckoutController extends Controller
 
     private function canonicalCity(?string $city): ?string
     {
-        $city = trim((string) $city);
-
-        if ($city === '') {
-            return null;
-        }
-
-        foreach (self::BANGLADESH_CITIES as $option) {
-            if (strcasecmp($option, $city) === 0) {
-                return $option;
-            }
-        }
-
-        return $city;
+        return BangladeshLocations::canonicalDistrict($city);
     }
 
     private function rememberedCheckoutDetails(): array
