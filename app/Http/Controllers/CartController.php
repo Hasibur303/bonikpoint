@@ -279,9 +279,8 @@ class CartController extends Controller
     private function quantityForProduct(array $cart, int $productId, string $exceptKey): int
     {
         return collect($cart)
-            ->except($exceptKey)
-            ->sum(function ($item, $key) use ($productId) {
-                return (int) str($key)->before(':')->toString() === $productId ? (int) ($item['quantity'] ?? 0) : 0;
-            });
+            ->except([$exceptKey])
+            ->filter(fn ($item, $key) => (int) str($key)->before(':')->toString() === $productId)
+            ->sum(fn ($item) => (int) ($item['quantity'] ?? 0));
     }
 }
