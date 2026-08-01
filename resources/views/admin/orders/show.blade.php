@@ -365,9 +365,24 @@
                 </div>
                 <div class="flex items-start gap-3 py-3 last:pb-0">
                     <span class="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-amber-50 text-amber-600"><i class="fa-solid fa-location-dot text-xs"></i></span>
-                    <div class="min-w-0">
+                    <div class="min-w-0 flex-1">
                         <dt class="text-[10px] font-black uppercase text-gray-400">Delivery address</dt>
-                        <dd class="mt-0.5 break-words text-sm font-semibold leading-5 text-ink">{{ collect([$order->address, $order->thana, $order->city])->filter()->implode(', ') }}</dd>
+                        <dd class="mt-2 space-y-2 text-sm text-ink">
+                            <div>
+                                <span class="block text-[10px] font-black uppercase text-gray-400">Full address</span>
+                                <span class="mt-0.5 block break-words font-semibold leading-5">{{ $order->address }}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 rounded-md bg-[#f7faf9] p-2.5 ring-1 ring-[#e7edeb]">
+                                <div class="min-w-0">
+                                    <span class="block text-[10px] font-black uppercase text-gray-400">Thana</span>
+                                    <span class="mt-0.5 block break-words font-bold">{{ $order->thana ?: 'Not provided' }}</span>
+                                </div>
+                                <div class="min-w-0 border-l border-[#dce7e4] pl-3">
+                                    <span class="block text-[10px] font-black uppercase text-gray-400">District</span>
+                                    <span class="mt-0.5 block break-words font-bold">{{ $order->city ?: 'Not provided' }}</span>
+                                </div>
+                            </div>
+                        </dd>
                     </div>
                 </div>
             </dl>
