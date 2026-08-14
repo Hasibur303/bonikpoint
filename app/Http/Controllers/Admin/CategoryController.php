@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Support\ImageUploadOptimizer;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Support\ImageUploadOptimizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class CategoryController extends Controller
@@ -19,6 +20,7 @@ class CategoryController extends Controller
         return view('admin.categories.index', [
             'categories' => Category::whereNull('parent_id')
                 ->withCount(['children', 'products'])
+                ->orderBy('sort_order')
                 ->orderBy('name')
                 ->paginate(12),
         ]);
@@ -33,15 +35,17 @@ class CategoryController extends Controller
         }
 
         return view('admin.categories.form', [
-            'category' => new Category(),
-            'parentCategories' => Category::whereNull('parent_id')->orderBy('name')->get(),
+            'category' => new Category,
+            'parentCategories' => Category::whereNull('parent_id')->orderBy('sort_order')->orderBy('name')->get(),
             'parentCategory' => $parentCategory,
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $category = Category::create($this->validated($request));
+        $data = $this->validated($request);
+        $data['sort_order'] = ((int) Category::where('parent_id', $data['parent_id'])->max('sort_order')) + 1;
+        $category = Category::create($data);
 
         if ($category->parent_id) {
             return redirect()->route('admin.categories.show', $category->parent_id)->with('success', 'Subcategory created.');
@@ -58,6 +62,7 @@ class CategoryController extends Controller
             'category' => $category->loadCount('products'),
             'subcategories' => $category->children()
                 ->withCount('products')
+                ->orderBy('sort_order')
                 ->orderBy('name')
                 ->paginate(12),
         ]);
@@ -69,6 +74,7 @@ class CategoryController extends Controller
             'category' => $category,
             'parentCategories' => Category::whereNull('parent_id')
                 ->whereKeyNot($category->id)
+                ->orderBy('sort_order')
                 ->orderBy('name')
                 ->get(),
             'parentCategory' => $category->parent,
@@ -77,7 +83,13 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category): RedirectResponse
     {
-        $category->update($this->validated($request, $category));
+        $data = $this->validated($request, $category);
+
+        if ($category->parent_id != $data['parent_id']) {
+            $data['sort_order'] = ((int) Category::where('parent_id', $data['parent_id'])->max('sort_order')) + 1;
+        }
+
+        $category->update($data);
 
         if ($category->parent_id) {
             return redirect()->route('admin.categories.show', $category->parent_id)->with('success', 'Subcategory updated.');
@@ -108,6 +120,32 @@ class CategoryController extends Controller
         }
 
         return redirect()->route('admin.categories.index')->with('success', 'Category deleted.');
+    }
+
+    public function move(Category $category, string $direction): RedirectResponse
+    {
+        abort_unless(in_array($direction, ['up', 'down'], true), 404);
+
+        $siblings = Category::where('parent_id', $category->parent_id)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+        $currentIndex = $siblings->search(fn (Category $sibling) => $sibling->is($category));
+        $targetIndex = $direction === 'up' ? $currentIndex - 1 : $currentIndex + 1;
+
+        if ($currentIndex === false || ! $siblings->has($targetIndex)) {
+            return back();
+        }
+
+        $target = $siblings->get($targetIndex);
+
+        DB::transaction(function () use ($category, $target) {
+            [$categoryOrder, $targetOrder] = [$category->sort_order, $target->sort_order];
+            $category->update(['sort_order' => $targetOrder]);
+            $target->update(['sort_order' => $categoryOrder]);
+        });
+
+        return back()->with('success', 'Category order updated.');
     }
 
     private function validated(Request $request, ?Category $category = null): array

@@ -504,8 +504,8 @@
                     </div>
                     <a href="#shop-products" class="text-xs font-black text-primary hover:text-ink">View all</a>
                 </div>
-                <div id="trending-products-viewport" class="trending-products-viewport" aria-label="Trending products">
-                    <div id="trending-products-track" class="trending-products-track">
+                <div class="trending-products-viewport" data-product-marquee aria-label="Trending products">
+                    <div class="trending-products-track" data-product-marquee-track>
                         @for($copy = 0; $copy < 2; $copy++)
                             <div class="trending-products-panel" aria-hidden="{{ $copy === 1 ? 'true' : 'false' }}">
                                 @foreach($featuredProducts as $featuredProduct)
@@ -608,7 +608,7 @@
                                             </summary>
                                             <div class="space-y-1 px-3 pb-2 pl-14">
                                                 <a href="{{ $category->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="block rounded px-2 py-1.5 text-xs font-bold {{ $isMainActive ? 'bg-primary text-white' : 'text-primary hover:bg-white' }}">All {{ $category->name }}</a>
-                                                @foreach($category->children->sortBy('name') as $child)
+                                                @foreach($category->children as $child)
                                                     <a href="{{ $child->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="block rounded px-2 py-1.5 text-xs font-semibold {{ $selectedCategory === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-white hover:text-primary' }}">{{ $child->name }}</a>
                                                 @endforeach
                                             </div>
@@ -642,23 +642,62 @@
                     <p class="mt-3 max-w-3xl text-sm leading-6 text-gray-600">{{ $shopDescription }}</p>
                 @else
                     <h1 class="sr-only">{{ $shopHeading }}</h1>
-                    <div class="flex justify-end border-b border-[#d8e0dd] pb-3">
-                        <p class="rounded-md border border-[#d6dfdc] bg-white px-3 py-1.5 text-sm font-bold text-gray-500 shadow-sm">{{ $products->total() }} results</p>
-                    </div>
+                    @if($categoryProductRows->isNotEmpty())
+                        <div class="flex items-end justify-between gap-4 border-b border-[#d8e0dd] pb-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-wide text-primary">Browse by category</p>
+                                <h2 class="mt-1 text-2xl font-black text-ink">Shop Products</h2>
+                            </div>
+                            <p class="rounded-md border border-[#d6dfdc] bg-white px-3 py-1.5 text-sm font-bold text-gray-500 shadow-sm">{{ $products->total() }} products</p>
+                        </div>
+                    @else
+                        <div class="flex justify-end border-b border-[#d8e0dd] pb-3">
+                            <p class="rounded-md border border-[#d6dfdc] bg-white px-3 py-1.5 text-sm font-bold text-gray-500 shadow-sm">{{ $products->total() }} results</p>
+                        </div>
+                    @endif
                 @endif
 
-                <div class="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
-                    @forelse($products as $product)
-                        <x-product-card :product="$product" />
-                    @empty
-                        <div class="col-span-full border border-gray-200 bg-white p-10 text-center shadow-sm">
-                            <span class="mx-auto grid h-12 w-12 place-items-center rounded-md bg-gray-100 text-gray-400"><i class="fa-solid fa-magnifying-glass"></i></span>
-                            <p class="mt-4 font-bold text-ink">No products found</p>
-                            <p class="mt-1 text-sm text-gray-500">Try another category or adjust your filters.</p>
-                        </div>
-                    @endforelse
-                </div>
-                <div class="mt-8">{{ $products->links() }}</div>
+                @if($categoryProductRows->isNotEmpty())
+                    <div class="mt-5 space-y-8">
+                        @foreach($categoryProductRows as $category)
+                            <section aria-labelledby="category-row-{{ $category->id }}">
+                                <div class="mb-3 flex items-end justify-between gap-4">
+                                    <div class="min-w-0">
+                                        <p class="text-[10px] font-black uppercase tracking-wide text-primary">Category</p>
+                                        <h2 id="category-row-{{ $category->id }}" class="mt-0.5 truncate text-xl font-black text-ink">{{ $category->name }}</h2>
+                                    </div>
+                                    <a href="{{ $category->public_url }}" class="shrink-0 text-xs font-black text-primary hover:text-ink">View all <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i></a>
+                                </div>
+                                <div class="trending-products-viewport" data-product-marquee aria-label="{{ $category->name }} products">
+                                    <div class="trending-products-track" data-product-marquee-track>
+                                        @for($copy = 0; $copy < 2; $copy++)
+                                            <div class="trending-products-panel" aria-hidden="{{ $copy === 1 ? 'true' : 'false' }}">
+                                                @foreach($category->shopProducts as $categoryProduct)
+                                                    <div class="trending-product-card" @if($copy === 1) inert @endif>
+                                                        <x-product-card :product="$categoryProduct" />
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endfor
+                                    </div>
+                                </div>
+                            </section>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
+                        @forelse($products as $product)
+                            <x-product-card :product="$product" />
+                        @empty
+                            <div class="col-span-full border border-gray-200 bg-white p-10 text-center shadow-sm">
+                                <span class="mx-auto grid h-12 w-12 place-items-center rounded-md bg-gray-100 text-gray-400"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                <p class="mt-4 font-bold text-ink">No products found</p>
+                                <p class="mt-1 text-sm text-gray-500">Try another category or adjust your filters.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                    <div class="mt-8">{{ $products->links() }}</div>
+                @endif
             </div>
         </div>
     </section>
@@ -836,21 +875,22 @@
         });
 
         document.addEventListener('DOMContentLoaded', function () {
-            const viewport = document.getElementById('trending-products-viewport');
-            const track = document.getElementById('trending-products-track');
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-            if (!viewport || !track || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            document.querySelectorAll('[data-product-marquee]').forEach((viewport) => {
+                const track = viewport.querySelector('[data-product-marquee-track]');
 
-            let offset = 0;
-            let isDragging = false;
-            let didDrag = false;
-            let isHoverPaused = false;
-            let isFocusPaused = false;
-            let startX = 0;
-            let startOffset = 0;
-            let lastFrameTime = null;
-            let animationFrame = null;
-            const pixelsPerSecond = 24;
+                if (!track) return;
+
+                let offset = 0;
+                let isDragging = false;
+                let didDrag = false;
+                let isHoverPaused = false;
+                let isFocusPaused = false;
+                let startX = 0;
+                let startOffset = 0;
+                let lastFrameTime = null;
+                const pixelsPerSecond = 24;
 
             const firstPanel = track.querySelector('.trending-products-panel');
             const panelWidth = () => Math.max(1, firstPanel?.getBoundingClientRect().width || 1);
@@ -885,7 +925,7 @@
                     render();
                 }
 
-                animationFrame = window.requestAnimationFrame(animate);
+                window.requestAnimationFrame(animate);
             };
 
             viewport.addEventListener('pointerdown', (event) => {
@@ -947,9 +987,10 @@
                 render();
             });
 
-            ensureTrackCoverage();
-            render();
-            animationFrame = window.requestAnimationFrame(animate);
+                ensureTrackCoverage();
+                render();
+                window.requestAnimationFrame(animate);
+            });
         });
     </script>
 

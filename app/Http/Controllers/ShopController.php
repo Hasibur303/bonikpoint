@@ -70,6 +70,12 @@ class ShopController extends Controller
             && ! $request->filled('min_price')
             && ! $request->filled('max_price')
             && ! $request->filled('sort');
+        $categories = Category::where('is_active', true)
+            ->whereNull('parent_id')
+            ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('sort_order')->orderBy('name')])
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
 
         $products = Product::with('category')
             ->where('is_active', true)
@@ -85,6 +91,26 @@ class ShopController extends Controller
             ->when(! in_array($request->sort, ['price_low', 'price_high'], true), fn ($query) => $query->latest())
             ->paginate(12)
             ->withQueryString();
+        $categoryProductRows = collect();
+
+        if ($showTrendingProducts) {
+            $categoryIds = $categories->flatMap(fn (Category $category) => $category->children->pluck('id')->push($category->id));
+            $productsByMainCategory = Product::with('category')
+                ->where('is_active', true)
+                ->whereIn('category_id', $categoryIds)
+                ->latest()
+                ->get()
+                ->groupBy(fn (Product $product) => $product->category->parent_id ?? $product->category_id);
+
+            $categoryProductRows = $categories
+                ->map(function (Category $category) use ($productsByMainCategory) {
+                    $category->setRelation('shopProducts', $productsByMainCategory->get($category->id, collect()));
+
+                    return $category;
+                })
+                ->filter(fn (Category $category) => $category->shopProducts->isNotEmpty())
+                ->values();
+        }
 
         return view('shop.index', [
             'products' => $products,
@@ -103,11 +129,8 @@ class ShopController extends Controller
                 ->latest()
                 ->take(6)
                 ->get(),
-            'categories' => Category::where('is_active', true)
-                ->whereNull('parent_id')
-                ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('name')])
-                ->orderBy('name')
-                ->get(),
+            'categories' => $categories,
+            'categoryProductRows' => $categoryProductRows,
             'selectedCategory' => $selectedCategoryModel?->slug,
             'selectedCategoryModel' => $selectedCategoryModel,
             'selectedBrand' => $selectedBrand,

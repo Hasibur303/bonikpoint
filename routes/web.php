@@ -157,6 +157,9 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(function () {
     Route::get('/', [AdminComtroller::class, 'index'])->name('index');
+    Route::patch('categories/{category}/move/{direction}', [AdminCategoryController::class, 'move'])
+        ->whereIn('direction', ['up', 'down'])
+        ->name('categories.move');
     Route::resource('categories', AdminCategoryController::class);
     Route::get('products/{product}/faqs', [AdminProductFaqController::class, 'edit'])->name('products.faqs.edit');
     Route::patch('products/{product}/faqs', [AdminProductFaqController::class, 'update'])->name('products.faqs.update');
@@ -186,6 +189,4 @@ Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(fu
     Route::get('settings', [AdminSettingController::class, 'edit'])->name('settings.edit');
     Route::patch('settings', [AdminSettingController::class, 'update'])->name('settings.update');
 });
-
-
 require __DIR__.'/auth.php';

@@ -22,6 +22,7 @@ class Category extends Model
         'image',
         'image_alt',
         'is_active',
+        'sort_order',
     ];
 
     protected function casts(): array
