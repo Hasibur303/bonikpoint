@@ -440,6 +440,7 @@
             <div class="grid grid-cols-2 gap-2">
                 @foreach($categories as $category)
                     @php
+                        $hasActiveChild = $category->children->contains(fn ($child) => $selectedCategory === $child->slug);
                         [$categoryIcon, $categoryTone] = match ($category->slug) {
                             'vape-accessories' => ['fa-solid fa-wind', 'bg-[#103f44] text-white'],
                             'electronics-gadgets' => ['fa-solid fa-microchip', 'bg-[#dceced] text-[#087c7f]'],
@@ -447,19 +448,39 @@
                             default => ['fa-solid fa-shapes', 'bg-gray-100 text-gray-600'],
                         };
                     @endphp
-                    <a href="{{ $category->public_url }}" class="flex min-w-0 items-center gap-2.5 rounded-md border border-[#dce5e2] bg-[#f9fbfa] p-2.5 shadow-sm transition hover:border-primary hover:bg-[#eef6f3]">
-                        @if($category->image)
-                            <img src="{{ $category->image_url }}" @if($category->image_srcset) srcset="{{ $category->image_srcset }}" sizes="44px" @endif alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-11 w-11 shrink-0 rounded-md object-cover ring-1 ring-black/5">
-                        @else
-                            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
-                        @endif
-                        <span class="min-w-0">
-                            <span class="block truncate text-sm font-black text-ink">{{ $category->name }}</span>
-                            @if($category->children->isNotEmpty())
-                                <span class="mt-0.5 block text-[11px] font-semibold text-gray-500">{{ $category->children->count() }} {{ Str::plural('subcategory', $category->children->count()) }}</span>
+
+                    @if($category->children->isNotEmpty())
+                        <details class="group/category rounded-md border border-[#dce5e2] bg-[#f9fbfa] shadow-sm transition open:border-primary open:bg-[#eef6f3]" {{ $hasActiveChild ? 'open' : '' }}>
+                            <summary class="flex min-w-0 cursor-pointer list-none items-center gap-2.5 p-2.5">
+                                @if($category->image)
+                                    <img src="{{ $category->image_url }}" @if($category->image_srcset) srcset="{{ $category->image_srcset }}" sizes="44px" @endif alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-11 w-11 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                                @else
+                                    <span class="grid h-11 w-11 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
+                                @endif
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate text-sm font-black text-ink">{{ $category->name }}</span>
+                                    <span class="mt-0.5 block text-[11px] font-semibold text-gray-500">{{ $category->children->count() }} {{ Str::plural('subcategory', $category->children->count()) }}</span>
+                                </span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition group-open/category:rotate-180"></i>
+                            </summary>
+                            <div class="space-y-1 border-t border-[#dce5e2] px-2.5 py-2">
+                                @foreach($category->children as $child)
+                                    <a href="{{ $child->public_url }}" class="block rounded px-2 py-1.5 text-xs font-bold {{ $selectedCategory === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-white hover:text-primary' }}">{{ $child->name }}</a>
+                                @endforeach
+                            </div>
+                        </details>
+                    @else
+                        <a href="{{ $category->public_url }}" class="flex min-w-0 items-center gap-2.5 rounded-md border border-[#dce5e2] bg-[#f9fbfa] p-2.5 shadow-sm transition hover:border-primary hover:bg-[#eef6f3]">
+                            @if($category->image)
+                                <img src="{{ $category->image_url }}" @if($category->image_srcset) srcset="{{ $category->image_srcset }}" sizes="44px" @endif alt="{{ $category->image_alt ?: $category->name.' category' }}" width="80" height="80" loading="lazy" decoding="async" class="h-11 w-11 shrink-0 rounded-md object-cover ring-1 ring-black/5">
+                            @else
+                                <span class="grid h-11 w-11 shrink-0 place-items-center rounded-md text-sm {{ $categoryTone }}"><i class="{{ $categoryIcon }}"></i></span>
                             @endif
-                        </span>
-                    </a>
+                            <span class="min-w-0">
+                                <span class="block truncate text-sm font-black text-ink">{{ $category->name }}</span>
+                            </span>
+                        </a>
+                    @endif
                 @endforeach
             </div>
         </div>
@@ -607,7 +628,6 @@
                                                 <i class="fa-solid fa-chevron-right text-xs text-gray-400 transition group-open/category:rotate-90"></i>
                                             </summary>
                                             <div class="space-y-1 px-3 pb-2 pl-14">
-                                                <a href="{{ $category->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="block rounded px-2 py-1.5 text-xs font-bold {{ $isMainActive ? 'bg-primary text-white' : 'text-primary hover:bg-white' }}">All {{ $category->name }}</a>
                                                 @foreach($category->children as $child)
                                                     <a href="{{ $child->public_url }}{{ http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) ? '?'.http_build_query(array_filter(['search' => $search, 'min_price' => $minPrice, 'max_price' => $maxPrice, 'sort' => $sort])) : '' }}" class="block rounded px-2 py-1.5 text-xs font-semibold {{ $selectedCategory === $child->slug ? 'bg-primary text-white' : 'text-gray-600 hover:bg-white hover:text-primary' }}">{{ $child->name }}</a>
                                                 @endforeach
@@ -668,19 +688,25 @@
                                     </div>
                                     <a href="{{ $category->public_url }}" class="shrink-0 text-xs font-black text-primary hover:text-ink">View all <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i></a>
                                 </div>
-                                <div class="trending-products-viewport" data-product-marquee aria-label="{{ $category->name }} products">
-                                    <div class="trending-products-track" data-product-marquee-track>
-                                        @for($copy = 0; $copy < 2; $copy++)
-                                            <div class="trending-products-panel" aria-hidden="{{ $copy === 1 ? 'true' : 'false' }}">
-                                                @foreach($category->shopProducts as $categoryProduct)
-                                                    <div class="trending-product-card" @if($copy === 1) inert @endif>
-                                                        <x-product-card :product="$categoryProduct" />
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @endfor
+                                @if($category->shopProducts->count() === 1)
+                                    <div class="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
+                                        <x-product-card :product="$category->shopProducts->first()" />
                                     </div>
-                                </div>
+                                @else
+                                    <div class="trending-products-viewport" data-product-marquee aria-label="{{ $category->name }} products">
+                                        <div class="trending-products-track" data-product-marquee-track>
+                                            @for($copy = 0; $copy < 2; $copy++)
+                                                <div class="trending-products-panel" aria-hidden="{{ $copy === 1 ? 'true' : 'false' }}">
+                                                    @foreach($category->shopProducts as $categoryProduct)
+                                                        <div class="trending-product-card" @if($copy === 1) inert @endif>
+                                                            <x-product-card :product="$categoryProduct" />
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                @endif
                             </section>
                         @endforeach
                     </div>
