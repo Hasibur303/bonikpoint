@@ -196,6 +196,7 @@
                 }
 
                 .trending-products-viewport {
+                    max-width: 100%;
                     overflow: hidden;
                     cursor: grab;
                     touch-action: pan-y;
@@ -208,6 +209,7 @@
 
                 .trending-products-track {
                     display: flex;
+                    max-width: none;
                     width: max-content;
                     will-change: transform;
                 }
@@ -650,7 +652,7 @@
                 </details>
             </aside>
 
-            <div>
+            <div class="min-w-0">
                 @if($selectedCategoryModel || $selectedBrand)
                     <div class="flex items-end justify-between gap-4 border-b border-[#d8e0dd] pb-4">
                         <div>
