@@ -905,120 +905,133 @@
         document.addEventListener('DOMContentLoaded', function () {
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+            const marquees = [];
+
             document.querySelectorAll('[data-product-marquee]').forEach((viewport) => {
                 const track = viewport.querySelector('[data-product-marquee-track]');
 
                 if (!track) return;
 
-                let offset = 0;
-                let isDragging = false;
-                let didDrag = false;
-                let isHoverPaused = false;
-                let isFocusPaused = false;
-                let startX = 0;
-                let startOffset = 0;
-                let lastFrameTime = null;
-                const pixelsPerSecond = 24;
+                const marquee = {
+                    viewport,
+                    track,
+                    firstPanel: track.querySelector('.trending-products-panel'),
+                    offset: 0,
+                    isDragging: false,
+                    didDrag: false,
+                    isHoverPaused: false,
+                    isFocusPaused: false,
+                    startX: 0,
+                    startOffset: 0,
+                    pixelsPerSecond: 24,
+                };
 
-            const firstPanel = track.querySelector('.trending-products-panel');
-            const panelWidth = () => Math.max(1, firstPanel?.getBoundingClientRect().width || 1);
-            const normalize = (value) => {
-                const width = panelWidth();
-                while (value <= -width) value += width;
-                while (value > 0) value -= width;
-                return value;
-            };
-            const render = () => {
-                track.style.transition = 'none';
-                track.style.transform = `translate3d(${offset}px, 0, 0)`;
-            };
-            const ensureTrackCoverage = () => {
-                if (!firstPanel) return;
+                marquee.panelWidth = () => Math.max(1, marquee.firstPanel?.getBoundingClientRect().width || 1);
+                marquee.normalize = (value) => {
+                    const width = marquee.panelWidth();
+                    while (value <= -width) value += width;
+                    while (value > 0) value -= width;
+                    return value;
+                };
+                marquee.render = () => {
+                    marquee.track.style.transition = 'none';
+                    marquee.track.style.transform = `translate3d(${marquee.offset}px, 0, 0)`;
+                };
+                marquee.ensureTrackCoverage = () => {
+                    if (!marquee.firstPanel) return;
 
-                while (track.scrollWidth < viewport.clientWidth + (panelWidth() * 2)) {
-                    const clone = firstPanel.cloneNode(true);
-                    clone.setAttribute('aria-hidden', 'true');
-                    clone.setAttribute('inert', '');
-                    track.appendChild(clone);
-                }
-            };
-            const isPaused = () => isDragging || isHoverPaused || isFocusPaused || document.hidden;
+                    while (marquee.track.scrollWidth < marquee.viewport.clientWidth + (marquee.panelWidth() * 2)) {
+                        const clone = marquee.firstPanel.cloneNode(true);
+                        clone.setAttribute('aria-hidden', 'true');
+                        clone.setAttribute('inert', '');
+                        marquee.track.appendChild(clone);
+                    }
+                };
+                marquee.isPaused = () => marquee.isDragging || marquee.isHoverPaused || marquee.isFocusPaused || document.hidden;
+
+                viewport.addEventListener('pointerdown', (event) => {
+                    marquee.isDragging = true;
+                    marquee.didDrag = false;
+                    marquee.startX = event.clientX;
+                    marquee.offset = marquee.normalize(marquee.offset);
+                    marquee.startOffset = marquee.offset;
+                    marquee.render();
+                });
+                viewport.addEventListener('pointermove', (event) => {
+                    if (!marquee.isDragging) return;
+                    const delta = event.clientX - marquee.startX;
+                    if (!marquee.didDrag && Math.abs(delta) < 10) return;
+                    marquee.didDrag = true;
+                    viewport.classList.add('is-dragging');
+                    viewport.setPointerCapture?.(event.pointerId);
+                    marquee.offset = marquee.normalize(marquee.startOffset + delta);
+                    marquee.render();
+                    event.preventDefault();
+                });
+                const stopDrag = (event) => {
+                    if (!marquee.isDragging) return;
+                    marquee.isDragging = false;
+                    viewport.classList.remove('is-dragging');
+                    if (viewport.hasPointerCapture?.(event.pointerId)) viewport.releasePointerCapture(event.pointerId);
+                };
+                viewport.addEventListener('pointerup', stopDrag);
+                viewport.addEventListener('pointercancel', stopDrag);
+                viewport.addEventListener('pointerenter', (event) => {
+                    if (event.pointerType === 'mouse') marquee.isHoverPaused = true;
+                });
+                viewport.addEventListener('pointerleave', (event) => {
+                    if (marquee.isDragging) stopDrag(event);
+                    marquee.isHoverPaused = false;
+                });
+                viewport.addEventListener('focusin', () => {
+                    marquee.isFocusPaused = true;
+                });
+                viewport.addEventListener('focusout', () => {
+                    marquee.isFocusPaused = false;
+                });
+                viewport.addEventListener('click', (event) => {
+                    if (!marquee.didDrag) return;
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    marquee.didDrag = false;
+                }, true);
+
+                marquee.ensureTrackCoverage();
+                marquee.render();
+                marquees.push(marquee);
+            });
+
+            let lastFrameTime = null;
             const animate = (time) => {
                 if (lastFrameTime === null) lastFrameTime = time;
                 const elapsed = Math.min(50, time - lastFrameTime);
                 lastFrameTime = time;
 
-                if (!isPaused()) {
-                    offset = normalize(offset - ((pixelsPerSecond * elapsed) / 1000));
-                    render();
-                }
+                marquees.forEach((marquee) => {
+                    if (marquee.isPaused()) return;
+
+                    marquee.offset = marquee.normalize(marquee.offset - ((marquee.pixelsPerSecond * elapsed) / 1000));
+                    marquee.render();
+                });
 
                 window.requestAnimationFrame(animate);
             };
 
-            viewport.addEventListener('pointerdown', (event) => {
-                isDragging = true;
-                didDrag = false;
-                startX = event.clientX;
-                offset = normalize(offset);
-                startOffset = offset;
-                render();
-            });
-            viewport.addEventListener('pointermove', (event) => {
-                if (!isDragging) return;
-                const delta = event.clientX - startX;
-                if (!didDrag && Math.abs(delta) < 10) return;
-                didDrag = true;
-                viewport.classList.add('is-dragging');
-                viewport.setPointerCapture?.(event.pointerId);
-                offset = normalize(startOffset + delta);
-                render();
-                event.preventDefault();
-            });
-            const stopDrag = (event) => {
-                if (!isDragging) return;
-                isDragging = false;
-                viewport.classList.remove('is-dragging');
-                if (viewport.hasPointerCapture?.(event.pointerId)) viewport.releasePointerCapture(event.pointerId);
-                lastFrameTime = null;
-            };
-            viewport.addEventListener('pointerup', stopDrag);
-            viewport.addEventListener('pointercancel', stopDrag);
-            viewport.addEventListener('pointerenter', (event) => {
-                if (event.pointerType === 'mouse') isHoverPaused = true;
-            });
-            viewport.addEventListener('pointerleave', (event) => {
-                if (isDragging) stopDrag(event);
-                isHoverPaused = false;
-                lastFrameTime = null;
-            });
-            viewport.addEventListener('focusin', () => {
-                isFocusPaused = true;
-            });
-            viewport.addEventListener('focusout', () => {
-                isFocusPaused = false;
-                lastFrameTime = null;
-            });
-            viewport.addEventListener('click', (event) => {
-                if (!didDrag) return;
-
-                event.preventDefault();
-                event.stopPropagation();
-                didDrag = false;
-            }, true);
             document.addEventListener('visibilitychange', () => {
                 lastFrameTime = null;
             });
             window.addEventListener('resize', () => {
-                ensureTrackCoverage();
-                offset = normalize(offset);
-                render();
+                marquees.forEach((marquee) => {
+                    marquee.ensureTrackCoverage();
+                    marquee.offset = marquee.normalize(marquee.offset);
+                    marquee.render();
+                });
             });
 
-                ensureTrackCoverage();
-                render();
+            if (marquees.length > 0) {
                 window.requestAnimationFrame(animate);
-            });
+            }
         });
     </script>
 
