@@ -92,7 +92,7 @@
                 </div>
                 <div class="p-5">
                     <div class="space-y-3 text-sm">
-                        <div class="flex justify-between gap-4 text-gray-600"><span>Delivery area</span><span class="font-bold text-ink">{{ $order->delivery_area === 'outside_dhaka' ? 'Outside Dhaka' : 'Inside Dhaka' }}</span></div>
+                        <div class="flex justify-between gap-4 text-gray-600"><span>Delivery area</span><span class="font-bold text-ink">{{ $order->delivery_area_label }}</span></div>
                         <div class="flex justify-between gap-4 border-t border-[#ead9ad] pt-4 text-lg font-black text-ink"><span>Delivery Charge</span><span class="text-primary">BDT {{ number_format($order->shipping, 2) }}</span></div>
                     </div>
                     <p class="mt-5 rounded-md border border-red-200 bg-red-50 p-3 text-sm font-semibold leading-6 text-red-700">{{ $settings['delivery_pay_later_note_bn'] }}</p>

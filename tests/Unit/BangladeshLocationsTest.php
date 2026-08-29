@@ -21,6 +21,10 @@ class BangladeshLocationsTest extends TestCase
         $thanas = BangladeshLocations::thanas('Dhaka');
 
         $this->assertContains('Savar', $thanas);
+        $this->assertContains('Ashulia', $thanas);
+        $this->assertContains('Hemayetpur', $thanas);
+        $this->assertContains('Keraniganj Model', $thanas);
+        $this->assertContains('South Keraniganj', $thanas);
         $this->assertContains('Dhanmondi', $thanas);
         $this->assertContains('Uttara', $thanas);
     }

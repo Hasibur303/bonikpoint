@@ -6,6 +6,19 @@ use RuntimeException;
 
 class BangladeshLocations
 {
+    public const DHAKA_SUB_AREAS = [
+        'Ashulia',
+        'Dhamrai',
+        'Dohar',
+        'Hemayetpur',
+        'Keraniganj',
+        'Keraniganj Model',
+        'Nawabganj',
+        'Newabganj',
+        'Savar',
+        'South Keraniganj',
+    ];
+
     private const DISTRICT_NAME_OVERRIDES = [
         'Nawabganj' => 'Chapainawabganj',
         'Sirajgonj' => 'Sirajganj',
@@ -50,6 +63,8 @@ class BangladeshLocations
         foreach ($dhakaCityData as $area) {
             $locations['Dhaka'][] = trim($area['name']);
         }
+
+        $locations['Dhaka'] = array_merge($locations['Dhaka'], self::DHAKA_SUB_AREAS);
 
         ksort($locations, SORT_NATURAL | SORT_FLAG_CASE);
 

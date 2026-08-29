@@ -66,11 +66,12 @@ class CheckoutController extends Controller
 
         $rememberedDetails = $this->rememberedCheckoutDetails();
         $city = $this->canonicalCity(old('city', $rememberedDetails['city'] ?? null));
+        $thana = BangladeshLocations::canonicalThana(old('thana', $rememberedDetails['thana'] ?? null), $city);
 
         return view('checkout.create', [
             'cartItems' => $cartItems,
             'subtotal' => CartController::subtotal(),
-            'shipping' => $city ? $this->deliveryChargeForCity($city) : 0,
+            'shipping' => $city ? $this->deliveryChargeForLocation($city, $thana) : 0,
             'advanceDeliveryRequired' => $this->advanceDeliveryRequired($cartItems),
             'deliverySettings' => StoreSetting::deliverySettings(),
             'cities' => BangladeshLocations::districts(),
@@ -160,7 +161,7 @@ class CheckoutController extends Controller
             ? ($isGuestCheckout ? 'pay_now' : $data['delivery_charge_payment_option'])
             : null;
 
-        $deliveryArea = $this->deliveryAreaForCity($data['city']);
+        $deliveryArea = $this->deliveryAreaForLocation($data['city'], $data['thana']);
         $paymentProofPath = null;
 
         if ($advanceDeliveryRequired && $data['delivery_charge_payment_option'] === 'pay_now' && $request->hasFile('delivery_payment_proof')) {
@@ -320,18 +321,24 @@ class CheckoutController extends Controller
     {
         $settings = StoreSetting::deliverySettings();
 
-        return $area === 'outside_dhaka'
-            ? $settings['outside_dhaka_delivery_charge']
-            : $settings['inside_dhaka_delivery_charge'];
+        return match ($area) {
+            'dhaka_sub_area' => $settings['dhaka_sub_area_delivery_charge'],
+            'outside_dhaka' => $settings['outside_dhaka_delivery_charge'],
+            default => $settings['inside_dhaka_delivery_charge'],
+        };
     }
 
-    private function deliveryChargeForCity(string $city): int
+    private function deliveryChargeForLocation(string $city, ?string $thana): int
     {
-        return $this->deliveryCharge($this->deliveryAreaForCity($city));
+        return $this->deliveryCharge($this->deliveryAreaForLocation($city, $thana));
     }
 
-    private function deliveryAreaForCity(string $city): string
+    private function deliveryAreaForLocation(string $city, ?string $thana): string
     {
+        if ($city === 'Dhaka' && $thana && in_array($thana, BangladeshLocations::DHAKA_SUB_AREAS, true)) {
+            return 'dhaka_sub_area';
+        }
+
         return $city === 'Dhaka' ? 'inside_dhaka' : 'outside_dhaka';
     }
 

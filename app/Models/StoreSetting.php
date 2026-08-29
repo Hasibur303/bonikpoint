@@ -22,6 +22,7 @@ class StoreSetting extends Model
     {
         return [
             'inside_dhaka_delivery_charge' => (int) static::value('inside_dhaka_delivery_charge', '60'),
+            'dhaka_sub_area_delivery_charge' => 100,
             'outside_dhaka_delivery_charge' => (int) static::value('outside_dhaka_delivery_charge', '120'),
             'bkash_number' => static::value('bkash_number', '01832510343'),
             'nagad_number' => static::value('nagad_number', '01832510343'),

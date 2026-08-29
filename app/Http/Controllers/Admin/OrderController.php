@@ -47,7 +47,7 @@ class OrderController extends Controller
         }
 
         return view('admin.orders.index', [
-            'orders' => Order::with('user')
+            'orders' => Order::with(['user', 'items.product'])
                 ->when($status, fn ($query) => $query->where('status', $status))
                 ->when($search, fn ($query) => $query->where(function ($query) use ($search) {
                     $query->where('parcel_id', 'like', '%'.$search.'%')
@@ -71,7 +71,7 @@ class OrderController extends Controller
     public function show(Order $order, SteadfastCourier $steadfast): View
     {
         return view('admin.orders.show', [
-            'order' => $order->load('items', 'user', 'adjustedBy'),
+            'order' => $order->load('items.product', 'user', 'adjustedBy'),
             'steadfastConfigured' => $steadfast->configured(),
         ]);
     }

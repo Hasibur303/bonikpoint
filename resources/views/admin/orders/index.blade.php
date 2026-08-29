@@ -80,6 +80,18 @@
                             <td class="px-3 py-4">
                                 <a href="{{ route('admin.orders.show', $order) }}" class="font-black text-ink hover:text-primary">{{ $order->order_number }}</a>
                                 <span class="mt-0.5 block text-[11px] text-gray-400">{{ $order->user_id ? 'Customer account' : 'Guest order' }}</span>
+                                <div class="mt-2 flex items-center gap-1.5">
+                                    @foreach($order->items->take(3) as $item)
+                                        @if($item->product)
+                                            <img src="{{ $item->product->image_url }}" @if($item->product->image_srcset) srcset="{{ $item->product->image_srcset }}" sizes="32px" @endif alt="{{ $item->product->image_alt ?: $item->product_name }}" width="32" height="32" loading="lazy" decoding="async" class="h-8 w-8 rounded-md border border-gray-100 bg-[#f7f9f8] object-contain p-0.5">
+                                        @else
+                                            <span class="grid h-8 w-8 place-items-center rounded-md border border-gray-100 bg-gray-50 text-[10px] text-gray-400"><i class="fa-solid fa-box"></i></span>
+                                        @endif
+                                    @endforeach
+                                    @if($order->items->count() > 3)
+                                        <span class="text-[10px] font-black text-gray-400">+{{ $order->items->count() - 3 }}</span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-4 py-4">
                                 @if($order->parcel_id)

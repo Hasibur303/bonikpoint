@@ -310,16 +310,25 @@
                     @foreach($order->items as $item)
                         <tr>
                             <td class="p-3">
-                                {{ $item->product_name }}
-                                @if($item->selected_color_name)
-                                    <span class="mt-1 flex items-center gap-2 text-xs font-semibold text-gray-500">
-                                        <span class="h-3 w-3 rounded-full border border-black/10" style="background-color: {{ $item->selected_color_hex ?: '#E5E7EB' }}"></span>
-                                        Color: {{ $item->selected_color_name }}
-                                    </span>
-                                @endif
-                                @if($item->selected_flavor_name)
-                                    <span class="mt-1 block text-xs font-semibold text-gray-500">Flavor: {{ $item->selected_flavor_name }}</span>
-                                @endif
+                                <div class="flex items-start gap-3">
+                                    @if($item->product)
+                                        <img src="{{ $item->product->image_url }}" @if($item->product->image_srcset) srcset="{{ $item->product->image_srcset }}" sizes="44px" @endif alt="{{ $item->product->image_alt ?: $item->product_name }}" width="44" height="44" loading="lazy" decoding="async" class="h-11 w-11 shrink-0 rounded-md border border-gray-100 bg-[#f7f9f8] object-contain p-1">
+                                    @else
+                                        <span class="grid h-11 w-11 shrink-0 place-items-center rounded-md border border-gray-100 bg-gray-50 text-gray-400"><i class="fa-solid fa-box"></i></span>
+                                    @endif
+                                    <div class="min-w-0">
+                                        <span class="font-black text-ink">{{ $item->product_name }}</span>
+                                        @if($item->selected_color_name)
+                                            <span class="mt-1 flex items-center gap-2 text-xs font-semibold text-gray-500">
+                                                <span class="h-3 w-3 rounded-full border border-black/10" style="background-color: {{ $item->selected_color_hex ?: '#E5E7EB' }}"></span>
+                                                Color: {{ $item->selected_color_name }}
+                                            </span>
+                                        @endif
+                                        @if($item->selected_flavor_name)
+                                            <span class="mt-1 block text-xs font-semibold text-gray-500">Flavor: {{ $item->selected_flavor_name }}</span>
+                                        @endif
+                                    </div>
+                                </div>
                             </td>
                             <td class="p-3">{{ $item->quantity }}</td>
                             <td class="p-3">৳{{ number_format($item->unit_price, 2) }}</td>
@@ -408,7 +417,7 @@
             @if($order->advance_delivery_required)
                 <div class="mt-5 rounded border border-accent/40 bg-accent/10 p-4 text-sm">
                     <p class="font-bold text-ink">Advance Delivery Charge</p>
-                    <p class="mt-1">Area: {{ $order->delivery_area === 'outside_dhaka' ? 'Outside Dhaka' : 'Inside Dhaka' }}</p>
+                    <p class="mt-1">Area: {{ $order->delivery_area_label }}</p>
                     <p>Charge: BDT {{ number_format($order->shipping, 2) }}</p>
                     <p>Option: {{ $order->delivery_charge_payment_option === 'pay_later' ? 'Pay Later' : 'Paid Now' }}</p>
                         @if($order->delivery_charge_payment_option === 'pay_now')

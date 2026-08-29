@@ -106,7 +106,7 @@
                 @if($order->advance_delivery_required)
                     <div class="mt-5 rounded border border-accent/40 bg-accent/10 p-3 text-sm sm:p-4">
                         <p class="font-bold text-ink">Advance Delivery Charge</p>
-                        <p class="mt-1">Area: {{ $order->delivery_area === 'outside_dhaka' ? 'Outside Dhaka' : 'Inside Dhaka' }}</p>
+                        <p class="mt-1">Area: {{ $order->delivery_area_label }}</p>
                         <p>Charge: BDT {{ number_format($order->shipping, 2) }}</p>
                         <p>Option: {{ $order->delivery_charge_payment_option === 'pay_later' ? 'Pay Later' : 'Paid Now' }}</p>
                         @if($order->delivery_charge_payment_option === 'pay_now')

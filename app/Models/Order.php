@@ -131,6 +131,15 @@ class Order extends Model
         return (float) $this->subtotal + (float) $this->shipping;
     }
 
+    public function getDeliveryAreaLabelAttribute(): string
+    {
+        return match ($this->delivery_area) {
+            'dhaka_sub_area' => 'Dhaka Sub Area',
+            'outside_dhaka' => 'Outside Dhaka',
+            default => 'Inside Dhaka',
+        };
+    }
+
     public function adjustmentLabel(): ?string
     {
         return match ($this->adjustment_type) {

@@ -106,7 +106,7 @@
                                     <span class="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary text-white sm:h-10 sm:w-10"><i class="fa-solid fa-truck-fast"></i></span>
                                     <div>
                                         <p id="delivery-city-label" class="text-sm font-black text-ink sm:text-base">Choose a city to calculate delivery</p>
-                                        <p class="mt-1 text-xs leading-5 text-gray-600 sm:text-sm sm:leading-6">Dhaka BDT {{ number_format($deliverySettings['inside_dhaka_delivery_charge']) }}. Outside Dhaka BDT {{ number_format($deliverySettings['outside_dhaka_delivery_charge']) }}.</p>
+                                        <p class="mt-1 text-xs leading-5 text-gray-600 sm:text-sm sm:leading-6">Inside Dhaka BDT {{ number_format($deliverySettings['inside_dhaka_delivery_charge']) }}. Dhaka Sub Area BDT {{ number_format($deliverySettings['dhaka_sub_area_delivery_charge']) }}. Outside Dhaka BDT {{ number_format($deliverySettings['outside_dhaka_delivery_charge']) }}.</p>
                                         <p class="mt-2 text-xs font-bold text-primary sm:text-sm">অর্ডার কনফার্ম করতে অগ্রিম ডেলিভারি চার্জ দিতে হবে।</p>
                                     </div>
                                 </div>
@@ -329,8 +329,11 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const subtotal = {{ (float) $subtotal }};
                 const dhakaCharge = {{ (int) $deliverySettings['inside_dhaka_delivery_charge'] }};
+                const dhakaSubAreaCharge = {{ (int) $deliverySettings['dhaka_sub_area_delivery_charge'] }};
                 const outsideDhakaCharge = {{ (int) $deliverySettings['outside_dhaka_delivery_charge'] }};
+                const dhakaSubAreas = @json(\App\Support\BangladeshLocations::DHAKA_SUB_AREAS);
                 const cityInput = document.getElementById('checkout-city');
+                const thanaInput = document.getElementById('checkout-thana');
                 const cityLabel = document.getElementById('delivery-city-label');
                 const chargeSummary = document.getElementById('delivery-charge-summary');
                 const total = document.getElementById('checkout-total');
@@ -371,9 +374,12 @@
                         return;
                     }
 
+                    const thana = thanaInput?.value.trim().toLowerCase() || '';
                     const insideDhaka = city.toLowerCase() === 'dhaka';
-                    const charge = insideDhaka ? dhakaCharge : outsideDhakaCharge;
-                    cityLabel.textContent = `${insideDhaka ? 'Dhaka' : 'Outside Dhaka'} delivery: ${money(charge)}`;
+                    const dhakaSubArea = insideDhaka && dhakaSubAreas.some((area) => area.toLowerCase() === thana);
+                    const charge = dhakaSubArea ? dhakaSubAreaCharge : (insideDhaka ? dhakaCharge : outsideDhakaCharge);
+                    const label = dhakaSubArea ? 'Dhaka Sub Area' : (insideDhaka ? 'Inside Dhaka' : 'Outside Dhaka');
+                    cityLabel.textContent = `${label} delivery: ${money(charge)}`;
                     chargeSummary.textContent = money(charge);
                     total.textContent = money(subtotal + charge);
                     paymentInstruction.textContent = `Send ${money(charge)} for advance delivery charge to the selected mobile account.`;
@@ -408,6 +414,8 @@
 
                 cityInput.addEventListener('input', refreshCharge);
                 cityInput.addEventListener('change', refreshCharge);
+                thanaInput?.addEventListener('input', refreshCharge);
+                thanaInput?.addEventListener('change', refreshCharge);
                 paymentAccount?.addEventListener('change', refreshPaymentAccount);
                 copyPaymentNumber?.addEventListener('click', async () => {
                     const number = copyPaymentNumber.dataset.number;
