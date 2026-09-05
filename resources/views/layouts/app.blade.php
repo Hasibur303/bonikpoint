@@ -292,7 +292,7 @@
             </div>
             <div>
                 <h3 class="mb-2 text-sm font-bold text-white md:mb-4 md:text-base">Contact</h3>
-                <p class="text-[11px] leading-4 text-gray-300 md:text-sm md:leading-5">Shimrail Zero point, Siddirganj, Narayanganj</p>
+                <p class="text-[11px] leading-4 text-gray-300 md:text-sm md:leading-5">Gulshan,Dhaka</p>
                 <p class="mt-1 text-[11px] text-gray-300 md:text-sm">WhatsApp: 01540381020</p>
                 <p class="mt-1 text-[11px] text-gray-300 md:text-sm"><span class="md:hidden">Service:</span><span class="hidden md:inline">24 Hours Customer Service:</span> 01540381020</p>
             </div>
