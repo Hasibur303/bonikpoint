@@ -193,6 +193,7 @@
     @endif
     @php
         $adjustmentLocked = in_array($order->status, ['delivered', 'cancelled'], true) || $order->hasSteadfastShipment();
+        $itemQuantityLocked = $adjustmentLocked;
     @endphp
     <section class="mb-6 overflow-hidden rounded-lg border border-[#d8e3e0] bg-white shadow-sm">
         <div class="flex flex-col gap-3 border-b border-[#e5ecea] bg-[#f4f8f7] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -330,13 +331,34 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="p-3">{{ $item->quantity }}</td>
+                            <td class="p-3">
+                                @if($itemQuantityLocked)
+                                    <span class="font-black text-ink">{{ $item->quantity }}</span>
+                                @else
+                                    <form method="POST" action="{{ route('admin.orders.items.update', [$order, $item]) }}" class="flex w-32 items-center overflow-hidden rounded-md border border-[#d6e3e0] bg-white shadow-sm">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="button" class="grid h-9 w-9 shrink-0 place-items-center text-primary transition hover:bg-[#edf5f3]" data-qty-step="-1" aria-label="Decrease quantity for {{ $item->product_name }}">
+                                            <i class="fa-solid fa-minus text-xs"></i>
+                                        </button>
+                                        <input name="quantity" type="number" min="1" max="10000" value="{{ $item->quantity }}" class="h-9 min-w-0 flex-1 border-0 p-0 text-center text-sm font-black text-ink focus:ring-0" data-qty-input>
+                                        <button type="button" class="grid h-9 w-9 shrink-0 place-items-center text-primary transition hover:bg-[#edf5f3]" data-qty-step="1" aria-label="Increase quantity for {{ $item->product_name }}">
+                                            <i class="fa-solid fa-plus text-xs"></i>
+                                        </button>
+                                        <button class="sr-only">Update quantity</button>
+                                    </form>
+                                @endif
+                            </td>
                             <td class="p-3">৳{{ number_format($item->unit_price, 2) }}</td>
                             <td class="p-3 text-right">৳{{ number_format($item->total, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+            @error('quantity')<p class="mt-3 rounded-md bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">{{ $message }}</p>@enderror
+            @unless($itemQuantityLocked)
+                <p class="mt-3 text-xs font-semibold text-gray-500">Changing quantity keeps the saved unit price and recalculates the order total.</p>
+            @endunless
             </div>
         </div>
         <aside class="h-fit min-w-0 rounded-lg bg-white p-6 shadow-sm">
@@ -447,4 +469,23 @@
             </div>
         </aside>
     </div>
+    @unless($itemQuantityLocked)
+        <script>
+            document.addEventListener('click', (event) => {
+                const button = event.target.closest('[data-qty-step]');
+
+                if (!button) return;
+
+                const form = button.closest('form');
+                const input = form?.querySelector('[data-qty-input]');
+
+                if (!form || !input) return;
+
+                const step = Number(button.dataset.qtyStep || 0);
+                const current = Number(input.value || 1);
+                input.value = Math.max(1, current + step);
+                form.submit();
+            });
+        </script>
+    @endunless
 </x-admin-layout>

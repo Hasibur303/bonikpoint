@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\SteadfastCourier;
 use App\Services\SteadfastOrderSynchronizer;
@@ -362,6 +363,58 @@ class OrderController extends Controller
         return back()->with('success', 'Order adjustment removed and the original total restored.');
     }
 
+    public function updateItemQuantity(Request $request, Order $order, OrderItem $item, OrderAdjustmentCalculator $calculator): RedirectResponse
+    {
+        abort_unless($item->order_id === $order->id, 404);
+
+        $validated = $request->validate([
+            'quantity' => ['required', 'integer', 'min:1', 'max:10000'],
+        ]);
+
+        DB::transaction(function () use ($order, $item, $validated, $calculator) {
+            $lockedOrder = Order::whereKey($order->getKey())->lockForUpdate()->firstOrFail();
+            $this->ensureOrderItemsCanChange($lockedOrder);
+
+            $lockedItem = OrderItem::whereKey($item->getKey())
+                ->where('order_id', $lockedOrder->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $oldQuantity = (int) $lockedItem->quantity;
+            $newQuantity = (int) $validated['quantity'];
+            $quantityDifference = $newQuantity - $oldQuantity;
+
+            if ($quantityDifference === 0) {
+                return;
+            }
+
+            if ($lockedItem->product_id) {
+                $product = Product::whereKey($lockedItem->product_id)->lockForUpdate()->first();
+
+                if ($product && $quantityDifference > 0 && $product->stock < $quantityDifference) {
+                    throw ValidationException::withMessages([
+                        'quantity' => "Only {$product->stock} extra unit(s) are available for {$lockedItem->product_name}.",
+                    ]);
+                }
+
+                if ($product && $quantityDifference > 0) {
+                    $product->decrement('stock', $quantityDifference);
+                } elseif ($product && $quantityDifference < 0) {
+                    $product->increment('stock', abs($quantityDifference));
+                }
+            }
+
+            $lockedItem->update([
+                'quantity' => $newQuantity,
+                'total' => round((float) $lockedItem->unit_price * $newQuantity, 2),
+            ]);
+
+            $this->recalculateOrderTotals($lockedOrder->fresh('items'), $calculator);
+        });
+
+        return back()->with('success', 'Order item quantity updated and totals recalculated.');
+    }
+
     public function sendToSteadfast(Order $order, SteadfastCourier $steadfast): RedirectResponse
     {
         $lock = Cache::lock('steadfast-order-'.$order->getKey(), 30);
@@ -491,5 +544,52 @@ class OrderController extends Controller
                 'adjustment_value' => 'This parcel is already submitted to Steadfast. Adjustments are locked to prevent a COD mismatch.',
             ]);
         }
+    }
+
+    private function ensureOrderItemsCanChange(Order $order): void
+    {
+        if (in_array($order->status, ['delivered', 'cancelled'], true)) {
+            throw ValidationException::withMessages([
+                'quantity' => 'Delivered or cancelled orders cannot be changed.',
+            ]);
+        }
+
+        if ($order->hasSteadfastShipment()) {
+            throw ValidationException::withMessages([
+                'quantity' => 'This parcel is already submitted to Steadfast. Item quantities are locked to prevent a COD mismatch.',
+            ]);
+        }
+    }
+
+    private function recalculateOrderTotals(Order $order, OrderAdjustmentCalculator $calculator): void
+    {
+        $subtotal = round((float) $order->items->sum(fn (OrderItem $item) => (float) $item->total), 2);
+        $updates = ['subtotal' => $subtotal];
+
+        if ($order->hasAdjustment()) {
+            try {
+                $amounts = $calculator->calculate(
+                    $subtotal,
+                    (float) $order->shipping,
+                    (string) $order->adjustment_type,
+                    (float) $order->adjustment_value
+                );
+            } catch (InvalidArgumentException $exception) {
+                throw ValidationException::withMessages([
+                    'quantity' => $exception->getMessage(),
+                ]);
+            }
+
+            $updates = [
+                ...$updates,
+                'discount_amount' => $amounts['discount_amount'],
+                'extra_charge_amount' => $amounts['extra_charge_amount'],
+                'total' => $amounts['total'],
+            ];
+        } else {
+            $updates['total'] = round($subtotal + (float) $order->shipping, 2);
+        }
+
+        $order->update($updates);
     }
 }
