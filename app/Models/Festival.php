@@ -52,7 +52,7 @@ class Festival extends Model
             return new Collection();
         }
 
-        return Product::with('category')
+        return Product::with('category')->withEngagementStats()
             ->where('is_active', true)
             ->where(function ($query) use ($productIds, $categoryIds) {
                 $query->whereIn('id', $productIds);

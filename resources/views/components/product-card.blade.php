@@ -40,6 +40,8 @@
 
         <a href="{{ route('shop.show', $product) }}" class="line-clamp-2 min-h-7 text-[10px] font-extrabold leading-[1.35] text-ink hover:text-primary sm:mt-2 sm:min-h-12 sm:text-base sm:font-black sm:leading-6">{{ $product->name }}</a>
 
+        <x-product-engagement :product="$product" compact />
+
         <div class="mt-auto flex items-end justify-between gap-1 pt-1.5 sm:gap-4 sm:pt-3">
             <div class="min-w-0">
                 <span class="block text-[10px] font-black leading-tight text-primary sm:text-lg">BDT {{ number_format($product->price) }}</span>

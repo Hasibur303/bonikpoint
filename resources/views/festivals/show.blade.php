@@ -44,6 +44,7 @@
                                 <span class="font-bold text-primary">BDT {{ number_format($offerPrice, 2) }}</span>
                                 <span class="ml-2 text-sm text-gray-400 line-through">BDT {{ number_format($product->price, 2) }}</span>
                             </div>
+                            <x-product-engagement :product="$product" compact />
                             <form method="POST" action="{{ route('cart.store', $product) }}" class="js-add-to-cart mt-4">
                                 @csrf
                                 <input type="hidden" name="festival_id" value="{{ $festival->id }}">

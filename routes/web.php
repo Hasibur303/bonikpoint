@@ -10,6 +10,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FestivalController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductReviewController;
+use App\Http\Controllers\ProductLikeController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
@@ -107,6 +108,8 @@ Route::view('/order-instructions', 'pages.order-instructions')->name('order-inst
 Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
 Route::get('/festivals/{festival:slug}', [FestivalController::class, 'show'])->name('festivals.show');
 Route::get('/products/{product}', [ShopController::class, 'show'])->name('shop.show');
+Route::post('/products/{product}/like', [ProductLikeController::class, 'update'])
+    ->middleware('throttle:60,1')->name('products.like');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::get('/cart/snapshot', [CartController::class, 'snapshotResponse'])->name('cart.snapshot');
 Route::post('/cart/confirm-age', [CartController::class, 'confirmAge'])->name('cart.confirm-age');

@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use App\Support\OptimizedImage;
+use App\Support\ProductVisitor;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -102,6 +105,23 @@ class Product extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function scopeWithEngagementStats(Builder $query): Builder
+    {
+        $hash = ProductVisitor::hash(request(), true);
+
+        return $query->addSelect('products.*')
+            ->selectSub(DB::table('product_likes')->selectRaw('COUNT(*)')
+                ->whereColumn('product_id', 'products.id'), 'likes_count')
+            ->selectSub(DB::table('product_visits')->selectRaw('COUNT(*)')
+                ->whereColumn('product_id', 'products.id'), 'visits_count')
+            ->selectSub(DB::table('product_likes')->selectRaw('COUNT(*)')
+                ->whereColumn('product_id', 'products.id')->where('visitor_hash', $hash), 'is_liked')
+            ->selectSub(DB::table('order_items')->join('orders', 'orders.id', '=', 'order_items.order_id')
+                ->selectRaw('COALESCE(SUM(order_items.quantity), 0)')
+                ->whereColumn('order_items.product_id', 'products.id')
+                ->where('orders.status', 'delivered'), 'sold_quantity');
     }
 
     public function festivals(): BelongsToMany

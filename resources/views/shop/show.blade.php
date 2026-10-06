@@ -232,6 +232,8 @@
                             </p>
                         </div>
 
+                        <x-product-engagement :product="$product" />
+
                         <div class="mt-4 flex flex-wrap items-end gap-2 border-y border-gray-100 py-4 md:mt-5 md:gap-3 md:py-5">
                             <span class="text-2xl font-black leading-none text-primary md:text-3xl">BDT {{ number_format($product->price, 2) }}</span>
                             @if($product->compare_price)

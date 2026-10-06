@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Festival;
 use App\Models\Product;
+use App\Support\ProductVisitor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ShopController extends Controller
@@ -77,7 +79,7 @@ class ShopController extends Controller
             ->orderBy('name')
             ->get();
 
-        $products = Product::with('category')
+        $products = Product::with('category')->withEngagementStats()
             ->where('is_active', true)
             ->when($selectedCategoryModel, function ($query, Category $category) {
                 return $query->whereIn('category_id', $category->children->pluck('id')->push($category->id));
@@ -95,7 +97,7 @@ class ShopController extends Controller
 
         if ($showTrendingProducts) {
             $categoryIds = $categories->flatMap(fn (Category $category) => $category->children->pluck('id')->push($category->id));
-            $productsByMainCategory = Product::with('category')
+            $productsByMainCategory = Product::with('category')->withEngagementStats()
                 ->where('is_active', true)
                 ->whereIn('category_id', $categoryIds)
                 ->latest()
@@ -115,7 +117,7 @@ class ShopController extends Controller
         return view('shop.index', [
             'products' => $products,
             'featuredProducts' => $showTrendingProducts
-                ? Product::with('category')
+                ? Product::with('category')->withEngagementStats()
                     ->where('is_active', true)
                     ->where('is_featured', true)
                     ->latest()
@@ -151,6 +153,13 @@ class ShopController extends Controller
             return redirect()->route('shop.show', $product, 301);
         }
 
+        DB::table('product_visits')->insertOrIgnore([
+            'product_id' => $product->id,
+            'visitor_hash' => ProductVisitor::hash($request),
+            'created_at' => now(),
+        ]);
+        $product = Product::withEngagementStats()->findOrFail($product->id);
+
         return view('shop.show', [
             'product' => $product->load('category.parent', 'images', 'faqs', 'colors', 'flavors')
                 ->loadCount(['reviews' => fn ($query) => $query->where('is_approved', true)])
@@ -161,7 +170,7 @@ class ShopController extends Controller
                 ->latest()
                 ->take(12)
                 ->get(),
-            'relatedProducts' => Product::where('is_active', true)
+            'relatedProducts' => Product::withEngagementStats()->where('is_active', true)
                 ->where('category_id', $product->category_id)
                 ->whereKeyNot($product->id)
                 ->take(4)
