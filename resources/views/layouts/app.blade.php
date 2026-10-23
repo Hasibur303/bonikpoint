@@ -58,6 +58,7 @@
     @stack('schema')
 </head>
 <body class="bg-[#f3f5f4] font-sans text-gray-700 antialiased">
+    <x-storefront-edit-tools />
     <header class="sticky top-0 z-50 bg-[#f3f5f4]/95 py-3 backdrop-blur">
         <div class="container relative">
             <div class="flex h-16 items-center gap-2 rounded-lg bg-[#0f5555] px-3 text-white shadow-[0_12px_30px_rgba(9,50,51,0.16)] max-[420px]:gap-1.5 max-[420px]:px-2 sm:gap-3 sm:px-4">

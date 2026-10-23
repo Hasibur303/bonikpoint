@@ -159,6 +159,13 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::prefix('admin')->name('admin.')->middleware([AuthAdmin::class])->group(function () {
+    Route::post('storefront/edit-mode', \App\Http\Controllers\Admin\StorefrontEditModeController::class)->name('storefront.edit-mode');
+    Route::prefix('storefront')->name('storefront.')->middleware(\App\Http\Middleware\RequireStorefrontEditMode::class)->group(function () {
+        Route::get('products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
+        Route::put('products/{product}', [AdminProductController::class, 'update'])->name('products.update');
+        Route::get('products/{product}/faqs', [AdminProductFaqController::class, 'edit'])->name('products.faqs.edit');
+        Route::patch('products/{product}/faqs', [AdminProductFaqController::class, 'update'])->name('products.faqs.update');
+    });
     Route::get('/', [AdminComtroller::class, 'index'])->name('index');
     Route::patch('categories/{category}/move/{direction}', [AdminCategoryController::class, 'move'])
         ->whereIn('direction', ['up', 'down'])

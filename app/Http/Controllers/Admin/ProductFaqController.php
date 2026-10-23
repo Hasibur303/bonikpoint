@@ -14,6 +14,7 @@ class ProductFaqController extends Controller
     public function edit(Product $product): View
     {
         return view('admin.products.faqs', [
+            'storefrontEditor' => request()->routeIs('admin.storefront.*'),
             'product' => $product->load('faqs'),
         ]);
     }
@@ -35,7 +36,9 @@ class ProductFaqController extends Controller
         $this->updateExistingFaqs($request, $product);
         $this->storeNewFaqs($request, $product);
 
-        return redirect()->route('admin.products.faqs.edit', $product)->with('success', 'Product FAQ updated.');
+        return redirect()->route($request->routeIs('admin.storefront.*') ? 'admin.storefront.products.faqs.edit' : 'admin.products.faqs.edit', $product)
+            ->with('success', 'Product FAQ updated.')
+            ->with('storefront_product_url', route('shop.show', $product));
     }
 
     private function storeNewFaqs(Request $request, Product $product): void

@@ -70,6 +70,7 @@ class ProductController extends Controller
     public function edit(Product $product): View
     {
         return view('admin.products.form', [
+            'storefrontEditor' => request()->routeIs('admin.storefront.*'),
             'product' => $product->load('images', 'colors', 'flavors'),
             'categories' => Category::with('parent')->orderBy('parent_id')->orderBy('name')->get(),
         ]);
@@ -89,6 +90,12 @@ class ProductController extends Controller
             $this->storeNewFlavors($request, $product);
         } else {
             $product->flavors()->delete();
+        }
+
+        if ($request->routeIs('admin.storefront.*')) {
+            return redirect()->route('admin.storefront.products.edit', $product)
+                ->with('success', 'Product updated.')
+                ->with('storefront_product_url', $product->is_active ? route('shop.show', $product) : route('shop.index'));
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated.');

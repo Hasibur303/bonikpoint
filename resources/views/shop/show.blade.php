@@ -161,6 +161,7 @@
 @endpush
 
 <x-app-layout>
+    <div class="container"><x-storefront-product-edit :product="$product" /></div>
 
     @if($isVapeProduct)
         <div id="vape-age-warning" class="fixed inset-0 z-[120] hidden bg-ink/90 px-4 py-6 backdrop-blur">

@@ -38,6 +38,7 @@
                             <img src="{{ $product->image_url }}" @if($product->image_srcset) srcset="{{ $product->image_srcset }}" sizes="(min-width: 1280px) 20vw, (min-width: 640px) 50vw, 100vw" @endif alt="{{ $product->image_alt ?: $product->name.' product image' }}" width="640" height="640" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-500 hover:scale-105">
                         </a>
                         <div class="p-4">
+                            <x-storefront-product-edit :product="$product" />
                             <p class="text-xs font-semibold uppercase tracking-wide text-primary">{{ $product->category?->name }}</p>
                             <a href="{{ route('shop.show', $product) }}" class="mt-1 block font-semibold text-ink hover:text-primary">{{ $product->name }}</a>
                             <div class="mt-3">

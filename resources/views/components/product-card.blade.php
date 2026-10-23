@@ -7,6 +7,7 @@
 @endphp
 
 <article class="group flex h-full flex-col overflow-hidden rounded-md border border-[#d9e0de] bg-white shadow-[0_6px_20px_rgba(25,52,54,0.06)] transition duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_16px_34px_rgba(18,59,62,0.13)] sm:rounded-lg">
+    <x-storefront-product-edit :product="$product" />
     <a href="{{ route('shop.show', $product) }}" class="relative block aspect-square overflow-hidden bg-[#f8f9f7] p-1 sm:aspect-[4/3] sm:p-3">
         <img
             src="{{ $product->image_url }}"

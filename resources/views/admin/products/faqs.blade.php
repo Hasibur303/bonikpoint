@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-dynamic-component :component="($storefrontEditor ?? false) ? 'storefront-editor-layout' : 'admin-layout'">
     <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
             <p class="text-sm font-bold uppercase tracking-wide text-primary">Product FAQ</p>
@@ -7,11 +7,11 @@
         </div>
         <div class="flex gap-2">
             <a href="{{ route('shop.show', $product) }}" target="_blank" rel="noopener noreferrer" class="rounded border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-ink hover:border-primary hover:text-primary">View Product</a>
-            <a href="{{ route('admin.products.index') }}" class="rounded bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-primary">Back to Products</a>
+            <a href="{{ ($storefrontEditor ?? false) ? route('admin.storefront.products.edit', $product) : route('admin.products.index') }}" class="rounded bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-primary">{{ ($storefrontEditor ?? false) ? 'Product details' : 'Back to Products' }}</a>
         </div>
     </div>
 
-    <form method="POST" action="{{ route('admin.products.faqs.update', $product) }}" class="rounded-lg bg-white p-6 shadow-sm">
+    <form method="POST" action="{{ route(($storefrontEditor ?? false) ? 'admin.storefront.products.faqs.update' : 'admin.products.faqs.update', $product) }}" class="rounded-lg bg-white p-6 shadow-sm">
         @csrf
         @method('PATCH')
 
@@ -110,4 +110,4 @@
             });
         });
     </script>
-</x-admin-layout>
+</x-dynamic-component>

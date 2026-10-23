@@ -6,6 +6,39 @@ window.Alpine = Alpine;
 
 Alpine.start();
 
+const productEditor = document.getElementById('storefront-product-editor');
+if (productEditor) {
+    const frame = productEditor.querySelector('iframe');
+    let savedProductUrl = null;
+    let returnFocus = null;
+    productEditor.setAttribute('aria-labelledby', 'storefront-editor-title');
+
+    document.addEventListener('click', (event) => {
+        const edit = event.target.closest('[data-storefront-product-edit]');
+        if (edit) {
+            returnFocus = edit;
+            frame.src = edit.dataset.storefrontProductEdit;
+            savedProductUrl = null;
+            productEditor.showModal();
+            document.body.style.overflow = 'hidden';
+        }
+        if (event.target.closest('[data-storefront-editor-close]')) productEditor.close();
+    });
+    window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin || event.source !== frame.contentWindow || event.data?.type !== 'storefront-product-saved') return;
+        const url = new URL(event.data.productUrl, window.location.origin);
+        if (url.origin === window.location.origin) savedProductUrl = url.href;
+    });
+    productEditor.addEventListener('close', () => {
+        document.body.style.overflow = '';
+        frame.removeAttribute('src');
+        if (savedProductUrl) {
+            if (window.location.pathname.startsWith('/products/')) window.location.assign(savedProductUrl);
+            else window.location.reload();
+        } else returnFocus?.focus();
+    });
+}
+
 document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-product-like]');
     if (!button || button.disabled) return;

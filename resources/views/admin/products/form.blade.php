@@ -1,13 +1,13 @@
-<x-admin-layout>
+<x-dynamic-component :component="($storefrontEditor ?? false) ? 'storefront-editor-layout' : 'admin-layout'">
     <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
             <p class="text-xs font-black uppercase tracking-wide text-primary">Catalog</p>
             <h1 class="mt-1 text-3xl font-black text-ink sm:text-4xl">{{ $product->exists ? 'Edit Product' : 'Add Product' }}</h1>
             <p class="mt-2 text-sm text-gray-500">Manage product information, media, pricing, fulfillment, and SEO.</p>
         </div>
-        <a href="{{ route('admin.products.index') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#d7e1df] bg-white px-4 text-xs font-black text-ink shadow-sm hover:border-primary hover:text-primary"><i class="fa-solid fa-arrow-left"></i>Back to Products</a>
+        <a href="{{ ($storefrontEditor ?? false) ? route('admin.storefront.products.faqs.edit', $product) : route('admin.products.index') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#d7e1df] bg-white px-4 text-xs font-black text-ink shadow-sm hover:border-primary hover:text-primary"><i class="fa-solid fa-arrow-left"></i>{{ ($storefrontEditor ?? false) ? 'Product FAQs' : 'Back to Products' }}</a>
     </div>
-    <form id="product-editor-form" method="POST" action="{{ $product->exists ? route('admin.products.update', $product) : route('admin.products.store') }}" enctype="multipart/form-data" class="rounded-lg border border-[#dfe7e5] bg-white p-5 shadow-sm sm:p-6">
+    <form id="product-editor-form" method="POST" action="{{ ($storefrontEditor ?? false) ? route('admin.storefront.products.update', $product) : ($product->exists ? route('admin.products.update', $product) : route('admin.products.store')) }}" enctype="multipart/form-data" class="rounded-lg border border-[#dfe7e5] bg-white p-5 shadow-sm sm:p-6">
         @csrf
         @if($product->exists) @method('PUT') @endif
         @if($errors->any())
@@ -323,4 +323,4 @@
             });
         });
     </script>
-</x-admin-layout>
+</x-dynamic-component>
